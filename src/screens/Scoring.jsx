@@ -3,8 +3,166 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, teamById, playerById, PLAYERS } from '../data/mock'
 import { ballClass, calcCRR } from '../utils/cricket'
-import { Undo2, RotateCcw, X, Check, Lock, ChevronRight, Coins } from 'lucide-react'
+import { Undo2, RotateCcw, X, Check, Lock, ChevronRight, Coins, Zap, ArrowLeft } from 'lucide-react'
 import { useEffect } from 'react'
+
+// ── Read-Only Live Scorecard (Pro, non-umpire users) ─────────────────────────
+function LiveScorecardReadOnly({ match, scoring, onUpgrade }) {
+  const navigate = useNavigate()
+  const { runs, wkts, overs, legalBalls, thisOver, striker, nonStriker, currentBowler } = scoring
+
+  const battingTeam  = teamById(match.team1)
+  const fieldingTeam = teamById(match.team2)
+  const sp  = playerById(striker?.id)
+  const nsp = playerById(nonStriker?.id)
+  const bp  = playerById(currentBowler?.id)
+  const crr = calcCRR(runs, Math.floor(overs) + legalBalls / 6)
+  const oversStr = `${Math.floor(overs)}.${legalBalls} / ${match.overs}`
+
+  return (
+    <div className="min-h-dvh flex flex-col bg-navy-900">
+      {/* Nav bar */}
+      <div className="flex items-center h-14 px-4 bg-navy-800 border-b border-navy-700 flex-shrink-0">
+        <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-navy-700 transition-colors">
+          <ArrowLeft size={20} className="text-navy-300" />
+        </button>
+        <div className="flex-1 flex justify-center">
+          <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center">
+            <span className="text-white font-black text-sm">CY</span>
+          </div>
+        </div>
+        {/* Live badge */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/20 rounded-full border border-red-500/40">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+          <span className="text-red-400 text-[10px] font-bold uppercase tracking-wider">Live</span>
+        </div>
+      </div>
+
+      {/* Match name */}
+      <div className="px-4 py-3 bg-navy-800 border-b border-navy-700">
+        <p className="text-navy-400 text-xs text-center">{match.name}</p>
+      </div>
+
+      {/* Score header */}
+      <div className="px-4 py-5 bg-navy-900 border-b border-navy-700 text-center">
+        <p className="text-brand-400 text-sm font-semibold mb-1">{battingTeam?.name} batting</p>
+        <div className="flex items-end justify-center gap-3">
+          <span className="text-white font-black text-5xl tabular-nums">{runs}/{wkts}</span>
+        </div>
+        <p className="text-navy-400 text-sm mt-1">({oversStr}) · CRR {crr}</p>
+      </div>
+
+      {/* Batsmen */}
+      <div className="mx-4 mt-4 bg-navy-800 rounded-2xl overflow-hidden border border-navy-700">
+        <div className="px-4 py-2 border-b border-navy-700">
+          <p className="text-navy-400 text-[10px] font-bold uppercase tracking-wider">Batsmen</p>
+        </div>
+        {/* Header row */}
+        <div className="flex items-center px-4 py-1.5 border-b border-navy-700/50">
+          <p className="flex-1 text-navy-500 text-xs">Batter</p>
+          <div className="flex gap-5 text-navy-500 text-xs">
+            <span className="w-7 text-center">R</span>
+            <span className="w-7 text-center">B</span>
+            <span className="w-7 text-center">SR</span>
+          </div>
+        </div>
+        {/* Striker */}
+        <div className="flex items-center px-4 py-3 border-b border-navy-700/40">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse flex-shrink-0" />
+            <p className="text-white font-semibold text-sm truncate">{sp?.name || 'Striker'}</p>
+            <span className="text-brand-400 text-xs font-bold">*</span>
+          </div>
+          <div className="flex gap-5 tabular-nums">
+            <span className="w-7 text-center text-white font-bold text-sm">{striker?.runs ?? 0}</span>
+            <span className="w-7 text-center text-navy-300 text-sm">{striker?.balls ?? 0}</span>
+            <span className="w-7 text-center text-navy-400 text-sm">
+              {striker?.balls ? ((striker.runs / striker.balls) * 100).toFixed(0) : '0'}
+            </span>
+          </div>
+        </div>
+        {/* Non-striker */}
+        <div className="flex items-center px-4 py-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-navy-600 flex-shrink-0" />
+            <p className="text-navy-300 font-medium text-sm truncate">{nsp?.name || 'Non-striker'}</p>
+          </div>
+          <div className="flex gap-5 tabular-nums">
+            <span className="w-7 text-center text-navy-300 text-sm">{nonStriker?.runs ?? 0}</span>
+            <span className="w-7 text-center text-navy-400 text-sm">{nonStriker?.balls ?? 0}</span>
+            <span className="w-7 text-center text-navy-500 text-sm">
+              {nonStriker?.balls ? ((nonStriker.runs / nonStriker.balls) * 100).toFixed(0) : '0'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Bowler + This over */}
+      <div className="mx-4 mt-3 bg-navy-800 rounded-2xl border border-navy-700 overflow-hidden">
+        <div className="px-4 py-2 border-b border-navy-700">
+          <p className="text-navy-400 text-[10px] font-bold uppercase tracking-wider">Bowling</p>
+        </div>
+        <div className="px-4 py-3 border-b border-navy-700/40">
+          <div className="flex justify-between items-center">
+            <p className="text-white font-semibold text-sm">{bp?.name || 'Bowler'}</p>
+            <p className="text-navy-300 text-sm tabular-nums font-bold">
+              {currentBowler?.wkts ?? 0}-{currentBowler?.runs ?? 0}
+              <span className="text-navy-500 font-normal"> ({currentBowler?.overs ?? 0}.{legalBalls})</span>
+            </p>
+          </div>
+        </div>
+        <div className="px-4 py-3">
+          <p className="text-navy-500 text-xs mb-2">This over</p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {thisOver.map((b, i) => (
+              <div key={i} className={ballClass(b)}>{b === '•' ? '' : b}</div>
+            ))}
+            {[...Array(Math.max(0, 6 - thisOver.length))].map((_, i) => (
+              <div key={`e-${i}`} className="w-8 h-8 rounded-full border-[1.5px] border-dashed border-navy-700" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Read-only notice */}
+      <div className="mx-4 mt-3 flex items-center gap-2 px-4 py-3 bg-navy-800/60 rounded-xl border border-navy-700/50">
+        <Lock size={13} className="text-navy-500 flex-shrink-0" />
+        <p className="text-navy-500 text-xs">You're watching live — scoring is managed by the umpire</p>
+      </div>
+    </div>
+  )
+}
+
+// ── Pro Paywall for non-Pro users trying to view live scorecard ──────────────
+function ScorecardPaywall({ navigate }) {
+  const { setShowProSheet } = useStore()
+  return (
+    <div className="min-h-dvh bg-navy-900 flex flex-col items-center justify-center px-6 text-center">
+      <div className="w-20 h-20 bg-amber-500/20 rounded-3xl flex items-center justify-center mb-5 border border-amber-500/30">
+        <Zap size={32} className="text-amber-400" />
+      </div>
+      <h2 className="text-white font-extrabold text-xl mb-2">Pro feature</h2>
+      <p className="text-navy-400 text-sm leading-relaxed mb-6">
+        Live scorecards — see who's batting, who's bowling, and every ball as it's bowled — are available on CricYaar Pro.
+      </p>
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <button
+          onClick={() => { setShowProSheet(true); navigate(-1) }}
+          className="w-full py-3 rounded-xl bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
+        >
+          <Zap size={16} />
+          Upgrade to Pro — ₹99/month
+        </button>
+        <button
+          onClick={() => navigate(-1)}
+          className="w-full py-3 rounded-xl bg-navy-700 text-navy-300 font-semibold text-sm hover:bg-navy-600 transition-colors"
+        >
+          Go Back
+        </button>
+      </div>
+    </div>
+  )
+}
 
 // ── Pre-match Setup Wizard ────────────────────────────────────────────────────
 function PreMatchSetup({ match, onStart }) {
@@ -255,39 +413,19 @@ export default function Scoring() {
 
   const match  = MATCHES.find(m => m.id === (matchId || 'm1')) || MATCHES[0]
 
-  // ── PRD v2: Umpire-only scoring gate ─────────────────────────────────────
-  // Only users with role 'umpire' or 'admin' can access the scoring screen.
-  // Players, Captains, and Organisers see an Access Denied state regardless
-  // of whether they are assigned to the match.
-  const isAdmin      = user?.role === 'admin'
-  const isUmpire     = user?.role === 'umpire'
-  const isAuthorized = isAdmin || isUmpire
+  // ── PRD v2: Umpire-only scoring gate (with Pro read-only view) ───────────
+  // - umpire / admin  → full scoring UI
+  // - non-umpire + pro_active → read-only live scorecard
+  // - non-umpire + free      → Pro paywall
+  const isAdmin  = user?.role === 'admin'
+  const isUmpire = user?.role === 'umpire'
+  const isPro    = user?.subscription === 'pro_active'
 
-  if (!isAuthorized) {
-    return (
-      <div className="h-dvh flex flex-col bg-navy-900 items-center justify-center px-6 text-center">
-        <div className="w-20 h-20 bg-navy-800 rounded-3xl flex items-center justify-center mb-5">
-          <Lock size={32} className="text-navy-400" />
-        </div>
-        <h2 className="text-white font-extrabold text-xl mb-2">Umpire access only</h2>
-        <p className="text-navy-400 text-sm leading-relaxed mb-6">
-          Scoring is managed by the assigned umpire for this match.
-          {' '}Players, captains, and organisers have read-only access to the live scorecard.
-        </p>
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-full py-3 rounded-xl bg-navy-700 text-white font-semibold text-sm hover:bg-navy-600 transition-colors"
-          >
-            Go Back
-          </button>
-          <p className="text-navy-500 text-xs">
-            Your role is <span className="text-brand-400 font-semibold capitalize">{user?.role || 'player'}</span>.
-            Switch to Umpire role to access scoring.
-          </p>
-        </div>
-      </div>
-    )
+  if (!isAdmin && !isUmpire) {
+    if (isPro) {
+      return <LiveScorecardReadOnly match={match} scoring={scoring} />
+    }
+    return <ScorecardPaywall navigate={navigate} />
   }
   // ── Pre-match setup gate ──────────────────────────────────────────────────
   if (!setupDone) {

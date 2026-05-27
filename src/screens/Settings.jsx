@@ -11,7 +11,7 @@ const ROLE_ICONS = {
 
 export default function Settings() {
   const navigate = useNavigate()
-  const { user, logout, addToast, setOtpMode, setSubscription } = useStore()
+  const { user, logout, addToast, setSubscription } = useStore()
   const [pushNotifs, setPushNotifs] = useState(true)
   const [showLogout, setShowLogout] = useState(false)
 
@@ -22,17 +22,8 @@ export default function Settings() {
   const isCancelled = user?.subscription === 'pro_cancelled'
 
   const handleChangeRole = () => {
-    // Check 24-hour cooldown
-    if (user?.lastRoleChangedAt) {
-      const elapsed = Date.now() - user.lastRoleChangedAt
-      const hoursLeft = Math.ceil((24 * 3600 * 1000 - elapsed) / 3600000)
-      if (elapsed < 24 * 3600 * 1000) {
-        addToast(`You changed your role recently. Try again in ${hoursLeft}h.`, 'error')
-        return
-      }
-    }
-    setOtpMode('role-switch')
-    navigate('/role-warning')
+    // PRD v2: Role change is zero-friction — no OTP, no cooldown, go straight to role-select
+    navigate('/role-select')
   }
 
   const handleLogout = () => {

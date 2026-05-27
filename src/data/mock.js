@@ -277,7 +277,7 @@ export const DEMO_USER = {
   isNew: false,
   avatar: null,
   lastRoleChangedAt: null,
-  subscription: 'free',  // v2: 'free' | 'pro_active' | 'pro_cancelled' | 'pro_expired'
+  subscription: 'pro_active',  // v2: 'free' | 'pro_active' | 'pro_cancelled' | 'pro_expired'
 };
 
 // ─── v2: FAN HOME — CITY LIVE DATA ───────────────────────────────────────────
