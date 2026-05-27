@@ -1,14 +1,15 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Search, User, Trophy, Eye, Inbox } from 'lucide-react'
+import { Home, Search, User, Trophy, Eye, Inbox, MapPin } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 // Role-specific 4th nav item
 const ROLE_FOURTH = {
-  player:    { label:'Teams',    icon:Trophy, path:'/open-tournaments' },
-  umpire:    { label:'Matches',  icon:Eye,    path:'/browse-matches'   },
-  organiser: { label:'Inbox',    icon:Inbox,  path:'/organiser-inbox', badge:'inbox' },
-  admin:     { label:'Teams',    icon:Trophy, path:'/teams'            },
-  fan:       null,
+  player:       { label:'Teams',     icon:Trophy, path:'/open-tournaments' },
+  umpire:       { label:'Matches',   icon:Eye,    path:'/browse-matches'   },
+  organiser:    { label:'Inbox',     icon:Inbox,  path:'/organiser-inbox', badge:'inbox' },
+  admin:        { label:'Teams',     icon:Trophy, path:'/teams'            },
+  ground_owner: { label:'My Ground', icon:MapPin, path:'/ground-owner'     },
+  fan:          null,
 }
 
 export default function BottomNav() {

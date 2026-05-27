@@ -82,8 +82,9 @@ export default function OtpVerify() {
           addToast('Phone verified! Complete your Pro setup.', 'success')
           navigate('/pro-payment')
         } else {
-          addToast('Welcome back, Rohit! 🏏', 'success')
-          navigate('/')
+          // Always go to role select so user can choose their role
+          addToast('Verified! Now choose your role.', 'success')
+          navigate('/role-select')
         }
       }
     } else {

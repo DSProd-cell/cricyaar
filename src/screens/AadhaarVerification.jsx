@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, Shield, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 export default function AadhaarVerification() {
   const navigate = useNavigate()
-  const { addToast } = useStore()
+  const [searchParams] = useSearchParams()
+  const fromGroundOwner = searchParams.get('from') === 'ground_owner'
+  const { addToast, user, setUser } = useStore()
   const [step, setStep] = useState(1)
   const [aadhaar, setAadhaar] = useState('')
   const [showAadhaar, setShowAadhaar] = useState(false)
@@ -45,7 +47,14 @@ export default function AadhaarVerification() {
     setLoading(true)
     await new Promise(r => setTimeout(r, 1200))
     setLoading(false); setStep(4)
-    addToast('Aadhaar verified! Your ground is under admin review.')
+    if (fromGroundOwner) {
+      // Mark user as verified ground owner
+      setUser({ ...user, groundOwnerVerified: true })
+      addToast('Identity verified! You can now list your ground.', 'success')
+      setTimeout(() => navigate('/ground-owner'), 1500)
+    } else {
+      addToast('Aadhaar verified! Your ground is under admin review.')
+    }
   }
 
   const handleOtpChange = (i, val) => {
@@ -205,8 +214,8 @@ export default function AadhaarVerification() {
               <div className="flex justify-between"><span>Ground Status</span><span className="font-semibold text-amber-600">Under Review</span></div>
               <div className="flex justify-between"><span>Est. approval</span><span className="font-semibold">Within 24 hours</span></div>
             </div>
-            <button onClick={() => navigate('/')} className="btn-primary w-full max-w-xs" style={{ background: '#0891b2' }}>
-              Back to Home
+            <button onClick={() => navigate(fromGroundOwner ? '/ground-owner' : '/')} className="btn-primary w-full max-w-xs" style={{ background: '#0891b2' }}>
+              {fromGroundOwner ? 'Go to My Ground →' : 'Back to Home'}
             </button>
           </div>
         )}

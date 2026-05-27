@@ -2,19 +2,20 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { ROLE_META } from '../data/mock'
-import { Check, Activity, BarChart2, Eye, Tv } from 'lucide-react'
+import { Check, Activity, BarChart2, Eye, Tv, MapPin } from 'lucide-react'
 
 // Admin is NOT a user-selectable role — provisioned server-side only
 const ROLES = [
-  { id:'fan',       label:'Fan',       Icon:Tv,        desc:'Follow live scores in your city. Free forever.' },
-  { id:'player',    label:'Player',    Icon:Activity,  desc:'Track your career stats, join teams and tournaments.' },
-  { id:'organiser', label:'Organiser', Icon:BarChart2, desc:'Create and manage matches, tournaments, and registrations.' },
-  { id:'umpire',    label:'Umpire',    Icon:Eye,       desc:'Manage your officiating profile and request assignments.' },
+  { id:'fan',          label:'Fan',          Icon:Tv,        desc:'Follow live scores in your city. Free forever.' },
+  { id:'player',       label:'Player',       Icon:Activity,  desc:'Track your career stats, join teams and tournaments.' },
+  { id:'organiser',    label:'Organiser',    Icon:BarChart2, desc:'Create and manage matches, tournaments, and registrations.' },
+  { id:'umpire',       label:'Umpire',       Icon:Eye,       desc:'Manage your officiating profile and request assignments.' },
+  { id:'ground_owner', label:'Ground Owner', Icon:MapPin,    desc:'List your ground, set pricing, and accept bookings.' },
 ]
 
 export default function RoleSelect() {
   const navigate = useNavigate()
-  const { user, setRole, addToast, proIntent, setProIntent, setShowProSheet } = useStore()
+  const { user, setRole, addToast, proIntent, setProIntent, setShowProSheet, setShowRoleModal } = useStore()
   const currentRole = user?.role || 'fan'
   // Fan is pre-selected by default (PRD v2: Fan is the default lowest-friction entry role)
   const [chosen, setChosen] = useState('fan')
@@ -25,12 +26,11 @@ export default function RoleSelect() {
     setLoading(true)
     await new Promise(r => setTimeout(r, 800))
     setRole(chosen)
-    addToast(`Role changed to ${ROLE_META[chosen]?.label}`, 'success')
     setLoading(false)
-    // Pro intent: show Pro subscription sheet before home loads
+    // Show role welcome modal on home screen
+    setShowRoleModal(true)
     if (proIntent) {
       setProIntent(false)
-      setShowProSheet(true)
     }
     navigate('/')
   }

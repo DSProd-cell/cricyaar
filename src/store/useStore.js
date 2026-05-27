@@ -15,7 +15,7 @@ export const useStore = create(
       logout: () => set({
         user: null, isAuthenticated: false, pendingPhone: null, otpMode: 'login',
         umpireRequests: [], tournamentRequests: [], teamJoinRequests: [], freeAgentRequests: [],
-        umpireTournamentRequests: [], proIntent: false, showProSheet: false,
+        umpireTournamentRequests: [], proIntent: false, showProSheet: false, showRoleModal: false,
       }),
 
       // Role management
@@ -25,6 +25,10 @@ export const useStore = create(
         user: s.user ? { ...s.user, role, lastRoleChangedAt: Date.now() } : s.user,
         otpMode: 'login',
       })),
+
+      // Role welcome modal (shown once after role selection)
+      showRoleModal: false,
+      setShowRoleModal: (v) => set({ showRoleModal: v }),
 
       // ── v2: Subscription ─────────────────────────────────────────────────────
       setSubscription: (status) => set(s => ({

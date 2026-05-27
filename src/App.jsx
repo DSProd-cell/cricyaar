@@ -6,7 +6,8 @@ import { useEffect } from 'react'
 import Toast           from './components/Toast'
 import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
-import ProSignupSheet  from './components/ProSignupSheet'
+import ProSignupSheet    from './components/ProSignupSheet'
+import RoleWelcomeModal  from './components/RoleWelcomeModal'
 
 // Screens — auth / onboarding
 import USPScreen      from './screens/USPScreen'
@@ -48,6 +49,7 @@ import OpponentFinder      from './screens/OpponentFinder'
 import EarningsDashboard   from './screens/EarningsDashboard'
 import AadhaarVerification from './screens/AadhaarVerification'
 import InviteEarn          from './screens/InviteEarn'
+import GroundOwnerDashboard from './screens/GroundOwnerDashboard'
 
 function AuthGuard({ children }) {
   const { user } = useStore()
@@ -56,7 +58,7 @@ function AuthGuard({ children }) {
 }
 
 function WhatsNewGate({ children }) {
-  const { user, showProSheet } = useStore()
+  const { user, showProSheet, showRoleModal } = useStore()
   const navigate   = useNavigate()
   const { pathname } = useLocation()
 
@@ -72,6 +74,7 @@ function WhatsNewGate({ children }) {
     <>
       {children}
       {showProSheet && <ProSignupSheet />}
+      {showRoleModal && <RoleWelcomeModal />}
     </>
   )
 }
@@ -150,6 +153,7 @@ export default function App() {
           <Route path="/earnings"            element={<AuthGuard><EarningsDashboard /></AuthGuard>} />
           <Route path="/aadhaar-verify"      element={<AuthGuard><AadhaarVerification /></AuthGuard>} />
           <Route path="/invite"              element={<AuthGuard><InviteEarn /></AuthGuard>} />
+          <Route path="/ground-owner"        element={<AuthGuard><GroundOwnerDashboard /></AuthGuard>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

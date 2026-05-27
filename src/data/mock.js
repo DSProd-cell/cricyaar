@@ -240,11 +240,12 @@ export const UMPIRES = [
 
 // ─── ROLE METADATA ───────────────────────────────────────────────────────────
 export const ROLE_META = {
-  player:    { label:'Player',    color:'#3b82f6', bg:'#dbeafe', desc:'Track your stats, join teams, and play in matches.' },
-  organiser: { label:'Organiser', color:'#16a34a', bg:'#dcfce7', desc:'Create matches and tournaments, manage teams, and score live.' },
-  umpire:    { label:'Umpire',    color:'#d97706', bg:'#fef3c7', desc:'Get assigned to matches and track your umpiring record.' },
-  fan:       { label:'Fan',       color:'#64748b', bg:'#f1f5f9', desc:'Follow live scores and match results.' },
-  admin:     { label:'Admin',     color:'#7c3aed', bg:'#ede9fe', desc:'Full access to all features and the admin panel.' },
+  player:       { label:'Player',       color:'#3b82f6', bg:'#dbeafe', desc:'Track your stats, join teams, and play in matches.' },
+  organiser:    { label:'Organiser',    color:'#16a34a', bg:'#dcfce7', desc:'Create matches and tournaments, manage teams, and score live.' },
+  umpire:       { label:'Umpire',       color:'#d97706', bg:'#fef3c7', desc:'Get assigned to matches and track your umpiring record.' },
+  fan:          { label:'Fan',          color:'#64748b', bg:'#f1f5f9', desc:'Follow live scores and match results.' },
+  ground_owner: { label:'Ground Owner', color:'#0891b2', bg:'#cffafe', desc:'List your ground, set pricing, and manage bookings.' },
+  admin:        { label:'Admin',        color:'#7c3aed', bg:'#ede9fe', desc:'Full access to all features and the admin panel.' },
 };
 
 // ─── UMPIRE PROFILE (DEMO) ───────────────────────────────────────────────────
