@@ -1,15 +1,15 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
 export default function Welcome() {
   const navigate = useNavigate()
-  const { isAuthenticated } = useStore()
+  const { user } = useStore()
 
-  // If already authenticated, skip to home
-  if (isAuthenticated) {
-    navigate('/', { replace: true })
-    return null
-  }
+  // If already authenticated, skip to home (must be in useEffect — not render phase)
+  useEffect(() => {
+    if (user) navigate('/', { replace: true })
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
