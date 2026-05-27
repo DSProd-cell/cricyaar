@@ -1,48 +1,67 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Bell, Settings, ArrowLeft } from 'lucide-react'
+import { Bell, ArrowLeft, Home } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
-const TITLES = {
-  '/':              '',
-  '/my-cricket':    'My Cricket',
-  '/grounds':       'Find a Ground',
-  '/teams':         'Teams & Tournaments',
-  '/notifications': 'Notifications',
-  '/settings':      'Settings',
-  '/profile':       'My Profile',
-}
-
-export default function TopBar({ title, showBack }) {
+/**
+ * Universal TopBar — PRD v2 Global Navigation Standard
+ *
+ * Three-zone layout:
+ *   LEFT  — ← Back  (or ⌂ Home icon if showHome prop, or nothing on root screens)
+ *   CENTRE — CY logo mark (always tappable → Home, except on Home screen itself)
+ *   RIGHT  — Bell with unread count (→ Notifications)
+ *
+ * Props:
+ *   title     — screen title shown below the bar (if provided, shown in left zone after back btn)
+ *   showBack  — show ← back button (calls navigate(-1))
+ *   showHome  — replace back button with ⌂ Home icon (for root tab screens with no back)
+ *   isHome    — current screen IS Home; CY logo tap is inactive
+ */
+export default function TopBar({ title, showBack, showHome, isHome }) {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
   const { notificationCount } = useStore()
 
-  const label = title || TITLES[pathname] || ''
-
   return (
-    <header className="sticky top-0 z-20 bg-white border-b border-slate-100 flex items-center h-14 px-4 gap-3">
-      {showBack && (
+    <header className="sticky top-0 z-20 bg-white border-b border-slate-100 h-14 px-4 flex items-center">
+      {/* LEFT — back / home icon / empty */}
+      <div className="w-10 flex-shrink-0 flex items-center">
+        {showBack && (
+          <button
+            onClick={() => navigate(-1)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={20} className="text-navy-700" />
+          </button>
+        )}
+        {showHome && !showBack && (
+          <button
+            onClick={() => navigate('/')}
+            className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors"
+            aria-label="Go to Home"
+          >
+            <Home size={20} className="text-navy-700" />
+          </button>
+        )}
+      </div>
+
+      {/* CENTRE — CY Logo (tap = Home, inactive when already on Home) */}
+      <div className="flex-1 flex justify-center">
         <button
-          onClick={() => navigate(-1)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors -ml-1 flex-shrink-0"
-          aria-label="Go back"
+          onClick={() => !isHome && navigate('/')}
+          className={`flex items-center gap-1.5 ${isHome ? 'cursor-default' : 'hover:opacity-80 transition-opacity'}`}
+          aria-label={isHome ? 'CricYaar' : 'Go to Home'}
         >
-          <ArrowLeft size={20} />
-        </button>
-      )}
-
-      {!showBack && (
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-7 h-7 bg-brand-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-black text-xs">CY</span>
+          <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center shadow-sm">
+            <span className="text-white font-black text-sm tracking-tight">CY</span>
           </div>
-          <span className="font-extrabold text-navy-900 text-base tracking-tight md:hidden">CricYaar</span>
-        </div>
-      )}
+          {title && (
+            <span className="font-bold text-navy-900 text-sm truncate max-w-[160px]">{title}</span>
+          )}
+        </button>
+      </div>
 
-      <h1 className="flex-1 font-bold text-navy-900 text-base truncate">{label}</h1>
-
-      <div className="flex items-center gap-1 flex-shrink-0">
+      {/* RIGHT — Bell */}
+      <div className="w-10 flex-shrink-0 flex items-center justify-end">
         <button
           onClick={() => navigate('/notifications')}
           className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors"
@@ -54,13 +73,6 @@ export default function TopBar({ title, showBack }) {
               {notificationCount}
             </span>
           )}
-        </button>
-        <button
-          onClick={() => navigate('/settings')}
-          className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors"
-          aria-label="Settings"
-        >
-          <Settings size={20} className="text-navy-600" />
         </button>
       </div>
     </header>

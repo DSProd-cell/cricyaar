@@ -2,21 +2,22 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { ROLE_META } from '../data/mock'
-import { Check, Activity, BarChart2, Eye, Tv, Shield } from 'lucide-react'
+import { Check, Activity, BarChart2, Eye, Tv } from 'lucide-react'
 
+// Admin is NOT a user-selectable role — provisioned server-side only
 const ROLES = [
-  { id:'player',    label:'Player',    Icon:Activity  },
-  { id:'organiser', label:'Organiser', Icon:BarChart2 },
-  { id:'umpire',    label:'Umpire',    Icon:Eye       },
-  { id:'fan',       label:'Fan',       Icon:Tv        },
-  { id:'admin',     label:'Admin',     Icon:Shield    },
+  { id:'fan',       label:'Fan',       Icon:Tv,        desc:'Follow live scores in your city. Free forever.' },
+  { id:'player',    label:'Player',    Icon:Activity,  desc:'Track your career stats, join teams and tournaments.' },
+  { id:'organiser', label:'Organiser', Icon:BarChart2, desc:'Create and manage matches, tournaments, and registrations.' },
+  { id:'umpire',    label:'Umpire',    Icon:Eye,       desc:'Manage your officiating profile and request assignments.' },
 ]
 
 export default function RoleSelect() {
   const navigate = useNavigate()
   const { user, setRole, addToast, proIntent, setProIntent, setShowProSheet } = useStore()
   const currentRole = user?.role || 'fan'
-  const [chosen, setChosen] = useState('')
+  // Fan is pre-selected by default (PRD v2: Fan is the default lowest-friction entry role)
+  const [chosen, setChosen] = useState('fan')
   const [loading, setLoading] = useState(false)
 
   const handleConfirm = async () => {
@@ -45,8 +46,8 @@ export default function RoleSelect() {
           <div className="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-brand-500/25">
             <span className="text-white font-black text-xl">CY</span>
           </div>
-          <h2 className="font-bold text-navy-900 text-xl">Choose your new role</h2>
-          <p className="text-navy-500 text-sm mt-1">Select the role you'd like to switch to.</p>
+          <h2 className="font-bold text-navy-900 text-xl">Who are you?</h2>
+          <p className="text-navy-500 text-sm mt-1">You can change your role at any time — no OTP needed.</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-card p-6 space-y-4">
@@ -62,13 +63,13 @@ export default function RoleSelect() {
                   key={r.id}
                   className="relative border-2 rounded-xl p-4 text-center cursor-pointer transition-all"
                   style={{
-                    borderColor: isCurrent && !isSelected
-                      ? '#f59e0b'
-                      : isSelected
-                        ? meta.color
+                    borderColor: isSelected
+                      ? (meta?.color || '#22c55e')
+                      : isCurrent && !isSelected
+                        ? '#f59e0b'
                         : '#e2e8f0',
                     background: isSelected
-                      ? `${meta.color}10`
+                      ? `${meta?.color || '#22c55e'}12`
                       : isCurrent && !isSelected
                         ? '#fefce8'
                         : '#fff',
@@ -76,16 +77,18 @@ export default function RoleSelect() {
                   onClick={() => setChosen(r.id)}
                 >
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5"
-                    style={{ background: isSelected ? `${meta.color}20` : isCurrent ? '#fef3c7' : '#f8fafc' }}
+                    style={{ background: isSelected ? `${meta?.color || '#22c55e'}20` : isCurrent ? '#fef3c7' : '#f8fafc' }}
                   >
-                    <r.Icon size={16} style={{ color: isSelected ? meta.color : isCurrent ? '#d97706' : '#94a3b8' }} />
+                    <r.Icon size={16} style={{ color: isSelected ? (meta?.color || '#22c55e') : isCurrent ? '#d97706' : '#94a3b8' }} />
                   </div>
                   <p className="font-semibold text-sm text-navy-900">{r.label}</p>
+                  <p className="text-[10px] text-navy-400 mt-0.5 leading-tight line-clamp-2">{r.desc}</p>
                   {isCurrent && (
                     <span className="block text-[10px] font-medium mt-0.5" style={{ color:'#d97706' }}>Current</span>
                   )}
-                  {isSelected && !isCurrent && (
-                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: meta.color }}>
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ background: meta?.color || '#22c55e' }}>
                       <Check size={11} className="text-white" />
                     </div>
                   )}

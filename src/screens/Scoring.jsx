@@ -255,34 +255,37 @@ export default function Scoring() {
 
   const match  = MATCHES.find(m => m.id === (matchId || 'm1')) || MATCHES[0]
 
-  // ── v3: Scorer gate ───────────────────────────────────────────────────────
-  const assignedScorerId = match?.assignedScorerUserId
-  const isAdmin    = user?.role === 'admin'
-  const isAssigned = !assignedScorerId || user?.id === assignedScorerId
-  const isAuthorized = isAdmin || isAssigned
+  // ── PRD v2: Umpire-only scoring gate ─────────────────────────────────────
+  // Only users with role 'umpire' or 'admin' can access the scoring screen.
+  // Players, Captains, and Organisers see an Access Denied state regardless
+  // of whether they are assigned to the match.
+  const isAdmin      = user?.role === 'admin'
+  const isUmpire     = user?.role === 'umpire'
+  const isAuthorized = isAdmin || isUmpire
 
   if (!isAuthorized) {
-    const scorerPlayer = playerById(assignedScorerId)
     return (
       <div className="h-dvh flex flex-col bg-navy-900 items-center justify-center px-6 text-center">
         <div className="w-20 h-20 bg-navy-800 rounded-3xl flex items-center justify-center mb-5">
           <Lock size={32} className="text-navy-400" />
         </div>
-        <h2 className="text-white font-extrabold text-xl mb-2">Scorer access only</h2>
-        <p className="text-navy-400 text-sm leading-relaxed mb-1">
-          You are not the assigned scorer for this match.
+        <h2 className="text-white font-extrabold text-xl mb-2">Umpire access only</h2>
+        <p className="text-navy-400 text-sm leading-relaxed mb-6">
+          Scoring is managed by the assigned umpire for this match.
+          {' '}Players, captains, and organisers have read-only access to the live scorecard.
         </p>
-        {scorerPlayer && (
-          <p className="text-brand-400 font-semibold text-sm mb-6">
-            {scorerPlayer.name} is managing the live score.
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-full py-3 rounded-xl bg-navy-700 text-white font-semibold text-sm hover:bg-navy-600 transition-colors"
+          >
+            Go Back
+          </button>
+          <p className="text-navy-500 text-xs">
+            Your role is <span className="text-brand-400 font-semibold capitalize">{user?.role || 'player'}</span>.
+            Switch to Umpire role to access scoring.
           </p>
-        )}
-        <button
-          onClick={() => navigate(-1)}
-          className="btn-secondary"
-        >
-          Go Back
-        </button>
+        </div>
       </div>
     )
   }
