@@ -11,7 +11,7 @@ const ROLE_ICONS = {
 
 export default function Settings() {
   const navigate = useNavigate()
-  const { user, logout, addToast, setSubscription } = useStore()
+  const { user, logout, addToast, setSubscription, setProIntent, setOtpMode } = useStore()
   const [pushNotifs, setPushNotifs] = useState(true)
   const [showLogout, setShowLogout] = useState(false)
 
@@ -22,8 +22,16 @@ export default function Settings() {
   const isCancelled = user?.subscription === 'pro_cancelled'
 
   const handleChangeRole = () => {
-    // PRD v2: Role change is zero-friction — no OTP, no cooldown, go straight to role-select
-    navigate('/role-select')
+    if (!user?.phone) {
+      // Guest fan (no account) — sign up / sign in first, then choose role with limited access
+      setOtpMode('role-switch')
+      setProIntent(false)
+      navigate('/login?mode=signup')
+    } else {
+      // Signed-in user (free or Pro) — go straight to role select
+      // Pro gating happens inside the app via popup when they hit a Pro feature
+      navigate('/role-select')
+    }
   }
 
   const handleLogout = () => {

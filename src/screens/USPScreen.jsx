@@ -29,7 +29,7 @@ const PRO_FEATURES = [
 
 export default function USPScreen() {
   const navigate = useNavigate()
-  const { setProIntent, user } = useStore()
+  const { setProIntent, setUser, addToast, user } = useStore()
 
   // If already logged in, skip straight to home
   useEffect(() => {
@@ -37,18 +37,34 @@ export default function USPScreen() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFree = () => {
+    // Instant Fan login — no phone/OTP needed
     setProIntent(false)
-    navigate('/welcome')
+    setUser({
+      id: `fan_${Date.now()}`,
+      phone: null,
+      name: 'Cricket Fan',
+      username: 'fan_user',
+      city: 'Mumbai',
+      role: 'fan',
+      roles: ['fan'],
+      isNew: true,
+      avatar: null,
+      lastRoleChangedAt: null,
+      subscription: 'free',
+    })
+    addToast("You're in as a Fan! To unlock all features, change your role in Settings.", 'info')
+    navigate('/')
   }
 
   const handlePro = () => {
+    // Pro: requires sign in / sign up → then payment
     setProIntent(true)
-    navigate('/welcome')
+    navigate('/login?mode=signup')
   }
 
   const handleSignIn = () => {
     setProIntent(false)
-    navigate('/welcome?mode=signin')
+    navigate('/login?mode=login')
   }
 
   return (

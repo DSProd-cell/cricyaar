@@ -14,6 +14,7 @@ import Welcome        from './screens/Welcome'
 import Login          from './screens/Login'
 import OtpVerify      from './screens/OtpVerify'
 import ProfileSetup   from './screens/ProfileSetup'
+import ProPayment     from './screens/ProPayment'
 
 // Screens — main app
 import Home           from './screens/Home'
@@ -61,7 +62,7 @@ function WhatsNewGate({ children }) {
 
   useEffect(() => {
     if (!user) return
-    const skip = ['/whats-new','/welcome','/login','/otp','/setup','/usp','/role-warning','/role-select']
+    const skip = ['/whats-new','/welcome','/login','/otp','/setup','/usp','/role-warning','/role-select','/pro-payment']
     if (skip.includes(pathname) || pathname.startsWith('/score')) return
     const seen = localStorage.getItem('whats_new_seen_version')
     if (seen !== 'v3') navigate('/whats-new', { replace: true })
@@ -79,7 +80,7 @@ function AppShell({ children }) {
   const { pathname } = useLocation()
   const { user } = useStore()
 
-  const noShell = ['/welcome','/login','/otp','/setup','/role-warning','/role-select','/whats-new','/usp'].includes(pathname)
+  const noShell = ['/welcome','/login','/otp','/setup','/role-warning','/role-select','/whats-new','/usp','/pro-payment'].includes(pathname)
     || pathname.startsWith('/score')
     || pathname.startsWith('/ground-booking')
     || pathname === '/aadhaar-verify'
@@ -110,8 +111,9 @@ export default function App() {
           <Route path="/usp"     element={<USPScreen />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/login"   element={<Login />} />
-          <Route path="/otp"     element={<OtpVerify />} />
-          <Route path="/setup"   element={<ProfileSetup />} />
+          <Route path="/otp"         element={<OtpVerify />} />
+          <Route path="/setup"       element={<ProfileSetup />} />
+          <Route path="/pro-payment" element={<AuthGuard><ProPayment /></AuthGuard>} />
 
           {/* Main app */}
           <Route path="/"               element={<AuthGuard><Home /></AuthGuard>} />

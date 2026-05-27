@@ -5,7 +5,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
-  const { pendingPhone, setUser, addToast, otpMode } = useStore()
+  const { pendingPhone, setUser, addToast, otpMode, proIntent, user } = useStore()
   const [digits, setDigits]     = useState(['','','','','',''])
   const [error, setError]       = useState('')
   const [attempts, setAttempts] = useState(0)
@@ -70,13 +70,21 @@ export default function OtpVerify() {
     // Any 6-digit code is accepted in mock mode
     if (code.length === 6) {
       if (otpMode === 'role-switch') {
-        // Navigate to role selection screen
-        addToast('Identity verified. Choose your new role.', 'success')
+        // Upgrade guest user with real phone → then role select with limited access
+        if (!user?.phone) {
+          setUser({ ...user, phone: pendingPhone, id: 'p1', name: user?.name || 'Cricket Fan' })
+        }
+        addToast('Account created! Now choose your role.', 'success')
         navigate('/role-select')
       } else {
-        setUser({ id:'p1', phone: pendingPhone, name:'Rohit Sharma', username:'rohit_s', city:'Mumbai', role:'fan', roles:['player'], isNew:false, avatar:null, lastRoleChangedAt:null })
-        addToast('Welcome back, Rohit! 🏏', 'success')
-        navigate('/')
+        setUser({ id:'p1', phone: pendingPhone, name:'Rohit Sharma', username:'rohit_s', city:'Mumbai', role:'fan', roles:['player'], isNew:false, avatar:null, lastRoleChangedAt:null, subscription:'free' })
+        if (proIntent) {
+          addToast('Phone verified! Complete your Pro setup.', 'success')
+          navigate('/pro-payment')
+        } else {
+          addToast('Welcome back, Rohit! 🏏', 'success')
+          navigate('/')
+        }
       }
     } else {
       const newAttempts = attempts + 1
@@ -100,7 +108,7 @@ export default function OtpVerify() {
     <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm animate-slide-up">
         {/* Back */}
-        <button onClick={() => navigate(otpMode === 'role-switch' ? '/role-warning' : '/login')} className="flex items-center gap-2 text-navy-500 hover:text-navy-900 mb-6 transition-colors">
+        <button onClick={() => navigate('/login')} className="flex items-center gap-2 text-navy-500 hover:text-navy-900 mb-6 transition-colors">
           <ArrowLeft size={18} />
           <span className="text-sm font-medium">Back</span>
         </button>

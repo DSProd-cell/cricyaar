@@ -1,5 +1,6 @@
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Crown, Check, X } from 'lucide-react'
+import { Crown, Check, X, Zap } from 'lucide-react'
 
 const PERKS = [
   'Create & join tournaments',
@@ -11,12 +12,13 @@ const PERKS = [
 ]
 
 export default function ProSignupSheet() {
-  const { setShowProSheet, setSubscription, addToast } = useStore()
+  const navigate = useNavigate()
+  const { setShowProSheet, setProIntent, addToast } = useStore()
 
   const handleSubscribe = () => {
-    setSubscription('pro_active')
     setShowProSheet(false)
-    addToast('Welcome to CricYaar Pro! 🏆', 'success')
+    setProIntent(true)
+    navigate('/pro-payment')
   }
 
   const handleDismiss = () => {
@@ -50,8 +52,8 @@ export default function ProSignupSheet() {
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'#fef3c7' }}>
               <Crown size={28} className="text-amber-500 fill-amber-400" />
             </div>
-            <h2 className="font-extrabold text-navy-900 text-xl">Unlock CricYaar Pro</h2>
-            <p className="text-navy-500 text-sm mt-1">You're all set up! Get the full experience for just ₹99/mo.</p>
+            <h2 className="font-extrabold text-navy-900 text-xl">Want access to everything?</h2>
+            <p className="text-navy-500 text-sm mt-1">You're on the free plan. Upgrade to Pro and unlock the full CricYaar experience.</p>
           </div>
 
           {/* Perks */}
@@ -68,25 +70,23 @@ export default function ProSignupSheet() {
             </ul>
           </div>
 
-          {/* Price callout */}
-          <div className="flex items-baseline justify-center gap-1 mb-4">
-            <span className="text-3xl font-extrabold text-navy-900">₹99</span>
-            <span className="text-navy-400 text-sm">/month · Cancel anytime</span>
-          </div>
-
           {/* CTAs */}
           <button
             onClick={handleSubscribe}
-            className="w-full py-4 rounded-2xl font-bold text-white text-base mb-3"
+            className="w-full py-4 rounded-2xl font-bold text-white mb-3 flex flex-col items-center gap-0.5 active:scale-[0.98] transition-all"
             style={{ background:'linear-gradient(135deg, #f59e0b, #d97706)' }}
           >
-            Subscribe Now — ₹99/mo
+            <span className="flex items-center gap-2 text-base font-extrabold">
+              <Zap size={17} />
+              Upgrade to Pro — Unlock Everything
+            </span>
+            <span className="text-amber-100 text-xs font-medium opacity-90">₹99/month · UPI / Cards · Cancel anytime</span>
           </button>
           <button
             onClick={handleDismiss}
-            className="w-full py-3 text-center text-navy-500 text-sm font-medium hover:text-navy-700 transition-colors"
+            className="w-full py-3 text-center text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
           >
-            Maybe later — continue with free tier
+            Maybe later — stay on free
           </button>
         </div>
       </div>
