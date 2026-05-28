@@ -51,8 +51,10 @@ export default function ProfileSetup() {
       lastRoleChangedAt: null,
     })
     addToast(`Welcome to CricYaar, ${name.split(' ')[0]}!`, 'success')
+    // New users don't need to see "What's New" — everything is new to them
+    localStorage.setItem('whats_new_seen_version', 'v3')
     setLoading(false)
-    navigate('/')
+    navigate('/role-select')
   }
 
   const canSubmit = name.trim().length >= 2 && username.length >= 3 && !!selectedRole

@@ -1,13 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { DEMO_USER } from '../data/mock'
 
 export const useStore = create(
   persist(
     (set, get) => ({
       // ── Auth ──────────────────────────────────────────────────────────────────
-      user: DEMO_USER,          // pre-seed so AuthGuard passes on first render
-      isAuthenticated: true,
+      user: null,              // start unauthenticated — USP/landing page shows first
+      isAuthenticated: false,
       pendingPhone: null,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),

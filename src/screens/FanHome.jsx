@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { CITY_LIVE_DATA, ALL_CITIES } from '../data/mock'
-import { MapPin, Settings, Search, X, RefreshCw, Circle, ArrowRight } from 'lucide-react'
+import { MapPin, Settings, Search, X, RefreshCw, Circle, ArrowRight, Lock, Activity, Eye, Trophy, BarChart2, Building2, Users } from 'lucide-react'
+import RoleLockedModal from '../components/RoleLockedModal'
 
 function CityPickerModal({ currentCity, onSelect, onClose }) {
   const [query, setQuery] = useState('')
@@ -63,6 +64,15 @@ function CityPickerModal({ currentCity, onSelect, onClose }) {
   )
 }
 
+const LOCKED_BLOCKS = [
+  { icon: Activity, title: 'My Cricket',         sub: 'Player feature',       eligibleRoles: ['player'] },
+  { icon: Eye,      title: 'Umpiring',            sub: 'Umpire feature',       eligibleRoles: ['umpire'] },
+  { icon: Trophy,   title: 'Tournaments',         sub: 'Organiser / Player',   eligibleRoles: ['organiser','player'] },
+  { icon: BarChart2,title: 'My Stats',            sub: 'Player / Organiser',   eligibleRoles: ['player','organiser'] },
+  { icon: Building2,title: 'My Ground',           sub: 'Ground Owner feature', eligibleRoles: ['ground_owner'] },
+  { icon: Users,    title: 'Team Management',     sub: 'Player / Organiser',   eligibleRoles: ['player','organiser'] },
+]
+
 export default function FanHome() {
   const navigate = useNavigate()
   const { user, setRole } = useStore()
@@ -70,6 +80,7 @@ export default function FanHome() {
   const [showPicker, setShowPicker] = useState(false)
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [ticking, setTicking] = useState(false)
+  const [locked, setLocked] = useState(null)
 
   const data = CITY_LIVE_DATA[city] || { live: [], today: 0 }
 
@@ -120,7 +131,7 @@ export default function FanHome() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-5 space-y-4 pb-24">
+      <main className="flex-1 px-4 py-5 space-y-4 pb-32">
 
         {/* Section 1 — Live now */}
         <div className="card animate-fade-in">
@@ -183,6 +194,30 @@ export default function FanHome() {
           </p>
         </div>
 
+        {/* Locked blocks — all other role features */}
+        <div className="animate-slide-up">
+          <div className="flex items-center gap-2 mb-3">
+            <Lock size={12} className="text-slate-400" />
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">More features — change your role</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {LOCKED_BLOCKS.map(({ icon: Icon, title, sub, eligibleRoles }) => (
+              <button
+                key={title}
+                onClick={() => setLocked({ feature: title, eligibleRoles })}
+                className="home-block text-left relative opacity-40 active:scale-[0.97]"
+              >
+                <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center mb-2">
+                  <Icon size={20} className="text-slate-400" />
+                </div>
+                <p className="font-bold text-slate-400 text-sm leading-tight">{title}</p>
+                <p className="text-slate-400 text-[11px] mt-1">{sub}</p>
+                <Lock size={12} className="absolute top-4 right-3 text-slate-300" />
+              </button>
+            ))}
+          </div>
+        </div>
+
       </main>
 
       {/* Persistent bottom banner */}
@@ -208,6 +243,15 @@ export default function FanHome() {
           currentCity={city}
           onSelect={handleCitySelect}
           onClose={() => setShowPicker(false)}
+        />
+      )}
+
+      {locked && (
+        <RoleLockedModal
+          currentRole="fan"
+          featureName={locked.feature}
+          eligibleRoles={locked.eligibleRoles}
+          onClose={() => setLocked(null)}
         />
       )}
     </div>

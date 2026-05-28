@@ -78,6 +78,8 @@ export default function OtpVerify() {
         navigate('/role-select')
       } else {
         setUser({ id:'p1', phone: pendingPhone, name:'Rohit Sharma', username:'rohit_s', city:'Mumbai', role:'fan', roles:['player'], isNew:false, avatar:null, lastRoleChangedAt:null, subscription:'free' })
+        // New users don't need to see "What's New" — mark it as seen
+        localStorage.setItem('whats_new_seen_version', 'v3')
         if (proIntent) {
           addToast('Phone verified! Complete your Pro setup.', 'success')
           navigate('/pro-payment')

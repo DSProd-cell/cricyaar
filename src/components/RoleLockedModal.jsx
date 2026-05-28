@@ -65,9 +65,9 @@ export default function RoleLockedModal({ currentRole, featureName, eligibleRole
           </button>
           <button
             className="btn-primary flex-1 text-sm py-3"
-            onClick={() => { onClose(); navigate('/settings') }}
+            onClick={() => { onClose(); navigate('/role-select') }}
           >
-            Go to Settings
+            Change Role
           </button>
         </div>
       </div>

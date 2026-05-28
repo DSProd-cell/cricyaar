@@ -6,6 +6,10 @@ import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, Layout
 import TopBar from '../components/TopBar'
 import RoleLockedModal from '../components/RoleLockedModal'
 import FanHome from './FanHome'
+import UmpireHome from './UmpireHome'
+import GroundOwnerHome from './GroundOwnerHome'
+import PlayerHome from './PlayerHome'
+import OrganiserHome from './OrganiserHome'
 import ProPaywallSheet from '../components/ProPaywallSheet'
 
 const liveMatch   = MATCHES.find(m => m.status === 'live')
@@ -160,8 +164,12 @@ export default function Home() {
   const { user } = useStore()
   const role = user?.role || 'fan'
 
-  // Fan role gets its own standalone home
-  if (role === 'fan') return <FanHome />
+  // Route to role-specific home screens
+  if (role === 'fan')          return <FanHome />
+  if (role === 'umpire')       return <UmpireHome />
+  if (role === 'ground_owner') return <GroundOwnerHome />
+  if (role === 'player')       return <PlayerHome />
+  if (role === 'organiser')    return <OrganiserHome />
 
   const player     = PLAYERS.find(p => p.id === user?.id) || PLAYERS[0]
   const myTeams    = TEAMS.filter(t => t.squad.includes(player?.id))
