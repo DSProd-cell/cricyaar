@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { Plus, X, LogOut, RefreshCw, Headphones, User } from 'lucide-react'
 
-const SKIP_PATHS = ['/welcome', '/login', '/otp', '/setup', '/usp', '/role-warning', '/role-select', '/whats-new', '/pro-payment']
+const SKIP_PATHS = ['/welcome', '/login', '/otp', '/usp']
 
 const ITEMS = [
   {
@@ -43,10 +43,9 @@ export default function GlobalFAB() {
   const [open, setOpen] = useState(false)
   const [confirmLogout, setConfirmLogout] = useState(false)
 
-  // Don't show on auth/onboarding screens or if not logged in
+  // Only hide on bare auth screens
   if (!user) return null
   if (SKIP_PATHS.includes(pathname)) return null
-  if (pathname.startsWith('/score')) return null
 
   const handleAction = (key) => {
     setOpen(false)

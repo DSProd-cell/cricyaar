@@ -7,10 +7,7 @@ import {
 } from 'lucide-react'
 
 // ── Pages where chat should NOT appear ──────────────────────────────────────
-const SKIP_PATHS = [
-  '/welcome', '/login', '/otp', '/setup', '/usp',
-  '/role-warning', '/role-select', '/whats-new', '/pro-payment'
-]
+const SKIP_PATHS = ['/welcome', '/login', '/otp', '/usp']
 
 // ── Context labels for current page ─────────────────────────────────────────
 const PAGE_CONTEXT = {
@@ -333,10 +330,9 @@ export default function AIAssistant() {
 
   useEffect(() => { scrollToBottom() }, [messages, typing])
 
-  // ── Guard: don't render on auth pages or when not logged in ──
+  // ── Guard: only hide on bare auth screens ──
   if (!user) return null
   if (SKIP_PATHS.some(p => pathname === p)) return null
-  if (pathname.startsWith('/score')) return null
 
   const sendMessage = (text) => {
     const query = (text || input).trim()
