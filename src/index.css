@@ -86,6 +86,10 @@
   .bottom-nav-item.active { color: #22c55e; }
   .bottom-nav-item:active { opacity: 0.7; }
 
+  /* ── No scrollbar utility ── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
   /* ── Side Nav Item ── */
   .side-nav-item {
     display: flex;
