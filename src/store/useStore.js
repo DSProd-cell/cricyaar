@@ -220,6 +220,36 @@ export const useStore = create(
       addGroundBooking: (booking) => set(s => ({
         groundBookings: [...s.groundBookings, { ...booking, createdAt: Date.now() }],
       })),
+
+      // ── v4: Follow / Watch ────────────────────────────────────────────────────
+      followedMatches: [],
+      followedTournaments: [],
+      followedPlayers: [],
+
+      toggleFollowMatch: (match) => set(s => {
+        const key = match.id || `${match.teamA}_${match.teamB}`
+        const exists = s.followedMatches.some(m => (m.id || `${m.teamA}_${m.teamB}`) === key)
+        if (exists) {
+          return { followedMatches: s.followedMatches.filter(m => (m.id || `${m.teamA}_${m.teamB}`) !== key) }
+        }
+        return { followedMatches: [...s.followedMatches, match], notificationCount: s.notificationCount + 1 }
+      }),
+
+      toggleFollowTournament: (tournament) => set(s => {
+        const exists = s.followedTournaments.some(t => t.id === tournament.id)
+        if (exists) {
+          return { followedTournaments: s.followedTournaments.filter(t => t.id !== tournament.id) }
+        }
+        return { followedTournaments: [...s.followedTournaments, tournament], notificationCount: s.notificationCount + 1 }
+      }),
+
+      toggleFollowPlayer: (player) => set(s => {
+        const exists = s.followedPlayers.some(p => p.id === player.id)
+        if (exists) {
+          return { followedPlayers: s.followedPlayers.filter(p => p.id !== player.id) }
+        }
+        return { followedPlayers: [...s.followedPlayers, player], notificationCount: s.notificationCount + 1 }
+      }),
     }),
     {
       name: 'cricyaar-store-v4',
@@ -237,6 +267,9 @@ export const useStore = create(
         aiQueryResetDate:          state.aiQueryResetDate,
         proIntent:                 state.proIntent,
         notificationCount:         state.notificationCount,
+        followedMatches:           state.followedMatches,
+        followedTournaments:       state.followedTournaments,
+        followedPlayers:           state.followedPlayers,
       }),
     }
   )
