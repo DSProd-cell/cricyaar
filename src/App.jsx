@@ -9,6 +9,7 @@ import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
 import GlobalFAB         from './components/GlobalFAB'
+import AIAssistant       from './components/AIAssistant'
 
 // Screens — auth / onboarding
 import USPScreen      from './screens/USPScreen'
@@ -84,6 +85,8 @@ function WhatsNewGate({ children }) {
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
       {/* Global quick-action FAB — shown on all authenticated pages */}
       <GlobalFAB />
+      {/* Global AI Assistant — shown on all authenticated pages */}
+      <AIAssistant />
     </>
   )
 }

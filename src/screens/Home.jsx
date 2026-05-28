@@ -11,7 +11,6 @@ import GroundOwnerHome from './GroundOwnerHome'
 import PlayerHome from './PlayerHome'
 import OrganiserHome from './OrganiserHome'
 import ProPaywallSheet from '../components/ProPaywallSheet'
-import AIAssistant from '../components/AIAssistant'
 
 const liveMatch   = MATCHES.find(m => m.status === 'live')
 const upcomingMatch = MATCHES.find(m => m.status === 'upcoming')
@@ -166,11 +165,11 @@ export default function Home() {
   const role = user?.role || 'fan'
 
   // Route to role-specific home screens
-  if (role === 'fan')          return <><FanHome /><AIAssistant fanMode /></>
-  if (role === 'umpire')       return <><UmpireHome /><AIAssistant /></>
-  if (role === 'ground_owner') return <><GroundOwnerHome /><AIAssistant /></>
-  if (role === 'player')       return <><PlayerHome /><AIAssistant /></>
-  if (role === 'organiser')    return <><OrganiserHome /><AIAssistant /></>
+  if (role === 'fan')          return <FanHome />
+  if (role === 'umpire')       return <UmpireHome />
+  if (role === 'ground_owner') return <GroundOwnerHome />
+  if (role === 'player')       return <PlayerHome />
+  if (role === 'organiser')    return <OrganiserHome />
 
   const player     = PLAYERS.find(p => p.id === user?.id) || PLAYERS[0]
   const myTeams    = TEAMS.filter(t => t.squad.includes(player?.id))
