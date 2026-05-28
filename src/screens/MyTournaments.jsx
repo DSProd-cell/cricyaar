@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { TOURNAMENTS, MATCHES, teamById, groundById } from '../data/mock'
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
+import FollowButton from '../components/FollowButton'
 import {
   Trophy, Calendar, Users, MapPin, Clock,
   Circle, CheckCircle, Activity, ChevronRight
@@ -63,11 +64,12 @@ function TournamentCard({ t }) {
         </span>
       </div>
 
-      {/* Prize */}
+      {/* Prize + Follow */}
       <div className="flex items-center gap-2 bg-amber-50 rounded-xl px-3 py-2 text-xs">
         <Trophy size={12} className="text-amber-500 flex-shrink-0" />
-        <span className="text-amber-800 font-semibold">{t.prize}</span>
-        <span className="ml-auto text-navy-400">Entry: ₹{(t.entryFee || 0).toLocaleString('en-IN')}</span>
+        <span className="text-amber-800 font-semibold flex-1">{t.prize}</span>
+        <span className="text-navy-400 mr-2">₹{(t.entryFee || 0).toLocaleString('en-IN')}</span>
+        <FollowButton type="tournament" item={t} label="Follow" size="sm" />
       </div>
     </button>
   )
@@ -173,9 +175,13 @@ function MatchRow({ match, onScorecard }) {
           🏆 {teamById(match.result.winner)?.name} won by {match.result.margin}
         </p>
       )}
-      {match.status !== 'upcoming' && !match.result && (
-        <p className="text-navy-400 text-[10px] text-right mt-1">Tap for full scorecard →</p>
-      )}
+      {/* Follow + scorecard hint */}
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-50">
+        <FollowButton type="match" item={match} label="Follow" size="sm" />
+        {match.status !== 'upcoming' && !match.result && (
+          <p className="text-navy-400 text-[10px]">Tap for scorecard →</p>
+        )}
+      </div>
     </button>
   )
 }

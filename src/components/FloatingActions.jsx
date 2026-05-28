@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import {
@@ -165,33 +165,46 @@ export default function FloatingActions() {
     } catch {}
     return getDefault()
   })
-  const drag = useRef({ active: false, moved: false, startX: 0, startY: 0, origX: 0, origY: 0 })
+  // posRef always holds the latest pos — avoids stale closure in handlers
+  const posRef   = useRef(pos)
+  useEffect(() => { posRef.current = pos }, [pos])
 
-  const onPointerDown = useCallback((e) => {
-    // Only drag on the container itself (not child buttons)
-    drag.current = { active: true, moved: false, startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y }
-    e.currentTarget.setPointerCapture(e.pointerId)
-  }, [pos])
+  // didDrag stays true after a drag until the NEXT pointerDown — blocks accidental clicks
+  const didDrag  = useRef(false)
+  const dragData = useRef({ startX: 0, startY: 0, origX: 0, origY: 0, active: false })
 
-  const onPointerMove = useCallback((e) => {
-    if (!drag.current.active) return
-    const dx = e.clientX - drag.current.startX
-    const dy = e.clientY - drag.current.startY
-    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-      drag.current.moved = true
-      const btnW = 52, btnH = 116  // approx container size
-      const newX = Math.max(8, Math.min((window.innerWidth  - btnW - 8), drag.current.origX + dx))
-      const newY = Math.max(8, Math.min((window.innerHeight - btnH - 8), drag.current.origY + dy))
+  const onPointerDown = (e) => {
+    // Always reset at the start of a new interaction (fixes the "stuck" bug)
+    didDrag.current = false
+    dragData.current = {
+      active: true,
+      startX: e.clientX, startY: e.clientY,
+      origX: posRef.current.x, origY: posRef.current.y,
+    }
+  }
+
+  const onPointerMove = (e) => {
+    if (!dragData.current.active || e.buttons === 0) return
+    const dx = e.clientX - dragData.current.startX
+    const dy = e.clientY - dragData.current.startY
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+      didDrag.current = true
+      const newX = Math.max(8, Math.min(window.innerWidth  - 60,  dragData.current.origX + dx))
+      const newY = Math.max(8, Math.min(window.innerHeight - 120, dragData.current.origY + dy))
+      posRef.current = { x: newX, y: newY }
       setPos({ x: newX, y: newY })
     }
-  }, [])
+  }
 
-  const onPointerUp = useCallback(() => {
-    drag.current.active = false
-    if (drag.current.moved) {
-      try { localStorage.setItem('cy_fab_pos', JSON.stringify(pos)) } catch {}
+  const onPointerUp = () => {
+    dragData.current.active = false
+    if (didDrag.current) {
+      // Save final position — posRef is always up to date (no stale closure)
+      try { localStorage.setItem('cy_fab_pos', JSON.stringify(posRef.current)) } catch {}
     }
-  }, [pos])
+    // NOTE: do NOT reset didDrag here — keep it true so any lingering click
+    // events after the drag are still blocked. It resets on next pointerDown.
+  }
 
   // ── AI helpers ──
   const scrollToBottom = () => setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
@@ -269,7 +282,7 @@ export default function FloatingActions() {
     <>
       {/* ── Draggable container ── */}
       <div
-        style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 60, touchAction: 'none', cursor: drag.current.active ? 'grabbing' : 'grab' }}
+        style={{ position: 'fixed', left: pos.x, top: pos.y, zIndex: 60, touchAction: 'none', cursor: dragData.current.active ? 'grabbing' : 'grab' }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -280,8 +293,7 @@ export default function FloatingActions() {
             {FAB_ITEMS.map(item => (
               <button
                 key={item.key}
-                onPointerDown={e => e.stopPropagation()}
-                onClick={() => !drag.current.moved && handleFABAction(item.key)}
+                onClick={() => { if (!didDrag.current) handleFABAction(item.key) }}
                 className="flex items-center gap-2.5 rounded-full pl-3 pr-2 py-1.5 shadow-lg font-semibold text-sm transition-all active:scale-95 whitespace-nowrap bg-white border border-slate-200"
               >
                 <span className="text-navy-800">{item.label}</span>
@@ -298,8 +310,7 @@ export default function FloatingActions() {
         <div className="flex flex-col items-center gap-2">
           {/* AI Sparkles */}
           <button
-            onPointerDown={e => e.stopPropagation()}
-            onClick={() => !drag.current.moved && setAiOpen(v => !v)}
+            onClick={() => { if (!didDrag.current) setAiOpen(v => !v) }}
             className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95"
             style={{ background: 'linear-gradient(135deg,#6366f1,#4f46e5)', boxShadow: '0 4px 16px rgba(99,102,241,0.4)' }}
             aria-label="CricYaar Guide"
@@ -309,8 +320,7 @@ export default function FloatingActions() {
 
           {/* Plus / Quick actions */}
           <button
-            onPointerDown={e => e.stopPropagation()}
-            onClick={() => !drag.current.moved && setFabOpen(v => !v)}
+            onClick={() => { if (!didDrag.current) setFabOpen(v => !v) }}
             className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95"
             style={{ background: fabOpen ? '#0f172a' : 'linear-gradient(135deg,#0f172a,#1e293b)', boxShadow: '0 4px 16px rgba(15,23,42,0.30)' }}
             aria-label="Quick actions"

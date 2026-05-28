@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { MATCHES, teamById, groundById } from '../data/mock'
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
+import FollowButton from '../components/FollowButton'
 import { Activity, Circle, MapPin, Clock } from 'lucide-react'
 
 const TABS = ['Live','Upcoming','Past']
@@ -16,16 +17,19 @@ function MatchCard({ match, onClick }) {
   return (
     <button onClick={onClick} className="card card-hover w-full text-left mb-3 animate-fade-in">
       <div className="flex items-start justify-between mb-3">
-        <div>
+        <div className="flex-1 min-w-0 pr-2">
           <p className="font-semibold text-navy-900 text-sm">{match.name}</p>
           <div className="flex items-center gap-1.5 mt-1 text-navy-500 text-xs">
             <MapPin size={11} />
             <span>{g?.name || 'TBD'}</span>
           </div>
         </div>
-        {match.status === 'live' && <span className="badge badge-live flex items-center gap-1"><Circle size={6} fill="currentColor" />Live</span>}
-        {match.status === 'upcoming' && <span className="badge badge-blue">Upcoming</span>}
-        {match.status === 'completed' && <span className="badge badge-navy">Completed</span>}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <FollowButton type="match" item={match} label="Follow" size="sm" />
+          {match.status === 'live' && <span className="badge badge-live flex items-center gap-1"><Circle size={6} fill="currentColor" />Live</span>}
+          {match.status === 'upcoming' && <span className="badge badge-blue">Upcoming</span>}
+          {match.status === 'completed' && <span className="badge badge-navy">Completed</span>}
+        </div>
       </div>
 
       {/* Scorecard mini */}
@@ -72,7 +76,6 @@ export default function MyCricket() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('Live')
   const [scoreMatch, setScoreMatch] = useState(null)
-  const { user } = { user: { roles:['player','organiser'] } }
 
   const filtered = MATCHES.filter(m =>
     tab === 'Live'     ? m.status === 'live'      :
@@ -96,17 +99,11 @@ export default function MyCricket() {
         ))}
       </div>
 
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-44">
         {filtered.length === 0 ? (
           <div className="text-center py-16">
             <Activity size={40} className="mx-auto text-navy-300 mb-3" />
             <p className="font-semibold text-navy-500">No {tab.toLowerCase()} matches</p>
-            {tab === 'Upcoming' && (
-              <button onClick={() => {}} className="btn-primary mt-4 mx-auto w-fit gap-2">
-                <Plus size={16} />
-                Create a match
-              </button>
-            )}
           </div>
         ) : filtered.map(m => (
           <MatchCard key={m.id} match={m} onClick={() =>
