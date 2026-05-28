@@ -5,6 +5,7 @@ import {
   MATCHES, UMPIRE_PROFILE, OPEN_MATCHES, UMPIRE_OPEN_TOURNAMENTS,
   UMPIRE_GROUND_VISITS, UMPIRE_MY_REQUESTS, teamById
 } from '../data/mock'
+import UmpireMatchSession from './UmpireMatchSession'
 import TopBar from '../components/TopBar'
 import ProPaywallSheet from '../components/ProPaywallSheet'
 import MatchScoreSheet from '../components/MatchScoreSheet'
@@ -36,6 +37,9 @@ function MyAssignments({ navigate, addToast }) {
   const liveMatch = MATCHES.find(m => m.status === 'live')
   const [tossAssignment, setTossAssignment] = useState(null)
   const [scoreMatch, setScoreMatch]         = useState(null)
+  // sessions: { [assignmentId]: { tossResult, phase } }
+  const [sessions, setSessions] = useState({})
+  const [activeSession, setActiveSession] = useState(null) // { assignment, tossResult }
 
   const StarRating = ({ n }) => (
     <span className="flex items-center gap-0.5">
@@ -95,7 +99,10 @@ function MyAssignments({ navigate, addToast }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {upcoming.map(a => (
+              {upcoming.map(a => {
+                const sess = sessions[a.id]
+                const tossComplete = !!sess?.tossResult
+                return (
                 <div key={a.id} className="border border-amber-200 bg-amber-50 rounded-xl p-3">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ Assigned</span>
@@ -118,17 +125,40 @@ function MyAssignments({ navigate, addToast }) {
                       <CheckCircle size={10} />Result sign-off
                     </div>
                   </div>
-                  {/* Start Toss button */}
-                  <button
-                    onClick={() => setTossAssignment(a)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
-                    style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 12px rgba(251,191,36,0.35)' }}
-                  >
-                    <span>🪙</span>
-                    Start Toss
-                  </button>
+
+                  {/* Toss result chip — locked after done */}
+                  {tossComplete && (
+                    <div className="flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-xl px-3 py-2 mb-3">
+                      <CheckCircle size={13} className="text-green-600 flex-shrink-0" />
+                      <p className="text-green-800 text-xs font-semibold flex-1">
+                        Toss done · <strong>{sess.tossResult.winnerName}</strong> elected to{' '}
+                        <strong>{sess.tossResult.choice}</strong> first
+                      </p>
+                      <span className="text-green-600 text-[10px] font-bold uppercase">Locked</span>
+                    </div>
+                  )}
+
+                  {/* Toss button — disabled once done */}
+                  {!tossComplete ? (
+                    <button
+                      onClick={() => setTossAssignment(a)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
+                      style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 12px rgba(251,191,36,0.35)' }}
+                    >
+                      <span>🪙</span> Start Toss
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setActiveSession({ assignment: a, tossResult: sess.tossResult })}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
+                      style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow:'0 4px 12px rgba(34,197,94,0.35)' }}
+                    >
+                      <Activity size={15} /> Resume Match →
+                    </button>
+                  )}
                 </div>
-              ))}
+              )})}
+
             </div>
           )}
         </div>
@@ -138,8 +168,25 @@ function MyAssignments({ navigate, addToast }) {
       {tossAssignment && (
         <TossModal
           assignment={tossAssignment}
+          onComplete={(winnerName, winnerIdx, choice) => {
+            setSessions(prev => ({
+              ...prev,
+              [tossAssignment.id]: { tossResult: { winnerName, winnerIdx, choice } }
+            }))
+            addToast(`Toss done! ${winnerName} will ${choice} first.`, 'success')
+            setTossAssignment(null)
+          }}
           onClose={() => setTossAssignment(null)}
           addToast={addToast}
+        />
+      )}
+
+      {/* Match session (full-screen overlay) */}
+      {activeSession && (
+        <UmpireMatchSession
+          assignment={activeSession.assignment}
+          tossResult={activeSession.tossResult}
+          onClose={() => setActiveSession(null)}
         />
       )}
 
@@ -548,7 +595,7 @@ function OngoingMatches({ user, addToast, umpireRequests, addUmpireRequest, with
 // ══════════════════════════════════════════════════════════════════════════════
 // TOSS MODAL — Online Coin Toss
 // ══════════════════════════════════════════════════════════════════════════════
-function TossModal({ assignment, onClose, addToast }) {
+function TossModal({ assignment, onComplete, onClose, addToast }) {
   const [step, setStep]           = useState('caller')   // caller | call | flipping | result | choice | final
   const [caller, setCaller]       = useState(null)        // 0 or 1
   const [call, setCall]           = useState(null)        // 'heads' | 'tails'
@@ -730,10 +777,7 @@ function TossModal({ assignment, onClose, addToast }) {
               </div>
               <p className="text-navy-400 text-xs mb-5">Both teams have been notified via the app</p>
               <button
-                onClick={() => {
-                  addToast(`Toss done! ${winnerName} will ${choice} first.`, 'success')
-                  onClose()
-                }}
+                onClick={() => onComplete(winnerName, winnerIdx, choice)}
                 className="btn-primary w-full"
               >
                 Start Match →
