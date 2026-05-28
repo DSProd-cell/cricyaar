@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, TEAMS, TOURNAMENTS, teamById } from '../data/mock'
 import TopBar from '../components/TopBar'
+import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
   BarChart2, Trophy, MapPin, Activity, Eye, Building2,
   Circle, ChevronRight, Lock, Users, Send, Crown, Check,
@@ -234,8 +235,9 @@ function RoleChangePopup({ onClose }) {
 export default function OrganiserHome() {
   const navigate = useNavigate()
   const { user } = useStore()
-  const [locked, setLocked] = useState(null)
+  const [locked, setLocked]           = useState(null)
   const [showAddTeams, setShowAddTeams] = useState(false)
+  const [scoreMatch, setScoreMatch]   = useState(null)
 
   const isPro = user?.subscription === 'pro_active'
 
@@ -286,7 +288,7 @@ export default function OrganiserHome() {
           </div>
           {liveMatch && (
             <button
-              onClick={() => navigate(`/score/${liveMatch.id}`)}
+              onClick={() => setScoreMatch(liveMatch)}
               className="mt-3 w-full flex items-center gap-2 bg-white/15 rounded-xl px-3 py-2"
             >
               <Circle size={7} fill="#86efac" className="text-green-300 animate-pulse flex-shrink-0" />
@@ -394,6 +396,7 @@ export default function OrganiserHome() {
       </main>
 
       {locked && <RoleChangePopup onClose={() => setLocked(null)} />}
+      {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
       {showAddTeams && (
         <AddTeamsSheet
           isPro={isPro}

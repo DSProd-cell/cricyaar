@@ -7,6 +7,7 @@ import {
 } from '../data/mock'
 import TopBar from '../components/TopBar'
 import ProPaywallSheet from '../components/ProPaywallSheet'
+import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
   Eye, BarChart2, Calendar, Send, Star, MapPin, Clock,
   CheckCircle, Circle, AlertCircle, ChevronRight, Shield,
@@ -34,6 +35,7 @@ function MyAssignments({ navigate, addToast }) {
   const completed = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
   const liveMatch = MATCHES.find(m => m.status === 'live')
   const [tossAssignment, setTossAssignment] = useState(null)
+  const [scoreMatch, setScoreMatch]         = useState(null)
 
   const StarRating = ({ n }) => (
     <span className="flex items-center gap-0.5">
@@ -44,12 +46,13 @@ function MyAssignments({ navigate, addToast }) {
   )
 
   return (
+    <>
     <div className="space-y-4 animate-slide-up">
 
       {/* Live match banner — Score Now access */}
       {liveMatch && (
         <button
-          onClick={() => navigate(`/score/${liveMatch.id}`)}
+          onClick={() => setScoreMatch(liveMatch)}
           className="w-full rounded-2xl overflow-hidden text-left active:scale-[0.98] transition-transform"
           style={{ background: 'linear-gradient(135deg,#78350f,#d97706)' }}
         >
@@ -172,6 +175,8 @@ function MyAssignments({ navigate, addToast }) {
         </div>
       </div>
     </div>
+    {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
+    </>
   )
 }
 

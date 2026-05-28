@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, PLAYERS, TEAMS, TOURNAMENTS, teamById, playerById } from '../data/mock'
 import TopBar from '../components/TopBar'
+import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
   Activity, MapPin, Trophy, Eye, BarChart2, Building2, Circle,
   ChevronRight, Lock, Users, Send, Crown
@@ -71,7 +72,8 @@ function RoleChangePopup({ onClose }) {
 export default function PlayerHome() {
   const navigate  = useNavigate()
   const { user }  = useStore()
-  const [locked, setLocked] = useState(null)
+  const [locked, setLocked]           = useState(null)
+  const [scoreMatch, setScoreMatch]   = useState(null)
 
   const player     = PLAYERS.find(p => p.id === user?.id) || PLAYERS[0]
   const myTeams    = TEAMS.filter(t => t.squad?.includes(player?.id))
@@ -108,7 +110,7 @@ export default function PlayerHome() {
         {/* Hero — live banner (read-only scorecard) */}
         {liveMatch && (
           <button
-            onClick={() => navigate(`/score/${liveMatch.id}`)}
+            onClick={() => setScoreMatch(liveMatch)}
             className="w-full mb-5 rounded-2xl overflow-hidden text-left animate-slide-up"
             style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)' }}
           >
@@ -205,6 +207,7 @@ export default function PlayerHome() {
       </main>
 
       {locked && <RoleChangePopup onClose={() => setLocked(null)} />}
+      {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
     </div>
   )
 }
