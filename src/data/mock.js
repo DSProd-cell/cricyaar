@@ -459,6 +459,24 @@ export const ORGANISER_INBOX_DATA = {
   ],
 };
 
+// ─── UMPIRE: GROUND VISITS WITH DISTANCE FROM HOME ──────────────────────────
+export const UMPIRE_GROUND_VISITS = [
+  { groundId:'g5', groundName:'Bandra Box Cricket Arena', city:'Mumbai', matches:6,  distanceKm:3,    lastVisited:'Mar 15' },
+  { groundId:'g1', groundName:'Wankhede Cricket Ground',  city:'Mumbai', matches:12, distanceKm:8,    lastVisited:'Mar 20' },
+  { groundId:'g2', groundName:'Kotla Cricket Club',       city:'Delhi',  matches:4,  distanceKm:1200, lastVisited:'Mar 14' },
+  { groundId:'g3', groundName:'Chepauk Sports Arena',     city:'Chennai',matches:3,  distanceKm:1350, lastVisited:'Feb 28' },
+  { groundId:'g7', groundName:'Hyderabad Cricket Club',   city:'Hyderabad',matches:3,distanceKm:1420, lastVisited:'Feb 22' },
+];
+
+// ─── UMPIRE: MY REQUESTS (pre-seeded with various statuses) ─────────────────
+export const UMPIRE_MY_REQUESTS = [
+  { id:'ur1', type:'match',      name:'BLR vs HYD — T20 Friendly',   organiser:'Raj Sports Club',       date:'Mar 21',          city:'Bengaluru', sentOn:'3 days ago', status:'approved', seen:false },
+  { id:'ur2', type:'tournament', name:'Mumbai Box League 2024',       organiser:'MCA Events',            date:'Mar 22 – Mar 26', city:'Mumbai',    sentOn:'4 days ago', status:'rejected', reason:'Slot already filled by another umpire', seen:false },
+  { id:'ur3', type:'match',      name:'MUM vs CHE — T10 Cup',        organiser:'Mumbai Cricket Academy', date:'Mar 22',          city:'Mumbai',    sentOn:'2 days ago', status:'pending',  seen:true  },
+  { id:'ur4', type:'tournament', name:'Hyderabad Corporate T20',      organiser:'Deccan Cricket Trust',   date:'Apr 10 – Apr 15', city:'Hyderabad', sentOn:'5 days ago', status:'approved', seen:false },
+  { id:'ur5', type:'match',      name:'DEL vs BLR — League Match',   organiser:'Delhi Cricket Board',    date:'Mar 23',          city:'Delhi',     sentOn:'6 days ago', status:'approved', seen:true  },
+];
+
 // ─── GROUND OWNER: MY GROUNDS (demo owner = logged-in user) ─────────────────
 export const MY_GROUNDS_DATA = [
   { id:'g1', name:'Wankhede Cricket Ground', area:'Marine Drive', city:'Mumbai',
