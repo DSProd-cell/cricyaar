@@ -459,6 +459,75 @@ export const ORGANISER_INBOX_DATA = {
   ],
 };
 
+// ─── GROUND OWNER: MY GROUNDS (demo owner = logged-in user) ─────────────────
+export const MY_GROUNDS_DATA = [
+  { id:'g1', name:'Wankhede Cricket Ground', area:'Marine Drive', city:'Mumbai',
+    pitchType:'Turf', pitchCondition:'Fresh', floodlights:true,
+    rating:4.7, ratingCount:138, totalMatches:312,
+    thisMonth:{ bookings:8, matches:8, revenue:'₹9,600' },
+    lastMonth:{ bookings:11, matches:11, revenue:'₹13,200' },
+    status:'live',
+    recentMatches:[
+      { id:'m1', name:'MUM vs DEL — MPL Final', date:'Mar 20', status:'live' },
+      { id:'m3', name:'MUM vs CHE — Group B',   date:'Mar 15', status:'completed', winner:'Mumbai Mavericks' },
+    ]
+  },
+  { id:'g5', name:'Bandra Box Cricket Arena', area:'Bandra West', city:'Mumbai',
+    pitchType:'Matting', pitchCondition:'Fresh', floodlights:true,
+    rating:4.3, ratingCount:167, totalMatches:541,
+    thisMonth:{ bookings:14, matches:14, revenue:'₹7,000' },
+    lastMonth:{ bookings:17, matches:17, revenue:'₹8,500' },
+    status:'live',
+    recentMatches:[
+      { id:'rm1', name:'Bandra Bears vs Andheri Aces', date:'Mar 24', status:'completed', winner:'Bandra Bears' },
+      { id:'rm2', name:'Thane Tigers vs Navi Stars',   date:'Mar 25', status:'upcoming' },
+    ]
+  },
+];
+
+// ─── GROUND OWNER: GROUND DEMAND LIST (tournaments/matches seeking grounds) ──
+export const GROUND_DEMAND_LIST = [
+  // Tournaments needing a ground
+  { id:'gd1', type:'tournament',
+    name:'Mumbai Box League 2024',
+    organiser:'MCA Events', organiserPhone:'+919876541234',
+    format:'T10', overs:10, teams:8,
+    dateRange:'Apr 1 – Apr 10', city:'Mumbai',
+    requirement:'Floodlit Turf or Matting ground, weekday evenings',
+    budget:'₹1,000 – ₹1,500/hr',
+    matchesNeeded:14, status:'open' },
+  { id:'gd2', type:'tournament',
+    name:'Andheri Premier T20',
+    organiser:'Andheri Cricket Club', organiserPhone:'+919876545678',
+    format:'T20', overs:20, teams:6,
+    dateRange:'Apr 12 – Apr 20', city:'Mumbai',
+    requirement:'Turf pitch with changing room',
+    budget:'₹1,200 – ₹1,800/hr',
+    matchesNeeded:10, status:'open' },
+  // Individual matches needing a ground
+  { id:'gd3', type:'match',
+    name:'Mumbai Mavericks vs Pune Warriors',
+    organiser:'Raj Kapoor (Captain)', organiserPhone:'+919876549012',
+    format:'T20', overs:20,
+    date:'Mar 28', time:'05:00 PM', city:'Mumbai',
+    requirement:'Floodlit ground, parking preferred',
+    budget:'₹1,200 – ₹1,500/hr', status:'open' },
+  { id:'gd4', type:'match',
+    name:'Bandra League — Sunday Fixture',
+    organiser:'Bandra Cricket Society', organiserPhone:'+919876543456',
+    format:'T10', overs:10,
+    date:'Mar 30', time:'07:00 AM', city:'Mumbai',
+    requirement:'Any ground, early morning slot',
+    budget:'₹600 – ₹900/hr', status:'open' },
+  { id:'gd5', type:'match',
+    name:'Corporate League Quarter Final',
+    organiser:'Infotech Sports Club', organiserPhone:'+919876547890',
+    format:'T20', overs:20,
+    date:'Apr 2', time:'06:30 PM', city:'Mumbai',
+    requirement:'Floodlit turf, 2 grounds if possible',
+    budget:'₹1,500 – ₹2,000/hr', status:'open' },
+];
+
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 export const playerById  = id => PLAYERS.find(p => p.id === id);
 export const teamById    = id => TEAMS.find(t => t.id === id);
