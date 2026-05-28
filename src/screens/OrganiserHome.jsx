@@ -252,7 +252,7 @@ export default function OrganiserHome() {
   return (
     <div className="min-h-dvh flex flex-col bg-slate-50">
       <TopBar isHome />
-      <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full pb-28">
+      <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full pb-44">
 
         {/* Greeting */}
         <div className="mb-5 animate-fade-in">

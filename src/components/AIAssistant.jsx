@@ -403,7 +403,7 @@ export default function AIAssistant() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-24 right-4 z-[58] w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95"
+          className="fixed bottom-[72px] right-4 z-[58] w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95"
           style={{
             background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
             boxShadow: '0 4px 16px rgba(99,102,241,0.4)',

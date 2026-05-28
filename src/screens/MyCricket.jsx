@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { MATCHES, teamById, groundById } from '../data/mock'
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
-import { Activity, Plus, Circle, MapPin, Clock } from 'lucide-react'
+import { Activity, Circle, MapPin, Clock } from 'lucide-react'
 
 const TABS = ['Live','Upcoming','Past']
 
@@ -114,15 +114,6 @@ export default function MyCricket() {
           } />
         ))}
       </main>
-
-      {/* FAB for organiser */}
-      <button
-        onClick={() => {}}
-        className="fixed bottom-20 right-4 md:bottom-4 w-14 h-14 bg-brand-500 rounded-full flex items-center justify-center shadow-lg shadow-brand-500/30 hover:bg-brand-600 transition-all hover:scale-105 active:scale-95 z-10"
-        aria-label="Create match"
-      >
-        <Plus size={24} className="text-white" />
-      </button>
 
       {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
     </div>

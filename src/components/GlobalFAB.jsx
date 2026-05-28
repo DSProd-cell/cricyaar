@@ -84,7 +84,7 @@ export default function GlobalFAB() {
       )}
 
       {/* FAB container — right side, above AI chat button */}
-      <div className="fixed bottom-[152px] right-4 z-[60] flex flex-col items-end gap-2">
+      <div className="fixed bottom-[128px] right-4 z-[60] flex flex-col items-end gap-2">
 
         {/* Action pills */}
         {open && (
