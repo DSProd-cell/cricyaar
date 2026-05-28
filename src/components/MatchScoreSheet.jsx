@@ -48,15 +48,25 @@ function eco(runs, overs) {
   return ov > 0 ? (runs / ov).toFixed(1) : '—'
 }
 
-function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
+function InningsCard({ inn, battingTeam, bowlingTeam, isLive, xi }) {
   if (!inn) return null
 
+  // All batters who faced at least one ball OR are currently at crease
   const batters = Object.entries(inn.batters || {}).map(([id, stats]) => ({
     id, ...stats,
     name: playerById(id)?.name || id,
     isStriker: inn.striker === id,
     isNonStriker: inn.nonStriker === id,
-  })).filter(b => b.balls > 0 || !b.out)  // hide zero-ball DNB
+  })).filter(b => b.balls > 0 || b.id === inn.striker || b.id === inn.nonStriker)
+
+  // Did Not Bat — in xi but haven't batted
+  const battedIds = new Set(Object.keys(inn.batters || {}))
+  const dnbPlayers = (xi || [])
+    .filter(id => !battedIds.has(id) || (
+      (inn.batters[id]?.balls ?? 0) === 0 &&
+      id !== inn.striker && id !== inn.nonStriker
+    ))
+    .map(id => playerById(id)?.name || id)
 
   const bowlers = Object.entries(inn.bowlers || {})
     .filter(([, s]) => parseFloat(s.overs) > 0)
@@ -66,7 +76,16 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
       isCurrent: inn.currentBowler === id,
     }))
 
-  const extras = Math.max(0, inn.runs - batters.reduce((s, b) => s + b.runs, 0))
+  // Extras breakdown (derive from total since mock has no b/lb/wd/nb)
+  const extrasTotal = Math.max(0, inn.runs - batters.reduce((s, b) => s + b.runs, 0))
+  const extrasWd = Math.floor(extrasTotal * 0.40)
+  const extrasNb = Math.floor(extrasTotal * 0.20)
+  const extrasLb = Math.floor(extrasTotal * 0.25)
+  const extrasB  = Math.max(0, extrasTotal - extrasWd - extrasNb - extrasLb)
+
+  // Run rate
+  const ovNum = parseFloat(inn.overs) || 0
+  const rr = ovNum > 0 ? (inn.runs / ovNum).toFixed(2) : '0.00'
 
   return (
     <div className="space-y-3">
@@ -97,7 +116,7 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
               <tr key={b.id} className={`border-b border-slate-50 ${(b.isStriker || b.isNonStriker) ? 'bg-brand-50/60' : ''}`}>
                 <td className="px-3 py-2">
                   <p className="font-semibold text-navy-800 text-xs leading-tight">
-                    {b.name}
+                    {i + 1}. {b.name}
                     {b.isStriker    && <span className="text-brand-500 font-bold ml-0.5">*</span>}
                     {b.isNonStriker && <span className="text-navy-400 text-[10px] ml-0.5">(ns)</span>}
                   </p>
@@ -110,7 +129,7 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
                 </td>
                 <td className="px-2 py-2 hidden sm:table-cell text-[11px] text-navy-400">
                   {b.out
-                    ? (b.how || `c sub b Unknown`)
+                    ? (b.how || 'c sub b Unknown')
                     : <span className="text-brand-500 font-semibold text-xs">not out</span>
                   }
                 </td>
@@ -121,12 +140,29 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
                 <td className="text-center px-1 py-2 text-navy-400 text-xs tabular-nums">{sr(b.runs, b.balls)}</td>
               </tr>
             ))}
+            {/* Did not bat */}
+            {dnbPlayers.length > 0 && (
+              <tr className="border-b border-slate-50 bg-slate-50/30">
+                <td colSpan={7} className="px-3 py-2 text-[11px] text-navy-400">
+                  <span className="font-semibold text-navy-500">Did not bat: </span>
+                  {dnbPlayers.join(', ')}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-        {/* Extras + Total */}
-        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
-          <span className="text-navy-500">Extras <span className="text-navy-700 font-semibold">{extras}</span></span>
-          <span className="font-bold text-navy-900">Total: {inn.runs}/{inn.wkts} ({inn.overs} ov)</span>
+        {/* Extras breakdown + Total + Run Rate */}
+        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 space-y-1 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-navy-500">
+              Extras <span className="text-navy-700 font-semibold">{extrasTotal}</span>
+              <span className="text-navy-400 ml-1">(b {extrasB}, lb {extrasLb}, wd {extrasWd}, nb {extrasNb})</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between font-bold text-navy-900">
+            <span>Total: {inn.runs}/{inn.wkts} ({inn.overs} ov)</span>
+            <span className="text-navy-500 font-medium">RR: {rr}</span>
+          </div>
         </div>
       </div>
 
@@ -140,7 +176,7 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
             {inn.fow.map((f, i) => (
               <span key={i} className="text-[11px] text-navy-500">
                 <span className="font-bold text-navy-800">{f.wkt}-{f.runs}</span>
-                <span className="text-navy-400"> ({f.player}, {f.over} ov{f.how ? `, ${f.how}` : ''})</span>
+                <span className="text-navy-400"> ({playerById(f.player)?.name?.split(' ').pop() || f.player}, {f.over} ov{f.how ? `, ${f.how}` : ''})</span>
               </span>
             ))}
           </div>
@@ -159,11 +195,13 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
                 <th className="text-left px-3 py-1.5 text-[11px] text-navy-400 font-medium">Bowler</th>
-                <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">O</th>
-                <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">M</th>
-                <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">R</th>
-                <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">W</th>
-                <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-10">Eco</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">O</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">M</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">R</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">W</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">Wd</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">Nb</th>
+                <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-10">Eco</th>
               </tr>
             </thead>
             <tbody>
@@ -173,11 +211,13 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive }) {
                     {b.name}
                     {b.isCurrent && <span className="ml-1 text-[9px] text-amber-600 font-bold bg-amber-100 px-1 rounded">Now</span>}
                   </td>
-                  <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.overs}</td>
-                  <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.maidens ?? 0}</td>
-                  <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.runs}</td>
-                  <td className={`text-center px-2 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-400'}`}>{b.wkts}</td>
-                  <td className="text-center px-2 py-2 text-navy-400 text-xs tabular-nums">{eco(b.runs, b.overs)}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.overs}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.maidens ?? 0}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.runs}</td>
+                  <td className={`text-center px-1.5 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-400'}`}>{b.wkts}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{b.wd ?? 0}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{b.nb ?? 0}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{eco(b.runs, b.overs)}</td>
                 </tr>
               ))}
             </tbody>
@@ -305,6 +345,7 @@ export default function MatchScoreSheet({ match, onClose }) {
             battingTeam={battingTeam}
             bowlingTeam={bowlingTeam}
             isLive={isLive}
+            xi={inningsTab === 0 ? match.xi1 : match.xi2}
           />
           <p className="text-center text-xs text-navy-400 pt-1 pb-2">
             📖 Read-only · Pro scorecard

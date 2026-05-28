@@ -58,61 +58,98 @@ function mockInnings(sc, overs, teamName) {
   const parsed = parseSc(sc)
   if (!parsed) return null
   const { runs, wkts } = parsed
-  // Build dismissed batters
+
+  // All 11 players — batting order
   const NAMES = ['R. Sharma','V. Kohli','S. Iyer','H. Pandya','K. Rahul',
                  'R. Jadeja','D. Karthik','K. Yadav','J. Bumrah','M. Shami','U. Yadav']
   const BOWL  = ['A. Singh','P. Kumar','N. Rao','S. Verma','K. Patel','T. Gupta']
-  const DISM  = ['c sub b','b','lbw b','c & b','run out','st b','c wk b']
+  const DISM  = ['c sub b','b','lbw b','c & b','run out','c wk b','lbw b']
+
   const batters = []
   let remaining = runs
-  for (let i = 0; i < Math.min(wkts, 8); i++) {
-    const r = i === wkts - 1
-      ? Math.min(remaining - (wkts - i - 1) * 5, Math.floor(remaining * 0.45))
-      : Math.max(2, Math.floor(Math.random() * (remaining / (wkts - i + 1) * 1.4)))
-    const b = Math.max(r, Math.floor(r * (0.7 + Math.random() * 0.8)))
-    const fours = Math.floor(r / 18)
-    const sixes = Math.floor(r / 40)
+
+  // Dismissed batters
+  for (let i = 0; i < Math.min(wkts, 9); i++) {
+    const share = Math.max(2, Math.floor(remaining / Math.max(wkts - i + 1, 1) * (0.6 + Math.random() * 0.8)))
+    const r = Math.min(share, remaining - (wkts - i - 1) * 2)
+    const b = Math.max(r, Math.floor(r * (0.7 + Math.random() * 0.7)))
     batters.push({
-      name: NAMES[i % NAMES.length], runs: r, balls: b, fours, sixes,
+      name: NAMES[i], runs: Math.max(r, 0), balls: Math.max(b, 1),
+      fours: Math.floor(Math.max(r, 0) / 16), sixes: Math.floor(Math.max(r, 0) / 38),
       dismissal: `${DISM[i % DISM.length]} ${BOWL[i % BOWL.length]}`,
-      out: true,
+      out: true, dnb: false,
     })
-    remaining -= r
+    remaining = Math.max(0, remaining - Math.max(r, 0))
   }
-  // Active batters (not out)
-  const notOut = 2 - Math.max(0, wkts - 9)
-  for (let j = 0; j < notOut; j++) {
-    const r = j === 0 ? Math.max(5, Math.floor(remaining * 0.6)) : Math.max(0, remaining - Math.floor(remaining * 0.6))
-    const b = Math.max(r, Math.floor(r * (0.75 + Math.random() * 0.6)))
+
+  // Active not-out batters (max 2 at crease)
+  const notOutCount = wkts < 10 ? Math.min(2, 11 - wkts) : 0
+  const notOutStart = wkts
+  for (let j = 0; j < notOutCount; j++) {
+    const r = j === 0 ? Math.max(3, Math.floor(remaining * 0.65)) : Math.max(0, remaining - Math.floor(remaining * 0.65))
+    const b = Math.max(r, Math.floor(r * (0.75 + Math.random() * 0.5)))
     batters.push({
-      name: NAMES[(wkts + j) % NAMES.length], runs: r, balls: b,
-      fours: Math.floor(r / 16), sixes: Math.floor(r / 38), dismissal: null, out: false,
+      name: NAMES[notOutStart + j], runs: Math.max(r, 0), balls: Math.max(b, 1),
+      fours: Math.floor(Math.max(r, 0) / 18), sixes: Math.floor(Math.max(r, 0) / 40),
+      dismissal: null, out: false, dnb: false,
+      isStriker: j === 0,
     })
   }
-  // Extras & total
-  const extras = Math.max(0, runs - batters.reduce((s, b) => s + b.runs, 0))
+
+  // Did not bat — remaining players to complete XI
+  const battedCount = batters.length
+  for (let k = battedCount; k < 11; k++) {
+    batters.push({ name: NAMES[k], dnb: true, out: false })
+  }
+
+  // Extras breakdown
+  const battedRuns = batters.filter(b => !b.dnb).reduce((s, b) => s + b.runs, 0)
+  const totalExtras = Math.max(0, runs - battedRuns)
+  const wd = Math.floor(totalExtras * 0.4)
+  const nb = Math.floor(totalExtras * 0.2)
+  const lb = Math.floor(totalExtras * 0.25)
+  const b_ = totalExtras - wd - nb - lb
+  const extras = { total: totalExtras, wd, nb, lb, b: Math.max(0, b_) }
+
   const totalOv = overs || '20.0'
-  // Bowling figures
-  const bowlCount = Math.min(5, Math.ceil(parseFloat(totalOv)))
+  const ovNum = parseFloat(totalOv)
+  const rr = ovNum > 0 ? (runs / ovNum).toFixed(2) : '0.00'
+
+  // Bowling — 5–6 bowlers
+  const bowlCount = Math.min(6, Math.max(4, Math.ceil(ovNum / 4)))
   const bowlers = []
-  let runsLeft = runs - extras
+  let runsLeft = runs - extras.total
   let wktsLeft = wkts
   for (let k = 0; k < bowlCount; k++) {
     const isLast = k === bowlCount - 1
-    const ov = isLast ? totalOv.toString().replace(/^\d+/, String(bowlCount)) : `${k < 4 ? k + 2 : k + 1}.0`
-    const w  = isLast ? wktsLeft : (k < 2 ? Math.min(wktsLeft, 1) : 0)
-    const r  = isLast ? runsLeft : Math.floor(runsLeft / (bowlCount - k) * (0.8 + Math.random() * 0.4))
-    bowlers.push({ name: BOWL[k % BOWL.length], overs: ov, maidens: r < 10 ? 1 : 0, runs: Math.max(r, 0), wkts: w })
-    runsLeft -= r
-    wktsLeft -= w
+    const bowlOv = isLast
+      ? (ovNum - bowlers.reduce((s, b) => s + parseFloat(b.overs), 0)).toFixed(1)
+      : `${Math.floor(ovNum / bowlCount)}.0`
+    const w = isLast ? wktsLeft : (k < 3 ? Math.min(wktsLeft, k === 0 ? 2 : 1) : 0)
+    const r = isLast ? Math.max(0, runsLeft) : Math.max(0, Math.floor(runsLeft / (bowlCount - k) * (0.7 + Math.random() * 0.5)))
+    bowlers.push({
+      name: BOWL[k % BOWL.length],
+      overs: bowlOv, maidens: r < 12 ? 1 : 0,
+      runs: Math.max(0, r), wkts: Math.max(0, w),
+      wd: Math.floor(Math.random() * 3), nb: Math.floor(Math.random() * 2),
+    })
+    runsLeft = Math.max(0, runsLeft - r)
+    wktsLeft = Math.max(0, wktsLeft - w)
   }
+
   // Fall of wickets
-  const fow = batters.filter(b => b.out).map((b, i) => ({
-    wkt: i + 1, runs: batters.slice(0, i + 1).reduce((s, x) => s + x.runs, 0) + Math.floor(extras * (i + 1) / Math.max(wkts, 1)),
-    over: `${Math.floor(parseFloat(totalOv) * (i + 1) / Math.max(wkts, 1))}.${Math.floor(Math.random() * 5)}`,
-    player: batters[i].name.split(' ')[1] || batters[i].name.split(' ')[0],
-  }))
-  return { batters, bowlers, extras, total: runs, wkts, overs: totalOv, fow, teamName }
+  const fow = batters.filter(b => b.out).map((b, i) => {
+    const cumRuns = batters.slice(0, i + 1).filter(x => !x.dnb).reduce((s, x) => s + x.runs, 0)
+      + Math.floor(extras.total * (i + 1) / Math.max(wkts, 1))
+    return {
+      wkt: i + 1,
+      runs: cumRuns,
+      over: `${Math.floor(ovNum * (i + 1) / Math.max(wkts, 1))}.${Math.floor(Math.random() * 5)}`,
+      player: b.name.split(' ').pop(),
+    }
+  })
+
+  return { batters, bowlers, extras, total: runs, wkts, overs: totalOv, rr, fow, teamName }
 }
 
 // ─── Score Detail Sheet ───────────────────────────────────────────────────────
@@ -216,16 +253,18 @@ function ScoreDetailSheet({ match, onClose }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {activeInn.batters.map((b, i) => (
-                      <tr key={i} className={`border-b border-slate-50 ${!b.out ? 'bg-brand-50/60' : ''}`}>
+                    {activeInn.batters.filter(b => !b.dnb).map((b, i) => (
+                      <tr key={i} className={`border-b border-slate-50 ${b.isStriker ? 'bg-brand-50/70' : (!b.out && !b.dnb ? 'bg-slate-50/60' : '')}`}>
                         <td className="px-3 py-2">
                           <p className="font-semibold text-navy-800 text-xs leading-tight">
-                            {b.name}{!b.out && <span className="text-brand-500 font-bold ml-0.5">*</span>}
+                            {i + 1}. {b.name}
+                            {b.isStriker && <span className="text-brand-500 font-bold ml-0.5">*</span>}
                           </p>
-                          {b.dismissal && <p className="text-[10px] text-navy-400 mt-0.5 sm:hidden truncate max-w-[100px]">{b.dismissal}</p>}
+                          {b.dismissal && <p className="text-[10px] text-navy-400 mt-0.5 sm:hidden truncate max-w-[110px]">{b.dismissal}</p>}
+                          {!b.out && !b.dnb && !b.dismissal && <p className="text-[10px] text-brand-500 font-semibold mt-0.5 sm:hidden">not out</p>}
                         </td>
                         <td className="px-2 py-2 text-[11px] text-navy-400 hidden sm:table-cell">
-                          {b.dismissal || <span className="text-brand-500 font-semibold">not out</span>}
+                          {b.dismissal || <span className="text-brand-500 font-semibold text-xs">not out</span>}
                         </td>
                         <td className="text-center px-1.5 py-2 font-bold text-navy-900 text-xs tabular-nums">{b.runs}</td>
                         <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.balls}</td>
@@ -236,14 +275,29 @@ function ScoreDetailSheet({ match, onClose }) {
                         </td>
                       </tr>
                     ))}
+                    {/* Did not bat row */}
+                    {activeInn.batters.some(b => b.dnb) && (
+                      <tr className="border-b border-slate-50 bg-slate-50/30">
+                        <td colSpan={7} className="px-3 py-2 text-[11px] text-navy-400">
+                          <span className="font-semibold text-navy-500">Did not bat: </span>
+                          {activeInn.batters.filter(b => b.dnb).map(b => b.name).join(', ')}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
-                {/* Extras + Total */}
-                <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-navy-500">Extras <span className="text-navy-700 font-semibold">{activeInn.extras}</span></span>
-                  <span className="font-bold text-navy-900">
-                    Total: {activeInn.total}/{activeInn.wkts} ({activeInn.overs} ov)
-                  </span>
+                {/* Extras breakdown + Total */}
+                <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-navy-500">
+                      Extras <span className="text-navy-700 font-semibold">{activeInn.extras.total}</span>
+                      <span className="text-navy-400 ml-1">(b {activeInn.extras.b}, lb {activeInn.extras.lb}, wd {activeInn.extras.wd}, nb {activeInn.extras.nb})</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between font-bold text-navy-900">
+                    <span>Total: {activeInn.total}/{activeInn.wkts} ({activeInn.overs} ov)</span>
+                    <span className="text-navy-500 font-medium">RR: {activeInn.rr}</span>
+                  </div>
                 </div>
               </div>
 
@@ -275,22 +329,26 @@ function ScoreDetailSheet({ match, onClose }) {
                   <thead>
                     <tr className="border-b border-slate-100 bg-slate-50/50">
                       <th className="text-left px-3 py-1.5 text-[11px] text-navy-400 font-medium">Bowler</th>
-                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">O</th>
-                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">M</th>
-                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">R</th>
-                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">W</th>
-                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-10">Eco</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">O</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">M</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">R</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">W</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">Wd</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">Nb</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-10">Eco</th>
                     </tr>
                   </thead>
                   <tbody>
                     {activeInn.bowlers.map((b, i) => (
                       <tr key={i} className="border-b border-slate-50">
                         <td className="px-3 py-2 font-semibold text-navy-800 text-xs">{b.name}</td>
-                        <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.overs}</td>
-                        <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.maidens}</td>
-                        <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.runs}</td>
-                        <td className={`text-center px-2 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-400'}`}>{b.wkts}</td>
-                        <td className="text-center px-2 py-2 text-navy-400 text-xs tabular-nums">
+                        <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.overs}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.maidens}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.runs}</td>
+                        <td className={`text-center px-1.5 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-400'}`}>{b.wkts}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{b.wd ?? 0}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{b.nb ?? 0}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">
                           {parseFloat(b.overs) > 0 ? (b.runs / parseFloat(b.overs)).toFixed(1) : '—'}
                         </td>
                       </tr>
