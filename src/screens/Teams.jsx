@@ -5,6 +5,7 @@ import TopBar from '../components/TopBar'
 import { useStore } from '../store/useStore'
 import RoleLockedModal from '../components/RoleLockedModal'
 import ProPaywallSheet from '../components/ProPaywallSheet'
+import CreateTeamSheet from '../components/CreateTeamSheet'
 import { Trophy, Users, Plus, Copy, ChevronRight, Calendar, Check, Search, X, UserPlus, Bell, CheckCircle, XCircle, Clock, Globe, Lock } from 'lucide-react'
 
 const POSITION_TAGS = { Batsman:'bg-blue-50 text-blue-700', Bowler:'bg-green-50 text-green-700', 'All-rounder':'bg-purple-50 text-purple-700', Wicketkeeper:'bg-amber-50 text-amber-700' }
@@ -223,6 +224,7 @@ export default function Teams() {
   const allTeams       = [...TEAMS,       ...publishedTeams]
   const allTournaments = [...TOURNAMENTS, ...publishedTournaments]
   const [showJoin, setShowJoin] = useState(false)
+  const [showCreateTeam, setShowCreateTeam] = useState(false)
   const [showJoinRequests, setShowJoinRequests] = useState(false)
   const [showRequestModal, setShowRequestModal] = useState(null) // team object
   const [showPaywall, setShowPaywall] = useState(false)
@@ -331,7 +333,7 @@ export default function Teams() {
                 </button>
               )}
               {canCreateTeam ? (
-                <button className="btn-primary flex-1 gap-2" onClick={() => addToast('Create team flow coming soon', 'info')}>
+                <button className="btn-primary flex-1 gap-2" onClick={() => setShowCreateTeam(true)}>
                   <Plus size={16} />Create team
                 </button>
               ) : (
@@ -521,6 +523,9 @@ export default function Teams() {
           eligibleRoles={lockedModal.eligibleRoles}
           onClose={() => setLockedModal(null)}
         />
+      )}
+      {showCreateTeam && (
+        <CreateTeamSheet onClose={() => setShowCreateTeam(false)} />
       )}
     </div>
   )

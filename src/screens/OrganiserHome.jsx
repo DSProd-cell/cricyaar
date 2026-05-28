@@ -6,8 +6,171 @@ import TopBar from '../components/TopBar'
 import RoleLockedModal from '../components/RoleLockedModal'
 import {
   BarChart2, Trophy, MapPin, Activity, Eye, Building2,
-  Circle, ChevronRight, Lock, Users, Send
+  Circle, ChevronRight, Lock, Users, Send, Crown, Check,
+  Zap, X, UserPlus
 } from 'lucide-react'
+
+// ── Add Teams to Tournament sheet (Pro-gated) ─────────────────────────────
+function AddTeamsSheet({ onClose, isPro, onUpgrade }) {
+  const [selectedTournament, setSelectedTournament] = useState(TOURNAMENTS[0]?.id || '')
+  const [selectedTeams, setSelectedTeams] = useState([])
+
+  const toggleTeam = (teamId) => {
+    setSelectedTeams(prev =>
+      prev.includes(teamId) ? prev.filter(id => id !== teamId) : [...prev, teamId]
+    )
+  }
+
+  const { addToast } = useStore()
+
+  const handleConfirm = () => {
+    if (!isPro) { onUpgrade(); return }
+    addToast(`${selectedTeams.length} team${selectedTeams.length !== 1 ? 's' : ''} added to tournament! 🏆`, 'success')
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up"
+        style={{ maxHeight: '88dvh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-center pt-3 flex-shrink-0">
+          <div className="w-10 h-1 bg-slate-200 rounded-full" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 flex-shrink-0">
+          <div>
+            <h2 className="font-extrabold text-navy-900 text-lg">Add Teams to Tournament</h2>
+            {!isPro && (
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <Crown size={11} className="text-amber-500 fill-amber-400" />
+                <span className="text-amber-600 text-xs font-bold">Pro feature</span>
+              </div>
+            )}
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+            <X size={15} className="text-navy-500" />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-4 space-y-4" style={{ maxHeight: 'calc(88dvh - 130px)' }}>
+          {/* Pro upgrade banner */}
+          {!isPro && (
+            <div
+              className="rounded-2xl p-4"
+              style={{ background: 'linear-gradient(135deg, #1c1209, #2d1a00)', border: '1.5px solid #d97706' }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Crown size={14} className="text-amber-400 fill-amber-400" />
+                <span className="text-amber-200 font-extrabold text-sm">Pro required to add teams</span>
+              </div>
+              <p className="text-amber-700 text-xs mb-3">Preview below — upgrade to activate team registrations.</p>
+              {['Register teams from your contact list', 'Set entry fees & collect payments', 'Approve or reject team applications'].map(f => (
+                <div key={f} className="flex items-center gap-2 mb-1.5">
+                  <Check size={11} className="text-amber-400 flex-shrink-0" strokeWidth={2.5} />
+                  <span className="text-amber-200 text-xs">{f}</span>
+                </div>
+              ))}
+              <button
+                onClick={onUpgrade}
+                className="mt-3 w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff' }}
+              >
+                <Zap size={13} /> Upgrade to Pro — ₹99/month
+              </button>
+            </div>
+          )}
+
+          {/* Select tournament */}
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">Select Tournament</label>
+            <select
+              value={selectedTournament}
+              onChange={e => setSelectedTournament(e.target.value)}
+              disabled={!isPro}
+              className="cm-select w-full"
+            >
+              {TOURNAMENTS.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+
+          {/* Team list */}
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-2 flex items-center gap-1.5">
+              <Users size={13} className="text-navy-500" />
+              Select Teams to Add
+              {selectedTeams.length > 0 && (
+                <span className="ml-auto text-brand-600 text-xs font-bold">{selectedTeams.length} selected</span>
+              )}
+            </label>
+            <div className="space-y-2">
+              {TEAMS.map(team => {
+                const isSelected = selectedTeams.includes(team.id)
+                return (
+                  <button
+                    key={team.id}
+                    onClick={() => isPro && toggleTeam(team.id)}
+                    disabled={!isPro}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
+                      isSelected
+                        ? 'border-brand-400 bg-brand-50'
+                        : 'border-slate-200 bg-white hover:border-slate-300'
+                    } ${!isPro ? 'opacity-50' : ''}`}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
+                      style={{ background: team.color }}
+                    >
+                      {team.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-navy-900 text-sm">{team.name}</p>
+                      <p className="text-navy-400 text-xs">{team.city} · {team.squad?.length || 11} players</p>
+                    </div>
+                    {isSelected && (
+                      <div className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center flex-shrink-0">
+                        <Check size={12} className="text-white" strokeWidth={3} />
+                      </div>
+                    )}
+                    {!isPro && <Lock size={13} className="text-slate-300 flex-shrink-0" />}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer CTA */}
+        <div className="px-5 pb-8 pt-3 border-t border-slate-100 flex-shrink-0 bg-white">
+          {isPro ? (
+            <button
+              onClick={handleConfirm}
+              disabled={selectedTeams.length === 0}
+              className="w-full py-4 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-40"
+              style={{ background: 'linear-gradient(135deg, #15803d, #16a34a)' }}
+            >
+              <UserPlus size={18} />
+              Add {selectedTeams.length || ''} Team{selectedTeams.length !== 1 ? 's' : ''} to Tournament
+            </button>
+          ) : (
+            <button
+              onClick={onUpgrade}
+              className="w-full py-4 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+            >
+              <Crown size={18} className="fill-white" />
+              Upgrade to Pro to Add Teams
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function ActiveBlock({ icon: Icon, color, bg, title, sub, badge, onClick }) {
   return (
@@ -43,6 +206,9 @@ export default function OrganiserHome() {
   const navigate = useNavigate()
   const { user } = useStore()
   const [locked, setLocked] = useState(null)
+  const [showAddTeams, setShowAddTeams] = useState(false)
+
+  const isPro = user?.subscription === 'pro_active'
 
   const liveMatch   = MATCHES.find(m => m.status === 'live')
   const liveCount   = MATCHES.filter(m => m.status === 'live').length
@@ -152,6 +318,30 @@ export default function OrganiserHome() {
             }
             onClick={() => navigate('/profile')}
           />
+
+          {/* Add Teams to Tournament — Pro-gated */}
+          <button
+            onClick={() => setShowAddTeams(true)}
+            className="home-block text-left relative active:scale-[0.97] transition-transform col-span-2"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: '#dcfce730' }}>
+                <Users size={20} style={{ color: '#16a34a' }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-navy-900 text-sm">Add Teams to Tournament</p>
+                {isPro
+                  ? <p className="text-navy-500 text-[11px] mt-0.5">Register teams & manage entries</p>
+                  : <div className="flex items-center gap-1 mt-0.5">
+                      <Crown size={10} className="text-amber-500 fill-amber-400" />
+                      <span className="text-amber-600 text-[11px] font-semibold">Pro feature</span>
+                    </div>
+                }
+              </div>
+              <ChevronRight size={13} className="text-navy-300 flex-shrink-0" />
+            </div>
+          </button>
         </div>
 
         {/* Locked blocks */}
@@ -180,6 +370,13 @@ export default function OrganiserHome() {
           featureName={locked.feature}
           eligibleRoles={locked.eligibleRoles}
           onClose={() => setLocked(null)}
+        />
+      )}
+      {showAddTeams && (
+        <AddTeamsSheet
+          isPro={isPro}
+          onClose={() => setShowAddTeams(false)}
+          onUpgrade={() => { setShowAddTeams(false); navigate('/pro-payment') }}
         />
       )}
     </div>

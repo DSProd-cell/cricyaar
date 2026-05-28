@@ -5,7 +5,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
-  const { pendingPhone, setUser, addToast, otpMode, proIntent, user } = useStore()
+  const { pendingPhone, setUser, setShowRoleModal, addToast, otpMode, proIntent, user } = useStore()
   const [digits, setDigits]     = useState(['','','','','',''])
   const [error, setError]       = useState('')
   const [attempts, setAttempts] = useState(0)
@@ -84,9 +84,10 @@ export default function OtpVerify() {
           addToast('Phone verified! Complete your Pro setup.', 'success')
           navigate('/pro-payment')
         } else {
-          // Always go to role select so user can choose their role
-          addToast('Verified! Now choose your role.', 'success')
-          navigate('/role-select')
+          // Free users → land on home as Fan; RoleWelcomeModal explains the limitation
+          setShowRoleModal(true)
+          addToast('Welcome to CricYaar! You\'re browsing as a Fan.', 'success')
+          navigate('/')
         }
       }
     } else {
