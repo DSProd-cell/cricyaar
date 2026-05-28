@@ -146,10 +146,10 @@ export default function PlayerHome() {
             sub={
               <div className="space-y-0.5">
                 <p className="text-navy-500 text-[11px]">{MATCHES.filter(m => m.status === 'live').length} live now</p>
-                <p className="text-blue-600 text-[10px] font-semibold">Read-only scorecard</p>
+                <p className="text-blue-600 text-[10px] font-semibold">Full scorecard</p>
               </div>
             }
-            onClick={() => navigate('/my-cricket')}
+            onClick={() => liveMatch ? setScoreMatch(liveMatch) : navigate('/my-cricket')}
           />
 
           <ActiveBlock

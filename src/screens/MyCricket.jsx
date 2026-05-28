@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MATCHES, teamById, groundById } from '../data/mock'
 import TopBar from '../components/TopBar'
+import MatchScoreSheet from '../components/MatchScoreSheet'
 import { Activity, Plus, Circle, MapPin, Clock } from 'lucide-react'
 
 const TABS = ['Live','Upcoming','Past']
@@ -70,6 +71,7 @@ function MatchCard({ match, onClick }) {
 export default function MyCricket() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('Live')
+  const [scoreMatch, setScoreMatch] = useState(null)
   const { user } = { user: { roles:['player','organiser'] } }
 
   const filtered = MATCHES.filter(m =>
@@ -108,7 +110,7 @@ export default function MyCricket() {
           </div>
         ) : filtered.map(m => (
           <MatchCard key={m.id} match={m} onClick={() =>
-            m.status === 'live' ? navigate(`/score/${m.id}`) : navigate(`/match/${m.id}`)
+            m.status === 'live' ? setScoreMatch(m) : navigate(`/match/${m.id}`)
           } />
         ))}
       </main>
@@ -121,6 +123,8 @@ export default function MyCricket() {
       >
         <Plus size={24} className="text-white" />
       </button>
+
+      {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
     </div>
   )
 }
