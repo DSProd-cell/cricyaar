@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { CITY_LIVE_DATA, ALL_CITIES } from '../data/mock'
-import { MapPin, Settings, Search, X, RefreshCw, Circle, ArrowRight, Lock, Activity, Eye, Trophy, BarChart2, Building2, Users, Bell, ChevronDown, Dot } from 'lucide-react'
-import RoleLockedModal from '../components/RoleLockedModal'
+import { MapPin, Settings, Search, X, RefreshCw, Circle, ArrowRight, Lock, Activity, Eye, Trophy, BarChart2, Building2, Users } from 'lucide-react'
 import FollowButton from '../components/FollowButton'
 
 // ─── City Picker Modal ────────────────────────────────────────────────────────
@@ -328,22 +327,24 @@ export default function FanHome() {
         {/* Locked blocks */}
         <div className="animate-slide-up">
           <div className="flex items-center gap-2 mb-3">
-            <Lock size={12} className="text-slate-400" />
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">More features — change your role</p>
+            <Lock size={12} className="text-navy-400" />
+            <p className="text-navy-400 text-xs font-bold uppercase tracking-wider">Other Role Features</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {LOCKED_BLOCKS.map(({ icon: Icon, title, sub, eligibleRoles }) => (
+            {LOCKED_BLOCKS.map(({ icon: Icon, title, sub }) => (
               <button
                 key={title}
-                onClick={() => setLocked({ feature: title, eligibleRoles })}
-                className="home-block text-left relative opacity-40 active:scale-[0.97]"
+                onClick={() => setLocked(true)}
+                className="home-block text-left relative active:scale-[0.97] transition-transform"
               >
                 <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center mb-2">
-                  <Icon size={20} className="text-slate-400" />
+                  <Icon size={20} className="text-navy-500" />
                 </div>
-                <p className="font-bold text-slate-400 text-sm leading-tight">{title}</p>
-                <p className="text-slate-400 text-[11px] mt-1">{sub}</p>
-                <Lock size={12} className="absolute top-4 right-3 text-slate-300" />
+                <p className="font-bold text-navy-800 text-sm leading-tight">{title}</p>
+                <p className="text-navy-400 text-[11px] mt-1">{sub}</p>
+                <div className="absolute top-3 right-3 w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
+                  <Lock size={10} className="text-navy-400" />
+                </div>
               </button>
             ))}
           </div>
@@ -386,12 +387,28 @@ export default function FanHome() {
       )}
 
       {locked && (
-        <RoleLockedModal
-          currentRole="fan"
-          featureName={locked.feature}
-          eligibleRoles={locked.eligibleRoles}
-          onClose={() => setLocked(null)}
-        />
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setLocked(null)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
+            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Lock size={22} className="text-navy-500" />
+            </div>
+            <h3 className="font-bold text-navy-900 text-lg text-center mb-2">Feature Locked</h3>
+            <p className="text-navy-500 text-sm text-center leading-relaxed mb-6">
+              Please change the role to access these features.
+            </p>
+            <div className="flex gap-3">
+              <button className="btn-secondary flex-1 py-3" onClick={() => setLocked(null)}>Cancel</button>
+              <button className="btn-primary flex-1 py-3" onClick={() => { setLocked(null); navigate('/role-select') }}>
+                Change Role
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

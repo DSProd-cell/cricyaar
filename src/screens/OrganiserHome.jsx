@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, TEAMS, TOURNAMENTS, teamById } from '../data/mock'
 import TopBar from '../components/TopBar'
-import RoleLockedModal from '../components/RoleLockedModal'
 import {
   BarChart2, Trophy, MapPin, Activity, Eye, Building2,
   Circle, ChevronRight, Lock, Users, Send, Crown, Check,
@@ -191,14 +190,44 @@ function ActiveBlock({ icon: Icon, color, bg, title, sub, badge, onClick }) {
 
 function LockedBlock({ icon: Icon, title, sub, onTap }) {
   return (
-    <button onClick={onTap} className="home-block text-left relative opacity-40">
+    <button onClick={onTap} className="home-block text-left relative active:scale-[0.97] transition-transform">
       <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center mb-2">
-        <Icon size={20} className="text-slate-400" />
+        <Icon size={20} className="text-navy-500" />
       </div>
-      <p className="font-bold text-slate-400 text-sm leading-tight">{title}</p>
-      <p className="text-slate-400 text-[11px] mt-1">{sub}</p>
-      <Lock size={12} className="absolute top-4 right-3 text-slate-300" />
+      <p className="font-bold text-navy-800 text-sm leading-tight">{title}</p>
+      <p className="text-navy-400 text-[11px] mt-1">{sub}</p>
+      <div className="absolute top-3 right-3 w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
+        <Lock size={10} className="text-navy-400" />
+      </div>
     </button>
+  )
+}
+
+function RoleChangePopup({ onClose }) {
+  const navigate = useNavigate()
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50" />
+      <div
+        className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
+        <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Lock size={22} className="text-navy-500" />
+        </div>
+        <h3 className="font-bold text-navy-900 text-lg text-center mb-2">Feature Locked</h3>
+        <p className="text-navy-500 text-sm text-center leading-relaxed mb-6">
+          Please change the role to access these features.
+        </p>
+        <div className="flex gap-3">
+          <button className="btn-secondary flex-1 py-3" onClick={onClose}>Cancel</button>
+          <button className="btn-primary flex-1 py-3" onClick={() => { onClose(); navigate('/role-select') }}>
+            Change Role
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -352,26 +381,19 @@ export default function OrganiserHome() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <LockedBlock icon={Eye} title="Umpiring" sub="Umpire feature"
-              onTap={() => setLocked({ feature: 'Umpiring', eligibleRoles: ['umpire'] })} />
+              onTap={() => setLocked(true)} />
             <LockedBlock icon={Building2} title="My Ground" sub="Ground Owner feature"
-              onTap={() => setLocked({ feature: 'My Ground', eligibleRoles: ['ground_owner'] })} />
+              onTap={() => setLocked(true)} />
             <LockedBlock icon={Users} title="Player Stats" sub="Player feature"
-              onTap={() => setLocked({ feature: 'Player Career Stats', eligibleRoles: ['player'] })} />
+              onTap={() => setLocked(true)} />
             <LockedBlock icon={Send} title="Umpire Earnings" sub="Umpire feature"
-              onTap={() => setLocked({ feature: 'Umpire Earnings & Charges', eligibleRoles: ['umpire'] })} />
+              onTap={() => setLocked(true)} />
           </div>
         </div>
 
       </main>
 
-      {locked && (
-        <RoleLockedModal
-          currentRole="organiser"
-          featureName={locked.feature}
-          eligibleRoles={locked.eligibleRoles}
-          onClose={() => setLocked(null)}
-        />
-      )}
+      {locked && <RoleChangePopup onClose={() => setLocked(null)} />}
       {showAddTeams && (
         <AddTeamsSheet
           isPro={isPro}
