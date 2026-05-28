@@ -47,25 +47,98 @@ function CityPickerModal({ currentCity, onSelect, onClose }) {
   )
 }
 
+// ─── helpers to generate realistic mock innings from a score string ───────────
+function parseSc(sc) {
+  if (!sc || sc === 'Yet to bat') return null
+  const [r, w] = sc.split('/')
+  return { runs: parseInt(r) || 0, wkts: parseInt(w) || 0 }
+}
+
+function mockInnings(sc, overs, teamName) {
+  const parsed = parseSc(sc)
+  if (!parsed) return null
+  const { runs, wkts } = parsed
+  // Build dismissed batters
+  const NAMES = ['R. Sharma','V. Kohli','S. Iyer','H. Pandya','K. Rahul',
+                 'R. Jadeja','D. Karthik','K. Yadav','J. Bumrah','M. Shami','U. Yadav']
+  const BOWL  = ['A. Singh','P. Kumar','N. Rao','S. Verma','K. Patel','T. Gupta']
+  const DISM  = ['c sub b','b','lbw b','c & b','run out','st b','c wk b']
+  const batters = []
+  let remaining = runs
+  for (let i = 0; i < Math.min(wkts, 8); i++) {
+    const r = i === wkts - 1
+      ? Math.min(remaining - (wkts - i - 1) * 5, Math.floor(remaining * 0.45))
+      : Math.max(2, Math.floor(Math.random() * (remaining / (wkts - i + 1) * 1.4)))
+    const b = Math.max(r, Math.floor(r * (0.7 + Math.random() * 0.8)))
+    const fours = Math.floor(r / 18)
+    const sixes = Math.floor(r / 40)
+    batters.push({
+      name: NAMES[i % NAMES.length], runs: r, balls: b, fours, sixes,
+      dismissal: `${DISM[i % DISM.length]} ${BOWL[i % BOWL.length]}`,
+      out: true,
+    })
+    remaining -= r
+  }
+  // Active batters (not out)
+  const notOut = 2 - Math.max(0, wkts - 9)
+  for (let j = 0; j < notOut; j++) {
+    const r = j === 0 ? Math.max(5, Math.floor(remaining * 0.6)) : Math.max(0, remaining - Math.floor(remaining * 0.6))
+    const b = Math.max(r, Math.floor(r * (0.75 + Math.random() * 0.6)))
+    batters.push({
+      name: NAMES[(wkts + j) % NAMES.length], runs: r, balls: b,
+      fours: Math.floor(r / 16), sixes: Math.floor(r / 38), dismissal: null, out: false,
+    })
+  }
+  // Extras & total
+  const extras = Math.max(0, runs - batters.reduce((s, b) => s + b.runs, 0))
+  const totalOv = overs || '20.0'
+  // Bowling figures
+  const bowlCount = Math.min(5, Math.ceil(parseFloat(totalOv)))
+  const bowlers = []
+  let runsLeft = runs - extras
+  let wktsLeft = wkts
+  for (let k = 0; k < bowlCount; k++) {
+    const isLast = k === bowlCount - 1
+    const ov = isLast ? totalOv.toString().replace(/^\d+/, String(bowlCount)) : `${k < 4 ? k + 2 : k + 1}.0`
+    const w  = isLast ? wktsLeft : (k < 2 ? Math.min(wktsLeft, 1) : 0)
+    const r  = isLast ? runsLeft : Math.floor(runsLeft / (bowlCount - k) * (0.8 + Math.random() * 0.4))
+    bowlers.push({ name: BOWL[k % BOWL.length], overs: ov, maidens: r < 10 ? 1 : 0, runs: Math.max(r, 0), wkts: w })
+    runsLeft -= r
+    wktsLeft -= w
+  }
+  // Fall of wickets
+  const fow = batters.filter(b => b.out).map((b, i) => ({
+    wkt: i + 1, runs: batters.slice(0, i + 1).reduce((s, x) => s + x.runs, 0) + Math.floor(extras * (i + 1) / Math.max(wkts, 1)),
+    over: `${Math.floor(parseFloat(totalOv) * (i + 1) / Math.max(wkts, 1))}.${Math.floor(Math.random() * 5)}`,
+    player: batters[i].name.split(' ')[1] || batters[i].name.split(' ')[0],
+  }))
+  return { batters, bowlers, extras, total: runs, wkts, overs: totalOv, fow, teamName }
+}
+
 // ─── Score Detail Sheet ───────────────────────────────────────────────────────
 function ScoreDetailSheet({ match, onClose }) {
   if (!match) return null
-  const mockBatsmen = [
-    { name: 'R. Sharma',  runs: 42, balls: 31, fours: 5, sixes: 1 },
-    { name: 'K. Rahul',   runs: 28, balls: 22, fours: 3, sixes: 0 },
-  ]
-  const mockBowler = { name: 'J. Bumrah', overs: '3.2', runs: 18, wkts: 2 }
+
+  const inn1 = mockInnings(match.scoreA, match.overs, match.teamA)
+  const inn2 = parseSc(match.scoreB) ? mockInnings(match.scoreB, match.overs, match.teamB) : null
+  const hasSecond = !!inn2
+  const [inningsTab, setInningsTab] = useState(0)  // 0 = 1st, 1 = 2nd
+  const activeInn = inningsTab === 0 ? inn1 : inn2
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative mt-auto bg-white rounded-t-3xl animate-slide-up max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="relative mt-auto bg-white rounded-t-3xl animate-slide-up max-h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
+
+        {/* Handle */}
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1 flex-shrink-0" />
+
+        {/* Header */}
         <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <Circle size={7} fill="#ef4444" className="text-red-500 animate-pulse" />
             <span className="text-red-500 font-bold text-xs uppercase tracking-wide">Live</span>
-            <span className="text-navy-400 text-xs ml-1">Over {match.overs}</span>
+            <span className="text-navy-400 text-xs ml-1">· Ov {match.overs}</span>
           </div>
           <div className="flex items-center gap-2">
             <FollowButton type="match" item={match} label="Follow" size="sm" />
@@ -75,85 +148,169 @@ function ScoreDetailSheet({ match, onClose }) {
           </div>
         </div>
 
-        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4 pb-10">
-          {/* Scoreboard */}
-          <div className="bg-navy-900 rounded-2xl px-5 py-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-extrabold text-base truncate">{match.teamA}</p>
-                <p className="text-brand-400 font-extrabold text-2xl tabular-nums mt-0.5">{match.scoreA}</p>
-              </div>
-              <div className="px-3 text-center flex-shrink-0">
-                <span className="text-navy-500 font-bold text-xs bg-navy-800 px-2.5 py-1 rounded-full">VS</span>
-              </div>
-              <div className="flex-1 min-w-0 text-right">
-                <p className="text-white font-extrabold text-base truncate">{match.teamB}</p>
-                <p className="text-navy-400 font-extrabold text-2xl tabular-nums mt-0.5">{match.scoreB || 'Yet to bat'}</p>
-              </div>
+        {/* Scoreboard hero */}
+        <div className="bg-navy-900 mx-5 mt-4 rounded-2xl px-4 py-4 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <p className="text-navy-400 text-[11px] font-semibold uppercase tracking-wide mb-0.5">Batting</p>
+              <p className="text-white font-extrabold text-sm leading-tight truncate">{match.teamA}</p>
+              <p className="text-brand-400 font-extrabold text-2xl tabular-nums mt-1">{match.scoreA}</p>
+              <p className="text-navy-500 text-xs mt-0.5">({match.overs} ov)</p>
             </div>
-            <div className="flex items-center justify-center gap-1.5 pt-2 border-t border-navy-800">
-              <span className="text-navy-400 text-xs">Overs: <span className="text-white font-semibold">{match.overs}</span></span>
+            <div className="flex flex-col items-center gap-1 px-2 flex-shrink-0">
+              <span className="text-navy-500 text-[10px] font-bold bg-navy-800 px-2 py-0.5 rounded-full">VS</span>
+            </div>
+            <div className="flex-1 min-w-0 text-right">
+              <p className="text-navy-400 text-[11px] font-semibold uppercase tracking-wide mb-0.5">
+                {hasSecond ? 'Batting' : 'Yet to bat'}
+              </p>
+              <p className="text-white font-extrabold text-sm leading-tight truncate">{match.teamB}</p>
+              {hasSecond
+                ? <p className="text-navy-300 font-extrabold text-2xl tabular-nums mt-1">{match.scoreB}</p>
+                : <p className="text-navy-600 font-bold text-sm mt-1">— —</p>
+              }
             </div>
           </div>
+        </div>
 
-          {/* Batting */}
-          <div className="card p-0 overflow-hidden">
-            <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-              <p className="text-xs font-bold text-navy-500 uppercase tracking-wider">Batting</p>
-            </div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left px-4 py-2 text-xs text-navy-400 font-medium">Batter</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">R</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">B</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">4s</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">6s</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockBatsmen.map((b, i) => (
-                  <tr key={i} className={i === 0 ? 'bg-brand-50' : ''}>
-                    <td className="px-4 py-2.5 font-semibold text-navy-800 text-sm">
-                      {b.name}{i === 0 && <span className="ml-1 text-[10px] text-brand-500 font-bold">*</span>}
-                    </td>
-                    <td className="text-center px-2 py-2.5 font-bold text-navy-900 tabular-nums">{b.runs}</td>
-                    <td className="text-center px-2 py-2.5 text-navy-500 tabular-nums">{b.balls}</td>
-                    <td className="text-center px-2 py-2.5 text-navy-500 tabular-nums">{b.fours}</td>
-                    <td className="text-center px-2 py-2.5 text-navy-500 tabular-nums">{b.sixes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Innings tabs (only if 2nd inn exists) */}
+        {hasSecond && (
+          <div className="flex mx-5 mt-3 gap-1 flex-shrink-0">
+            {[`${match.teamA} Innings`, `${match.teamB} Innings`].map((label, idx) => (
+              <button
+                key={idx}
+                onClick={() => setInningsTab(idx)}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-colors ${
+                  inningsTab === idx ? 'bg-navy-900 text-white' : 'bg-slate-100 text-navy-500'
+                }`}
+              >
+                {idx + 1}st Innings
+              </button>
+            ))}
           </div>
+        )}
 
-          {/* Bowling */}
-          <div className="card p-0 overflow-hidden">
-            <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
-              <p className="text-xs font-bold text-navy-500 uppercase tracking-wider">Bowling</p>
-            </div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left px-4 py-2 text-xs text-navy-400 font-medium">Bowler</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">O</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">R</th>
-                  <th className="text-center px-2 py-2 text-xs text-navy-400 font-medium">W</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="px-4 py-2.5 font-semibold text-navy-800">{mockBowler.name}</td>
-                  <td className="text-center px-2 py-2.5 text-navy-500 tabular-nums">{mockBowler.overs}</td>
-                  <td className="text-center px-2 py-2.5 text-navy-500 tabular-nums">{mockBowler.runs}</td>
-                  <td className="text-center px-2 py-2.5 font-bold text-red-600 tabular-nums">{mockBowler.wkts}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        {/* Scrollable scorecard */}
+        <div className="overflow-y-auto flex-1 px-5 py-3 space-y-3 pb-8">
 
-          <p className="text-center text-xs text-navy-400 py-1">
-            Read-only view · <span className="text-brand-500 font-medium">Change role</span> to score or manage
+          {activeInn && (
+            <>
+              {/* Batting table */}
+              <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <p className="text-xs font-bold text-navy-700 uppercase tracking-wider">
+                    {activeInn.teamName} — Batting
+                  </p>
+                  <p className="text-xs text-navy-400 font-medium">{activeInn.total}/{activeInn.wkts} ({activeInn.overs} ov)</p>
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/50">
+                      <th className="text-left px-3 py-1.5 text-[11px] text-navy-400 font-medium">Batter</th>
+                      <th className="text-left px-2 py-1.5 text-[11px] text-navy-400 font-medium hidden sm:table-cell">Dismissal</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">R</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-8">B</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-7">4s</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-7">6s</th>
+                      <th className="text-center px-1.5 py-1.5 text-[11px] text-navy-400 font-medium w-10">SR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeInn.batters.map((b, i) => (
+                      <tr key={i} className={`border-b border-slate-50 ${!b.out ? 'bg-brand-50/60' : ''}`}>
+                        <td className="px-3 py-2">
+                          <p className="font-semibold text-navy-800 text-xs leading-tight">
+                            {b.name}{!b.out && <span className="text-brand-500 font-bold ml-0.5">*</span>}
+                          </p>
+                          {b.dismissal && <p className="text-[10px] text-navy-400 mt-0.5 sm:hidden truncate max-w-[100px]">{b.dismissal}</p>}
+                        </td>
+                        <td className="px-2 py-2 text-[11px] text-navy-400 hidden sm:table-cell">
+                          {b.dismissal || <span className="text-brand-500 font-semibold">not out</span>}
+                        </td>
+                        <td className="text-center px-1.5 py-2 font-bold text-navy-900 text-xs tabular-nums">{b.runs}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.balls}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.fours}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.sixes}</td>
+                        <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">
+                          {b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(0) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {/* Extras + Total */}
+                <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-navy-500">Extras <span className="text-navy-700 font-semibold">{activeInn.extras}</span></span>
+                  <span className="font-bold text-navy-900">
+                    Total: {activeInn.total}/{activeInn.wkts} ({activeInn.overs} ov)
+                  </span>
+                </div>
+              </div>
+
+              {/* Fall of Wickets */}
+              {activeInn.fow.length > 0 && (
+                <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                  <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                    <p className="text-xs font-bold text-navy-700 uppercase tracking-wider">Fall of Wickets</p>
+                  </div>
+                  <div className="px-4 py-3 flex flex-wrap gap-x-3 gap-y-1">
+                    {activeInn.fow.map((f, i) => (
+                      <span key={i} className="text-[11px] text-navy-500">
+                        <span className="font-bold text-navy-800">{f.wkt}-{f.runs}</span>
+                        <span className="text-navy-400"> ({f.player}, {f.over})</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Bowling table */}
+              <div className="rounded-2xl border border-slate-100 overflow-hidden">
+                <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                  <p className="text-xs font-bold text-navy-700 uppercase tracking-wider">
+                    {inningsTab === 0 ? match.teamB : match.teamA} — Bowling
+                  </p>
+                </div>
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/50">
+                      <th className="text-left px-3 py-1.5 text-[11px] text-navy-400 font-medium">Bowler</th>
+                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">O</th>
+                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">M</th>
+                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">R</th>
+                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-8">W</th>
+                      <th className="text-center px-2 py-1.5 text-[11px] text-navy-400 font-medium w-10">Eco</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {activeInn.bowlers.map((b, i) => (
+                      <tr key={i} className="border-b border-slate-50">
+                        <td className="px-3 py-2 font-semibold text-navy-800 text-xs">{b.name}</td>
+                        <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.overs}</td>
+                        <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.maidens}</td>
+                        <td className="text-center px-2 py-2 text-navy-500 text-xs tabular-nums">{b.runs}</td>
+                        <td className={`text-center px-2 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-400'}`}>{b.wkts}</td>
+                        <td className="text-center px-2 py-2 text-navy-400 text-xs tabular-nums">
+                          {parseFloat(b.overs) > 0 ? (b.runs / parseFloat(b.overs)).toFixed(1) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Yet to bat */}
+              {!hasSecond && (
+                <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+                  <p className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-1">Yet to Bat</p>
+                  <p className="text-navy-700 font-semibold text-sm">{match.teamB}</p>
+                </div>
+              )}
+            </>
+          )}
+
+          <p className="text-center text-xs text-navy-400 pt-1 pb-2">
+            📖 Read-only scorecard · <span className="text-brand-500 font-medium">Change role</span> to manage
           </p>
         </div>
       </div>
