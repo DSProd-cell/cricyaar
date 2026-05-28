@@ -16,7 +16,8 @@ export default function BottomNav() {
   const navigate     = useNavigate()
   const { pathname } = useLocation()
   const { user, organiserInboxUnread } = useStore()
-  const role = user?.role || 'fan'
+  const role  = user?.role || 'fan'
+  const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
 
   const roleItem = ROLE_FOURTH[role] || null
 
@@ -49,6 +50,9 @@ export default function BottomNav() {
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
                   {badgeCount}
                 </span>
+              )}
+              {label === 'Profile' && isPro && (
+                <span className="absolute -top-1.5 -right-1.5 text-[10px] leading-none select-none" aria-label="Pro">👑</span>
               )}
             </div>
             <span>{label}</span>

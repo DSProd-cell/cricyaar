@@ -82,7 +82,17 @@ export default function Sidebar() {
             <span className="text-white font-bold text-sm">{initials(user.name)}</span>
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-navy-900 text-sm truncate">{user.name}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="font-semibold text-navy-900 text-sm truncate">{user.name}</p>
+              {isPro && (
+                <span
+                  className="flex-shrink-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold text-white leading-none"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+                >
+                  👑 PRO
+                </span>
+              )}
+            </div>
             <p className="text-navy-500 text-xs truncate">@{user.username}</p>
           </div>
         </div>
@@ -122,9 +132,20 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Pro upgrade CTA — shown only if not subscribed */}
-      {!isPro && (
-        <div className="px-3 pb-2">
+      {/* Pro status strip */}
+      <div className="px-3 pb-2">
+        {isPro ? (
+          <div
+            className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}
+          >
+            <Crown size={16} className="text-amber-600 fill-amber-500 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="font-bold text-amber-900 text-sm leading-none">CricYaar Pro ✓</p>
+              <p className="text-amber-700 text-xs mt-0.5">All premium features unlocked</p>
+            </div>
+          </div>
+        ) : (
           <button
             onClick={() => navigate('/pro')}
             className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-left transition-all hover:opacity-90"
@@ -136,8 +157,8 @@ export default function Sidebar() {
               <p className="text-amber-700 text-xs mt-0.5">₹99/mo — cancel anytime</p>
             </div>
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Logout */}
       <div className="px-3 pb-6 pt-1">

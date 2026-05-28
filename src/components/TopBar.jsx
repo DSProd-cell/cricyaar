@@ -72,8 +72,17 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           </button>
         </div>
 
-        {/* RIGHT — Bell + Logout */}
+        {/* RIGHT — PRO badge + Bell + Logout */}
         <div className="w-20 flex-shrink-0 flex items-center justify-end gap-0.5">
+          {(user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled') && (
+            <span
+              className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white tracking-wide mr-0.5 select-none"
+              style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 1px 4px rgba(245,158,11,0.4)' }}
+              aria-label="Pro member"
+            >
+              👑 PRO
+            </span>
+          )}
           <button
             onClick={() => navigate('/notifications')}
             className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors"
