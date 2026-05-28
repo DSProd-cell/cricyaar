@@ -301,32 +301,24 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
 
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function AIAssistant() {
-  const navigate   = useNavigate()
+  const navigate     = useNavigate()
   const { pathname } = useLocation()
-  const { user }   = useStore()
+  const { user }     = useStore()
 
-  const [open, setOpen]       = useState(false)
-  const [input, setInput]     = useState('')
-  const [typing, setTyping]   = useState(false)
-  const [ticketId, setTicketId]     = useState(null)
+  // ── All hooks MUST come before any conditional return ──
+  const [open, setOpen]                       = useState(false)
+  const [input, setInput]                     = useState('')
+  const [typing, setTyping]                   = useState(false)
+  const [ticketId, setTicketId]               = useState(null)
   const [ticketSubmitted, setTicketSubmitted] = useState(false)
-  const [supportMsgIndex, setSupportMsgIndex] = useState(null) // which message shows the form
-
-  const firstName = user?.name?.split(' ')[0] || 'there'
-
-  const [messages, setMessages] = useState([{
+  const [supportMsgIndex, setSupportMsgIndex] = useState(null)
+  const [messages, setMessages]               = useState([{
     from: 'bot',
-    text: `Hi ${firstName}! 👋 I'm your **CricYaar Guide**. I can help you navigate the app, answer questions, and raise support tickets.\n\nTap a suggestion below or type your question!`,
+    text: `Hi! 👋 I'm your **CricYaar Guide**. I can help you navigate the app, answer questions, and raise support tickets.\n\nTap a suggestion below or type your question!`,
     actions: []
   }])
-
   const messagesEndRef = useRef(null)
-  const inputRef = useRef(null)
-
-  // Don't render on skip pages or if not logged in
-  if (!user) return null
-  if (SKIP_PATHS.some(p => pathname === p)) return null
-  if (pathname.startsWith('/score')) return null
+  const inputRef       = useRef(null)
 
   const scrollToBottom = () => {
     setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
@@ -340,6 +332,11 @@ export default function AIAssistant() {
   }, [open])
 
   useEffect(() => { scrollToBottom() }, [messages, typing])
+
+  // ── Guard: don't render on auth pages or when not logged in ──
+  if (!user) return null
+  if (SKIP_PATHS.some(p => pathname === p)) return null
+  if (pathname.startsWith('/score')) return null
 
   const sendMessage = (text) => {
     const query = (text || input).trim()
