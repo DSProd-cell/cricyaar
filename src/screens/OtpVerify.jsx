@@ -77,14 +77,21 @@ export default function OtpVerify() {
         addToast('Account created! Now choose your role.', 'success')
         navigate('/role-select')
       } else {
-        setUser({ id:'p1', phone: pendingPhone, name:'Rohit Sharma', username:'rohit_s', city:'Mumbai', role:'fan', roles:['player'], isNew:false, avatar:null, lastRoleChangedAt:null, subscription:'free' })
-        // New users don't need to see "What's New" — mark it as seen
+        // Restore previously selected role for returning users
+        const savedRole = localStorage.getItem('cricyaar_last_role')
+        const restoredRole = savedRole || 'fan'
+        setUser({ id:'p1', phone: pendingPhone, name:'Rohit Sharma', username:'rohit_s', city:'Mumbai', role: restoredRole, roles:['player'], isNew:false, avatar:null, lastRoleChangedAt:null, subscription:'free' })
+        // Mark What's New as seen so returning users skip it
         localStorage.setItem('whats_new_seen_version', 'v3')
         if (proIntent) {
           addToast('Phone verified! Complete your Pro setup.', 'success')
           navigate('/pro-payment')
+        } else if (restoredRole !== 'fan') {
+          // Returning user with a saved role — go straight home
+          addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
+          navigate('/')
         } else {
-          // Free users → land on home as Fan; RoleWelcomeModal explains the limitation
+          // New / fan user — show role welcome modal
           setShowRoleModal(true)
           addToast('Welcome to CricYaar! You\'re browsing as a Fan.', 'success')
           navigate('/')

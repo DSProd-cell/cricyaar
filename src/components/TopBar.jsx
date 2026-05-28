@@ -23,10 +23,12 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
   const [confirmLogout, setConfirmLogout] = useState(false)
 
   const handleLogout = () => {
+    // Save role so it can be restored after next login
+    if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
     setUser(null)
     setConfirmLogout(false)
-    addToast('Logged out successfully', 'info')
-    navigate('/usp')
+    addToast('Logged out. Sign in to continue.', 'info')
+    navigate('/login')
   }
 
   return (
@@ -65,7 +67,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
               <span className="text-white font-black text-sm tracking-tight">CY</span>
             </div>
             {title && (
-              <span className="font-bold text-navy-900 text-sm truncate max-w-[140px]">{title}</span>
+              <span className="font-bold text-navy-900 text-sm truncate max-w-[180px]">{title}</span>
             )}
           </button>
         </div>

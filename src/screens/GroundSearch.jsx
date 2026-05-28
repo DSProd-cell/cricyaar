@@ -2,8 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GROUNDS } from '../data/mock'
 import TopBar from '../components/TopBar'
-import AIGroundAssistant from '../components/AIGroundAssistant'
-import { Search, Star, MapPin, Sun, Droplets, Plus, Sparkles } from 'lucide-react'
+import { Search, Star, MapPin, Sun, Droplets, Plus } from 'lucide-react'
 
 const PITCH_TYPES = ['All','Turf','Matting','Cement','Red Soil','Astro Turf']
 const CITIES = ['All','Mumbai','Delhi','Chennai','Bengaluru','Chandigarh','Hyderabad']
@@ -14,7 +13,7 @@ function GroundCard({ ground, onClick }) {
   const CondIcon   = condIcons[ground.pitchCondition] || MapPin
 
   return (
-    <button onClick={onClick} className="card card-hover w-full text-left mb-3 animate-fade-in">
+    <button onClick={onClick} className="card card-hover w-full text-left mb-3 animate-fade-in overflow-hidden">
       {/* Placeholder photo */}
       <div className="w-full h-32 rounded-xl bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center mb-3 overflow-hidden">
         <div className="text-center">
@@ -25,8 +24,8 @@ function GroundCard({ ground, onClick }) {
 
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-navy-900 text-base leading-tight">{ground.name}</h3>
-          <p className="text-navy-500 text-xs mt-0.5">{ground.area}, {ground.city}</p>
+          <h3 className="font-bold text-navy-900 text-base leading-tight truncate">{ground.name}</h3>
+          <p className="text-navy-500 text-xs mt-0.5 truncate">{ground.area}, {ground.city}</p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 text-amber-500">
           <Star size={13} fill="currentColor" />
@@ -63,7 +62,6 @@ export default function GroundSearch() {
   const [pitch,   setPitch]   = useState('All')
   const [city,    setCity]    = useState('All')
   const [floods,  setFloods]  = useState('Any')
-  const [showAI,  setShowAI]  = useState(false)
 
   const filtered = useMemo(() => {
     return GROUNDS.filter(g => {
@@ -77,38 +75,62 @@ export default function GroundSearch() {
   }, [search, pitch, city, floods])
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden">
       <TopBar title="Find a Ground" showBack />
 
-      {/* Search */}
-      <div className="px-4 pt-3 pb-2 bg-white border-b border-slate-100 sticky top-14 z-10">
-        <div className="relative mb-3">
-          <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            className="cm-input pl-10 h-11"
-            placeholder="Search grounds, areas, cities…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            autoComplete="off"
-          />
+      {/* Search + Filters — sticky below TopBar */}
+      <div className="bg-white border-b border-slate-100 sticky top-14 z-10">
+        {/* Search row + List my ground CTA */}
+        <div className="px-4 pt-3 pb-2 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              className="cm-input pl-10 h-11"
+              placeholder="Search grounds, areas, cities…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              autoComplete="off"
+            />
+          </div>
+          {/* List my ground — inline button */}
+          <button
+            onClick={() => {}}
+            className="flex-shrink-0 flex items-center gap-1.5 bg-brand-500 text-white font-semibold text-xs px-3 py-2.5 rounded-xl shadow-sm hover:bg-brand-600 transition-colors active:scale-95"
+            aria-label="List my ground"
+          >
+            <Plus size={14} />
+            <span className="hidden sm:inline">List my ground</span>
+            <span className="sm:hidden">List</span>
+          </button>
         </div>
-        {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+
+        {/* Pitch type chips */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 pb-1">
           {PITCH_TYPES.map(p => (
-            <button key={p} className={`filter-chip flex-shrink-0 ${pitch===p?'active':''}`} onClick={() => setPitch(p)}>{p === 'All' ? 'All Pitches' : p}</button>
+            <button key={p} className={`filter-chip flex-shrink-0 ${pitch===p?'active':''}`} onClick={() => setPitch(p)}>
+              {p === 'All' ? 'All Pitches' : p}
+            </button>
           ))}
         </div>
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pt-2">
+
+        {/* City + Floodlights chips */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 pt-1 pb-2">
           {CITIES.map(c => (
-            <button key={c} className={`filter-chip flex-shrink-0 ${city===c?'active':''}`} onClick={() => setCity(c)}>{c === 'All' ? 'All Cities' : c}</button>
+            <button key={c} className={`filter-chip flex-shrink-0 ${city===c?'active':''}`} onClick={() => setCity(c)}>
+              {c === 'All' ? 'All Cities' : c}
+            </button>
           ))}
-          <button className={`filter-chip flex-shrink-0 ${floods==='Yes'?'active':''}`} onClick={() => setFloods(f => f==='Yes'?'Any':'Yes')}>
+          <button
+            className={`filter-chip flex-shrink-0 ${floods==='Yes'?'active':''}`}
+            onClick={() => setFloods(f => f==='Yes'?'Any':'Yes')}
+          >
             🌟 Floodlights
           </button>
         </div>
       </div>
 
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
+      {/* Ground cards */}
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-28">
         <p className="text-navy-500 text-sm mb-3 font-medium">{filtered.length} ground{filtered.length !== 1 ? 's' : ''} found</p>
         {filtered.length === 0 ? (
           <div className="text-center py-16">
@@ -120,28 +142,6 @@ export default function GroundSearch() {
           <GroundCard key={g.id} ground={g} onClick={() => navigate(`/grounds/${g.id}`)} />
         ))}
       </main>
-
-      {/* List my ground FAB — left side on mobile to avoid conflict with global right FABs */}
-      <button
-        onClick={() => {}}
-        className="fixed bottom-20 left-4 md:bottom-4 md:left-auto md:right-4 flex items-center gap-2 bg-brand-500 text-white font-semibold text-sm px-4 py-3 rounded-full shadow-lg shadow-brand-500/30 hover:bg-brand-600 transition-all hover:scale-105 active:scale-95 z-10"
-        aria-label="List my ground"
-      >
-        <Plus size={16} />
-        List my ground
-      </button>
-
-      {/* AI Ground Assistant FAB — left side on mobile */}
-      <button
-        onClick={() => setShowAI(true)}
-        className="fixed bottom-36 left-4 md:bottom-16 md:left-auto md:right-4 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all hover:scale-105 active:scale-95 z-10 flex items-center justify-center"
-        aria-label="Ask AI about grounds"
-      >
-        <Sparkles size={22} />
-      </button>
-
-      {/* AI Bottom Sheet */}
-      <AIGroundAssistant visible={showAI} onClose={() => setShowAI(false)} />
     </div>
   )
 }

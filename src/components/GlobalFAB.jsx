@@ -67,10 +67,11 @@ export default function GlobalFAB() {
   }
 
   const handleLogout = () => {
+    if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
     setUser(null)
     setConfirmLogout(false)
-    addToast('Logged out successfully', 'info')
-    navigate('/usp')
+    addToast('Logged out. Sign in to continue.', 'info')
+    navigate('/login')
   }
 
   return (

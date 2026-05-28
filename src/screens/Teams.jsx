@@ -273,16 +273,16 @@ export default function Teams() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden">
       <TopBar title="Teams & Tournaments" showBack />
 
-      <div className="tab-bar">
-        <button className={`tab-item ${teamsTab==='teams'?'active':''}`} onClick={() => setTeamsTab('teams')}>My Teams</button>
-        <button className={`tab-item ${teamsTab==='find'?'active':''}`} onClick={() => setTeamsTab('find')}>
+      <div className="tab-bar overflow-x-auto no-scrollbar">
+        <button className={`tab-item flex-shrink-0 whitespace-nowrap ${teamsTab==='teams'?'active':''}`} onClick={() => setTeamsTab('teams')}>My Teams</button>
+        <button className={`tab-item flex-shrink-0 whitespace-nowrap ${teamsTab==='find'?'active':''}`} onClick={() => setTeamsTab('find')}>
           Find a Team
           {pendingRequests > 0 && <span className="ml-1.5 min-w-[18px] h-[18px] rounded-full bg-brand-500 text-white text-[10px] font-bold inline-flex items-center justify-center px-1">{pendingRequests}</span>}
         </button>
-        <button className={`tab-item ${teamsTab==='tournaments'?'active':''}`} onClick={() => setTeamsTab('tournaments')}>Tournaments</button>
+        <button className={`tab-item flex-shrink-0 whitespace-nowrap ${teamsTab==='tournaments'?'active':''}`} onClick={() => setTeamsTab('tournaments')}>Tournaments</button>
       </div>
 
       <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">

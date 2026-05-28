@@ -45,9 +45,10 @@ export default function Settings() {
   }
 
   const handleLogout = () => {
+    if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
     logout()
-    navigate('/usp')
-    addToast('Logged out', 'info')
+    navigate('/login')
+    addToast('Logged out. Sign in to continue.', 'info')
   }
 
   const ROWS = [
