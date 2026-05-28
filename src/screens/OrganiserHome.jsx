@@ -196,8 +196,8 @@ function LockedBlock({ icon: Icon, title, sub, onTap }) {
       </div>
       <p className="font-bold text-navy-800 text-sm leading-tight">{title}</p>
       <p className="text-navy-400 text-[11px] mt-1">{sub}</p>
-      <div className="absolute top-3 right-3 w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
-        <Lock size={10} className="text-navy-400" />
+      <div className="absolute top-3 right-3 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-sm">
+        <Lock size={9} className="text-white" strokeWidth={2.5} />
       </div>
     </button>
   )
