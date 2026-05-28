@@ -121,20 +121,20 @@ export default function GroundSearch() {
         ))}
       </main>
 
-      {/* List my ground FAB */}
+      {/* List my ground FAB — left side on mobile to avoid conflict with global right FABs */}
       <button
         onClick={() => {}}
-        className="fixed bottom-20 right-4 md:bottom-4 flex items-center gap-2 bg-brand-500 text-white font-semibold text-sm px-4 py-3 rounded-full shadow-lg shadow-brand-500/30 hover:bg-brand-600 transition-all hover:scale-105 active:scale-95 z-10"
+        className="fixed bottom-20 left-4 md:bottom-4 md:left-auto md:right-4 flex items-center gap-2 bg-brand-500 text-white font-semibold text-sm px-4 py-3 rounded-full shadow-lg shadow-brand-500/30 hover:bg-brand-600 transition-all hover:scale-105 active:scale-95 z-10"
         aria-label="List my ground"
       >
         <Plus size={16} />
         List my ground
       </button>
 
-      {/* AI Ground Assistant FAB */}
+      {/* AI Ground Assistant FAB — left side on mobile */}
       <button
         onClick={() => setShowAI(true)}
-        className="fixed bottom-36 right-4 md:bottom-16 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all hover:scale-105 active:scale-95 z-10 flex items-center justify-center"
+        className="fixed bottom-36 left-4 md:bottom-16 md:left-auto md:right-4 w-14 h-14 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all hover:scale-105 active:scale-95 z-10 flex items-center justify-center"
         aria-label="Ask AI about grounds"
       >
         <Sparkles size={22} />

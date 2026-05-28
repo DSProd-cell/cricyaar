@@ -29,10 +29,11 @@ const STATUS_COLORS = {
 // ══════════════════════════════════════════════════════════════════════════════
 // Tab 1 — MY ASSIGNMENTS
 // ══════════════════════════════════════════════════════════════════════════════
-function MyAssignments({ navigate }) {
+function MyAssignments({ navigate, addToast }) {
   const upcoming  = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming')
   const completed = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
   const liveMatch = MATCHES.find(m => m.status === 'live')
+  const [tossAssignment, setTossAssignment] = useState(null)
 
   const StarRating = ({ n }) => (
     <span className="flex items-center gap-0.5">
@@ -106,23 +107,38 @@ function MyAssignments({ navigate }) {
                     <Clock size={10} className="text-navy-400" />
                     <span>Match Day · Arrive 30 min early</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 text-xs text-amber-700 font-semibold">
-                      <Shield size={11} />Toss decisions
+                  <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                    <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
+                      <Activity size={10} />Score access
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-amber-700 font-semibold">
-                      <Activity size={11} />Score access
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-amber-700 font-semibold">
-                      <CheckCircle size={11} />Result sign-off
+                    <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
+                      <CheckCircle size={10} />Result sign-off
                     </div>
                   </div>
+                  {/* Start Toss button */}
+                  <button
+                    onClick={() => setTossAssignment(a)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 12px rgba(251,191,36,0.35)' }}
+                  >
+                    <span>🪙</span>
+                    Start Toss
+                  </button>
                 </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Toss Modal */}
+      {tossAssignment && (
+        <TossModal
+          assignment={tossAssignment}
+          onClose={() => setTossAssignment(null)}
+          addToast={addToast}
+        />
+      )}
 
       {/* Match history */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
@@ -524,6 +540,207 @@ function OngoingMatches({ user, addToast, umpireRequests, addUmpireRequest, with
   )
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// TOSS MODAL — Online Coin Toss
+// ══════════════════════════════════════════════════════════════════════════════
+function TossModal({ assignment, onClose, addToast }) {
+  const [step, setStep]           = useState('caller')   // caller | call | flipping | result | choice | final
+  const [caller, setCaller]       = useState(null)        // 0 or 1
+  const [call, setCall]           = useState(null)        // 'heads' | 'tails'
+  const [tossResult, setTossResult] = useState(null)
+  const [winnerIdx, setWinnerIdx] = useState(null)
+  const [choice, setChoice]       = useState(null)        // 'bat' | 'field'
+
+  const parts = (assignment.teams || 'Team A vs Team B').split(' vs ')
+  const team1 = parts[0]?.trim() || 'Team A'
+  const team2 = parts[1]?.trim() || 'Team B'
+  const teams = [team1, team2]
+
+  const doFlip = () => {
+    setStep('flipping')
+    const result = Math.random() > 0.5 ? 'heads' : 'tails'
+    setTimeout(() => {
+      setTossResult(result)
+      const won = call === result ? caller : (caller === 0 ? 1 : 0)
+      setWinnerIdx(won)
+      setStep('result')
+    }, 1800)
+  }
+
+  const winnerName = winnerIdx !== null ? teams[winnerIdx] : ''
+
+  return (
+    <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-2xl max-h-[90dvh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 bg-slate-200 rounded-full" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)' }}>
+              <span className="text-base">🪙</span>
+            </div>
+            <h2 className="font-extrabold text-navy-900 text-base">Online Toss</h2>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+            <X size={15} className="text-navy-500" />
+          </button>
+        </div>
+
+        <div className="px-5 py-4 pb-8">
+          {/* Match info */}
+          <div className="bg-slate-50 rounded-2xl px-4 py-3 mb-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-extrabold text-navy-900 text-sm text-center flex-1">{team1}</p>
+              <span className="text-xs font-bold text-navy-400 px-2 py-1 bg-white rounded-full border border-slate-200 flex-shrink-0">vs</span>
+              <p className="font-extrabold text-navy-900 text-sm text-center flex-1">{team2}</p>
+            </div>
+          </div>
+
+          {/* Step: caller selection */}
+          {step === 'caller' && (
+            <div>
+              <p className="text-navy-600 font-semibold text-sm text-center mb-4">Which team calls the toss?</p>
+              <div className="grid grid-cols-2 gap-3">
+                {teams.map((t, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setCaller(i); setStep('call') }}
+                    className="py-4 px-3 rounded-2xl font-bold text-sm border-2 border-slate-200 hover:border-brand-400 hover:bg-brand-50 transition-all active:scale-95 text-center"
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step: call heads/tails */}
+          {step === 'call' && (
+            <div>
+              <p className="text-navy-600 font-semibold text-sm text-center mb-1">
+                <span className="text-brand-600">{teams[caller]}</span> calls...
+              </p>
+              <p className="text-navy-400 text-xs text-center mb-5">Select heads or tails</p>
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                {[
+                  { key:'heads', label:'Heads', emoji:'👑' },
+                  { key:'tails', label:'Tails', emoji:'🌀' },
+                ].map(c => (
+                  <button
+                    key={c.key}
+                    onClick={() => setCall(c.key)}
+                    className="py-5 rounded-2xl font-extrabold text-lg border-2 transition-all active:scale-95 flex flex-col items-center gap-1"
+                    style={call === c.key
+                      ? { borderColor: '#22c55e', background: '#f0fdf4', color: '#15803d' }
+                      : { borderColor: '#e2e8f0', background: '#f8fafc', color: '#334155' }
+                    }
+                  >
+                    <span className="text-2xl">{c.emoji}</span>
+                    <span className="text-sm font-bold">{c.label}</span>
+                  </button>
+                ))}
+              </div>
+              {call && (
+                <button onClick={doFlip} className="btn-primary w-full">
+                  Flip the Coin!
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Step: flipping */}
+          {step === 'flipping' && (
+            <div className="text-center py-6">
+              <div
+                className="w-24 h-24 mx-auto rounded-full flex items-center justify-center text-4xl mb-4 animate-spin"
+                style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', boxShadow: '0 8px 32px rgba(251,191,36,0.4)' }}
+              >
+                🪙
+              </div>
+              <p className="font-bold text-navy-700 text-base">Flipping the coin...</p>
+              <p className="text-navy-400 text-sm mt-1">Hold tight!</p>
+            </div>
+          )}
+
+          {/* Step: result → winner chooses */}
+          {step === 'result' && (
+            <div className="text-center">
+              <div
+                className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl mb-3"
+                style={tossResult === 'heads'
+                  ? { background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 8px 24px rgba(251,191,36,0.4)' }
+                  : { background: 'linear-gradient(135deg, #94a3b8, #475569)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }
+                }
+              >
+                {tossResult === 'heads' ? '👑' : '🌀'}
+              </div>
+              <p className="text-xs font-semibold text-navy-400 uppercase tracking-wide mb-1">It's...</p>
+              <p className="text-2xl font-extrabold text-navy-900 capitalize mb-3">{tossResult}!</p>
+              <div className="bg-brand-50 border border-brand-200 rounded-2xl px-4 py-3 mb-5">
+                <p className="font-extrabold text-brand-700 text-sm">🎉 {winnerName} wins the toss!</p>
+              </div>
+              <p className="text-navy-600 font-semibold text-sm mb-4">What does {winnerName} choose?</p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { key:'bat',   emoji:'🏏', label:'Bat First'   },
+                  { key:'field', emoji:'🧤', label:'Field First' },
+                ].map(c => (
+                  <button
+                    key={c.key}
+                    onClick={() => { setChoice(c.key); setStep('final') }}
+                    className="py-4 rounded-2xl font-bold text-sm border-2 border-slate-200 hover:border-brand-400 hover:bg-brand-50 transition-all active:scale-95 flex flex-col items-center gap-1.5"
+                  >
+                    <span className="text-2xl">{c.emoji}</span>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step: final summary */}
+          {step === 'final' && (
+            <div className="text-center py-2">
+              <div
+                className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-4"
+                style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 8px 24px rgba(34,197,94,0.3)' }}
+              >
+                ✅
+              </div>
+              <p className="font-extrabold text-navy-900 text-lg mb-2">Toss Complete!</p>
+              <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4 mb-5">
+                <p className="font-bold text-green-800 text-base leading-relaxed">
+                  {winnerName} won the toss<br />
+                  <span className="text-green-600">and elected to {choice === 'bat' ? '🏏 bat' : '🧤 field'} first.</span>
+                </p>
+              </div>
+              <p className="text-navy-400 text-xs mb-5">Both teams have been notified via the app</p>
+              <button
+                onClick={() => {
+                  addToast(`Toss done! ${winnerName} will ${choice} first.`, 'success')
+                  onClose()
+                }}
+                className="btn-primary w-full"
+              >
+                Start Match →
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Full tournament date-picker modal ─────────────────────────────────────────
 function TournamentRequestModal({ tournament, onClose, onSend }) {
   const [selectedDates, setSelectedDates] = useState(tournament.upcomingMatchDates.map(() => true))
@@ -793,7 +1010,7 @@ export default function UmpireHome() {
         </div>
 
         {/* Tab content */}
-        {activeTab === 'assignments' && <MyAssignments navigate={navigate} />}
+        {activeTab === 'assignments' && <MyAssignments navigate={navigate} addToast={addToast} />}
         {activeTab === 'stats'       && <MyStats />}
         {activeTab === 'matches'     && (
           <OngoingMatches

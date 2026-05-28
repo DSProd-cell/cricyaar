@@ -3,8 +3,8 @@ import { useStore } from '../store/useStore'
 import { PLAYERS, MATCHES, TEAMS, teamById, initials } from '../data/mock'
 import { avg, sr, eco } from '../utils/cricket'
 import TopBar from '../components/TopBar'
-import { BarChart2, Activity, Star, Edit, Users, Trophy, X, MapPin, Check, ChevronRight } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { BarChart2, Activity, Star, Edit, Users, Trophy, X, MapPin, Check, ChevronRight, Camera } from 'lucide-react'
+import { useState, useMemo, useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 const CITIES = ['Mumbai','Delhi','Bengaluru','Chennai','Hyderabad','Kolkata','Pune','Chandigarh','Rajkot','Other']
@@ -87,6 +87,16 @@ export default function PlayerProfile() {
   const [tab, setTab] = useState('Overview')
   const [showEdit, setShowEdit] = useState(false)
   const [profileOverride, setProfileOverride] = useState(null) // local edits
+  const [photoUrl, setPhotoUrl] = useState(null)
+  const photoRef = useRef(null)
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setPhotoUrl(ev.target.result)
+    reader.readAsDataURL(file)
+  }
 
   const displayPlayer = profileOverride ? { ...player, ...profileOverride } : player
 
@@ -117,14 +127,36 @@ export default function PlayerProfile() {
   }, [player.id])
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden">
       <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack />
 
       {/* Profile header */}
       <div className="bg-white px-4 pt-4 pb-0 border-b border-slate-100">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white font-extrabold text-xl flex-shrink-0">
-            {initials(player.name)}
+          {/* Profile avatar with photo upload */}
+          <div className="relative flex-shrink-0">
+            <input
+              ref={photoRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
+            <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white font-extrabold text-xl overflow-hidden">
+              {photoUrl
+                ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                : initials(player.name)
+              }
+            </div>
+            {isOwnProfile && (
+              <button
+                onClick={() => photoRef.current?.click()}
+                className="absolute -bottom-1 -right-1 w-6 h-6 bg-navy-900 rounded-full flex items-center justify-center border-2 border-white hover:bg-navy-700 transition-colors"
+                aria-label="Change profile photo"
+              >
+                <Camera size={11} className="text-white" />
+              </button>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="font-extrabold text-navy-900 text-xl">{displayPlayer.name}</h1>
@@ -357,16 +389,16 @@ export default function PlayerProfile() {
                     <ChevronRight size={15} className="text-navy-300 flex-shrink-0" />
                   </div>
                   {/* Team record */}
-                  <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="grid grid-cols-4 gap-1.5 text-center">
                     {[
                       { label:'Played', val: totalMatches },
                       { label:'Won',    val: team.wins,    color:'#16a34a' },
                       { label:'Lost',   val: team.losses,  color:'#dc2626' },
                       { label:'Win%',   val: `${winPct}%`, color: winPct >= 50 ? '#16a34a' : '#dc2626' },
                     ].map(s => (
-                      <div key={s.label} className="bg-slate-50 rounded-xl py-2">
-                        <p className="font-extrabold text-sm tabular-nums" style={s.color ? { color: s.color } : { color: '#0f172a' }}>{s.val}</p>
-                        <p className="text-navy-400 text-[10px]">{s.label}</p>
+                      <div key={s.label} className="bg-slate-50 rounded-xl py-2 px-1 min-w-0">
+                        <p className="font-extrabold text-sm tabular-nums truncate" style={s.color ? { color: s.color } : { color: '#0f172a' }}>{s.val}</p>
+                        <p className="text-navy-400 text-[10px] leading-tight">{s.label}</p>
                       </div>
                     ))}
                   </div>

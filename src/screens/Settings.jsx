@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore'
 import { initials, ROLE_META } from '../data/mock'
 import TopBar from '../components/TopBar'
 import { User, Bell, Globe, Shield, Info, LogOut, ChevronRight, Camera, Phone, RefreshCw, Activity, BarChart2, Eye, Tv, Crown, Import, Sparkles, Gift, ShieldCheck, BarChart3 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const ROLE_ICONS = {
   player: Activity, organiser: BarChart2, umpire: Eye, fan: Tv, admin: Shield,
@@ -14,6 +14,16 @@ export default function Settings() {
   const { user, logout, addToast, setSubscription, setProIntent, setOtpMode } = useStore()
   const [pushNotifs, setPushNotifs] = useState(true)
   const [showLogout, setShowLogout] = useState(false)
+  const [photoUrl, setPhotoUrl] = useState(null)
+  const photoRef = useRef(null)
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => setPhotoUrl(ev.target.result)
+    reader.readAsDataURL(file)
+  }
 
   const role = user?.role || 'fan'
   const roleMeta = ROLE_META[role] || { label: role, color: '#64748b', bg: '#f1f5f9', desc: '' }
@@ -57,10 +67,24 @@ export default function Settings() {
         <div className="card mb-4 animate-fade-in">
           <div className="flex items-center gap-4">
             <div className="relative flex-shrink-0">
-              <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white font-extrabold text-xl">
-                {initials(user?.name || 'U')}
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
+              <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white font-extrabold text-xl overflow-hidden">
+                {photoUrl
+                  ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                  : initials(user?.name || 'U')
+                }
               </div>
-              <button className="absolute -bottom-1 -right-1 w-6 h-6 bg-navy-900 rounded-full flex items-center justify-center border-2 border-white">
+              <button
+                onClick={() => photoRef.current?.click()}
+                className="absolute -bottom-1 -right-1 w-6 h-6 bg-navy-900 rounded-full flex items-center justify-center border-2 border-white hover:bg-navy-700 transition-colors"
+                aria-label="Change profile photo"
+              >
                 <Camera size={11} className="text-white" />
               </button>
             </div>
