@@ -83,26 +83,26 @@ export default function GlobalFAB() {
         />
       )}
 
-      {/* FAB container */}
-      <div className="fixed bottom-24 left-4 z-[60] flex flex-col items-start gap-2">
+      {/* FAB container — right side, above AI chat button */}
+      <div className="fixed bottom-[152px] right-4 z-[60] flex flex-col items-end gap-2">
 
         {/* Action pills */}
         {open && (
-          <div className="flex flex-col gap-2 animate-slide-up">
+          <div className="flex flex-col items-end gap-2 animate-slide-up">
             {ITEMS.map(item => (
               <button
                 key={item.key}
                 onClick={() => handleAction(item.key)}
-                className="flex items-center gap-2.5 rounded-full pl-1.5 pr-4 py-1.5 shadow-lg font-semibold text-sm transition-all active:scale-95 whitespace-nowrap"
+                className="flex items-center gap-2.5 rounded-full pl-3 pr-2 py-1.5 shadow-lg font-semibold text-sm transition-all active:scale-95 whitespace-nowrap"
                 style={{ background: '#fff', border: '1.5px solid #e2e8f0' }}
               >
+                <span className="text-navy-800">{item.label}</span>
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: item.bg }}
                 >
                   <item.icon size={15} style={{ color: item.color }} />
                 </div>
-                <span className="text-navy-800">{item.label}</span>
               </button>
             ))}
           </div>
