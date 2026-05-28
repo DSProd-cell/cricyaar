@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Crown, Check, Shield, Zap, Lock } from 'lucide-react'
+import { ROLE_META } from '../data/mock'
+import { Crown, Check, Shield, Zap, Lock, RefreshCw, ChevronRight, Activity, BarChart2, Eye, MapPin, Tv } from 'lucide-react'
 
 const PRO_HIGHLIGHTS = [
   'Ball-by-ball live scorecard (read-only)',
@@ -16,38 +17,124 @@ const PRO_HIGHLIGHTS = [
 
 const UPI_APPS = ['GPay', 'PhonePe', 'Paytm', 'BHIM']
 
+const ROLE_ICONS = {
+  player:       Activity,
+  organiser:    BarChart2,
+  umpire:       Eye,
+  ground_owner: MapPin,
+  fan:          Tv,
+}
+
+// Pro features unlocked per role — shown in the "continue same role" section
+const ROLE_PRO_FEATURES = {
+  player:       ['Score matches live', 'Career batting & bowling stats', 'Join paid tournaments'],
+  organiser:    ['Create & manage tournaments', 'Assign scorers to matches', 'Ground booking requests'],
+  umpire:       ['Accept umpiring assignments', 'Set & receive per-match charges', 'Track earnings dashboard'],
+  ground_owner: ['List your ground publicly', 'Receive booking payments', 'Manage slot availability'],
+  fan:          ['Download scorecards', 'Full match history access', 'All city live scores'],
+}
+
 export default function ProPayment() {
-  const navigate   = useNavigate()
-  const { setSubscription, setProIntent, addToast } = useStore()
+  const navigate = useNavigate()
+  const { user, setSubscription, setProIntent, setShowRoleModal, addToast } = useStore()
   const [loading, setLoading] = useState(false)
   const [paid, setPaid]       = useState(false)
 
+  const currentRole   = user?.role || 'fan'
+  const roleMeta      = ROLE_META[currentRole] || ROLE_META.fan
+  const RoleIcon      = ROLE_ICONS[currentRole] || Tv
+  const proFeatures   = ROLE_PRO_FEATURES[currentRole] || ROLE_PRO_FEATURES.fan
+
   const handlePay = async () => {
     setLoading(true)
-    // Simulate Razorpay processing
     await new Promise(r => setTimeout(r, 2000))
     setLoading(false)
-    setPaid(true)
     setSubscription('pro_active')
     setProIntent(false)
     addToast('🎉 Welcome to CricYaar Pro!', 'success')
-    // Brief success screen, then role select
-    setTimeout(() => navigate('/role-select'), 1200)
+    setPaid(true)
   }
 
-  // ── Payment success screen ──────────────────────────────────────────────────
+  const handleContinueSameRole = () => {
+    setShowRoleModal(true)
+    navigate('/', { replace: true })
+  }
+
+  const handleChangeRole = () => {
+    navigate('/role-select', { replace: true })
+  }
+
+  // ── Payment success → choice screen ────────────────────────────────────────
   if (paid) {
     return (
-      <div className="min-h-dvh bg-navy-900 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-dvh bg-navy-900 flex flex-col items-center justify-center px-5">
+
+        {/* Success checkmark */}
         <div
-          className="w-28 h-28 rounded-full flex items-center justify-center mb-6 border-2"
-          style={{ background: '#fef3c7', borderColor: '#d97706' }}
+          className="w-24 h-24 rounded-full flex items-center justify-center mb-5 shadow-lg"
+          style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '2px solid #d97706' }}
         >
-          <Check size={48} className="text-amber-500" strokeWidth={2.5} />
+          <Check size={42} className="text-amber-600" strokeWidth={3} />
         </div>
-        <h2 className="text-white font-extrabold text-2xl mb-2">You're Pro!</h2>
-        <p className="text-amber-400 text-sm font-medium">Setting up your account…</p>
-        <div className="mt-4 w-8 h-1 bg-amber-500 rounded-full animate-pulse" />
+
+        <h2 className="text-white font-extrabold text-2xl mb-1">You're Pro! 🎉</h2>
+        <p className="text-amber-400 text-sm mb-8 text-center max-w-xs">
+          All features are unlocked. What would you like to do next?
+        </p>
+
+        <div className="w-full max-w-sm space-y-3">
+
+          {/* ── Option 1: Continue same role ── */}
+          <button
+            onClick={handleContinueSameRole}
+            className="w-full rounded-2xl overflow-hidden text-left transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}
+          >
+            <div className="px-5 pt-4 pb-3">
+              {/* Role badge row */}
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.25)' }}>
+                  <RoleIcon size={20} className="text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-extrabold text-base leading-tight">
+                    Continue as {roleMeta.label}
+                  </p>
+                  <p className="text-amber-100 text-xs">Pro features now unlocked for your role</p>
+                </div>
+                <ChevronRight size={18} className="text-amber-200 ml-auto flex-shrink-0" />
+              </div>
+
+              {/* Pro features for this role */}
+              <div className="border-t border-amber-600/40 pt-2.5 space-y-1.5">
+                {proFeatures.map((f, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Check size={11} className="text-amber-200 flex-shrink-0" strokeWidth={2.5} />
+                    <span className="text-amber-100 text-xs">{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </button>
+
+          {/* ── Option 2: Change role ── */}
+          <button
+            onClick={handleChangeRole}
+            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            style={{
+              background: 'rgba(255,255,255,0.07)',
+              border: '1.5px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <RefreshCw size={15} className="text-white/70" />
+            <span className="text-white font-semibold text-sm">I want to change my role</span>
+          </button>
+
+          <p className="text-center text-navy-600 text-xs pt-1">
+            You can change your role anytime from Settings — no OTP needed.
+          </p>
+        </div>
       </div>
     )
   }
@@ -85,7 +172,6 @@ export default function ProPayment() {
             border: '1.5px solid #d97706',
           }}
         >
-          {/* Ambient glow */}
           <div
             className="absolute inset-0 pointer-events-none opacity-10"
             style={{ background: 'radial-gradient(ellipse at 50% 0%, #f59e0b 0%, transparent 70%)' }}
@@ -156,7 +242,7 @@ export default function ProPayment() {
           </div>
 
           <button
-            onClick={() => navigate('/usp')}
+            onClick={() => navigate(-1)}
             className="w-full py-3 text-navy-500 text-sm hover:text-navy-400 transition-colors"
           >
             Maybe later
