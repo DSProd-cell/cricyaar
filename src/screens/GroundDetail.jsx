@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { groundById, MATCHES, teamById, TEAMS } from '../data/mock'
 import { useStore } from '../store/useStore'
 import TopBar from '../components/TopBar'
-import { Star, MapPin, Sun, Moon, Car, ShowerHead, Dumbbell, Droplets, Coffee, HeartPulse, Phone, MessageCircle, ChevronRight, Navigation, Crown, Lock, Zap, Calendar, X, CheckCircle } from 'lucide-react'
+import { Star, MapPin, Sun, Moon, Car, ShowerHead, Dumbbell, Droplets, Coffee, HeartPulse, Phone, MessageCircle, ChevronRight, Navigation, Crown, Lock, Zap, Calendar, X, CheckCircle, Shield } from 'lucide-react'
 import { useState } from 'react'
 
 // ── Booking Modal ─────────────────────────────────────────────────────────────
@@ -121,16 +121,16 @@ function slotForDay(groundId, dayOffset, slotIdx) {
 // ── Fake match history for grounds ───────────────────────────────────────
 const GROUND_HISTORY = {
   g1: [
-    { teams:'Mumbai Mavericks vs Delhi Dragons', date:'Mar 20', result:'MUM won', format:'T20' },
-    { teams:'Mumbai Mavericks vs Chennai Chiefs', date:'Mar 15', result:'MUM won', format:'T20' },
-    { teams:'Bandra Bears vs Andheri Aces', date:'Mar 12', result:'Bandra won', format:'T10' },
-    { teams:'Colaba Cannons vs Marine Drive XI', date:'Mar 10', result:'Colaba won', format:'T20' },
-    { teams:'Mumbai Mavericks vs Bengaluru Bulls', date:'Mar 5', result:'MUM won', format:'T20' },
+    { teams:'Mumbai Mavericks vs Delhi Dragons', date:'Mar 20', result:'MUM won', format:'T20', matchId:'m1' },
+    { teams:'Mumbai Mavericks vs Chennai Chiefs', date:'Mar 15', result:'MUM won', format:'T20', matchId:'m2' },
+    { teams:'Bandra Bears vs Andheri Aces', date:'Mar 12', result:'Bandra won', format:'T10', matchId:null },
+    { teams:'Colaba Cannons vs Marine Drive XI', date:'Mar 10', result:'Colaba won', format:'T20', matchId:null },
+    { teams:'Mumbai Mavericks vs Bengaluru Bulls', date:'Mar 5', result:'MUM won', format:'T20', matchId:'m3' },
   ],
   g4: [
-    { teams:'Chinnaswamy XI vs MG Road Warriors', date:'Mar 18', result:'Chinnaswamy won', format:'T20' },
-    { teams:'Koramangala KC vs Indiranagar XI', date:'Mar 14', result:'Koramangala won', format:'T10' },
-    { teams:'BTM Blazers vs JP Nagar Jets', date:'Mar 10', result:'BTM won', format:'T20' },
+    { teams:'Chinnaswamy XI vs MG Road Warriors', date:'Mar 18', result:'Chinnaswamy won', format:'T20', matchId:null },
+    { teams:'Koramangala KC vs Indiranagar XI', date:'Mar 14', result:'Koramangala won', format:'T10', matchId:null },
+    { teams:'BTM Blazers vs JP Nagar Jets', date:'Mar 10', result:'BTM won', format:'T20', matchId:null },
   ],
 }
 
@@ -184,7 +184,7 @@ export default function GroundDetail() {
     window.open(`https://wa.me/${phone}?text=${msg}`, '_blank')
   }
 
-  const handleCall = () => window.open(`tel:${ground.ownerPhone || '+919999999999'}`)
+  const handleCall = () => { window.location.href = `tel:${ground.ownerPhone || '+919999999999'}` }
 
   const handleDirections = () => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${ground.lat},${ground.lng}`
@@ -322,16 +322,23 @@ export default function GroundDetail() {
             </div>
           )}
 
-          {/* Contact buttons — Tier 1 (no owner details yet) */}
+          {/* ── Booking CTAs — in-app payment (Razorpay) ── */}
           <div className="space-y-2">
-            <button className="btn-primary w-full gap-2" onClick={handleWhatsApp}>
+            <button
+              className="btn-primary w-full gap-2"
+              onClick={() => navigate(`/ground-booking/${id}`)}
+            >
+              <CheckCircle size={18} />
+              Book via App — Secure Payment
+            </button>
+            <button className="btn-secondary w-full gap-2" onClick={handleWhatsApp}>
               <MessageCircle size={18} />
-              WhatsApp Enquiry
+              WhatsApp Enquiry Only
             </button>
-            <button className="btn-secondary w-full gap-2" onClick={handleCall}>
-              <Phone size={18} />
-              Call for Booking
-            </button>
+            <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs pt-1">
+              <Lock size={11} />
+              <span>All payments via Razorpay · 256-bit encryption</span>
+            </div>
           </div>
 
           {/* ── TIER 2 ── */}
@@ -434,13 +441,28 @@ export default function GroundDetail() {
                 </h3>
                 <div className="space-y-2">
                   {matchHistory.map((m, i) => (
-                    <div key={i} className="card py-2.5 px-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
+                    <div
+                      key={i}
+                      className={`card py-2.5 px-3 ${m.matchId ? 'cursor-pointer hover:bg-brand-50 transition-colors' : ''}`}
+                      onClick={() => m.matchId && navigate(`/score/${m.matchId}`)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
                           <p className="font-medium text-navy-900 text-sm truncate">{m.teams}</p>
-                          <p className="text-navy-400 text-xs">{m.date} · {m.format}</p>
+                          <p className="text-navy-400 text-xs mt-0.5">{m.date} · {m.format}</p>
+                          {m.matchId && (
+                            <div className="flex items-center gap-1 mt-1.5 text-brand-600 text-xs font-semibold">
+                              <ChevronRight size={11} />
+                              View Scorecard
+                            </div>
+                          )}
                         </div>
-                        <span className="text-brand-600 text-xs font-semibold flex-shrink-0">{m.result}</span>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-brand-600 text-xs font-semibold">{m.result}</span>
+                          {!m.matchId && (
+                            <p className="text-slate-400 text-[10px] mt-0.5">No scorecard</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

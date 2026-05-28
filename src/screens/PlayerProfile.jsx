@@ -3,20 +3,99 @@ import { useStore } from '../store/useStore'
 import { PLAYERS, MATCHES, TEAMS, teamById, initials } from '../data/mock'
 import { avg, sr, eco } from '../utils/cricket'
 import TopBar from '../components/TopBar'
-import { BarChart2, Activity, Star, Edit, Users, Trophy } from 'lucide-react'
+import { BarChart2, Activity, Star, Edit, Users, Trophy, X, MapPin, Check, ChevronRight } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
-const TABS = ['Overview','Batting','Bowling','Fielding','Matches']
+const CITIES = ['Mumbai','Delhi','Bengaluru','Chennai','Hyderabad','Kolkata','Pune','Chandigarh','Rajkot','Other']
+const TABS = ['Overview','Batting','Bowling','Fielding','Matches','My Teams']
+
+function EditProfileSheet({ player, onClose, onSave }) {
+  const [name, setName]   = useState(player.name)
+  const [city, setCity]   = useState(player.city)
+  const [bio, setBio]     = useState(player.bio || '')
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+          <h2 className="font-extrabold text-navy-900 text-lg">Edit Profile</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+            <X size={15} className="text-navy-500" />
+          </button>
+        </div>
+        <div className="px-5 py-4 space-y-4 pb-8">
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">Full Name</label>
+            <input
+              className="cm-input"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Your name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">City</label>
+            <select
+              className="cm-select w-full"
+              value={city}
+              onChange={e => setCity(e.target.value)}
+            >
+              {CITIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">
+              About me <span className="text-navy-400 font-normal">(optional)</span>
+            </label>
+            <textarea
+              className="cm-input resize-none"
+              rows={3}
+              placeholder="e.g. Right-arm fast bowler, 5+ years playing competitive cricket in Mumbai leagues…"
+              value={bio}
+              onChange={e => setBio(e.target.value.slice(0, 160))}
+            />
+            <p className="text-navy-400 text-xs text-right mt-0.5">{bio.length}/160</p>
+          </div>
+          <button
+            onClick={() => { onSave({ name, city, bio }); onClose() }}
+            disabled={!name.trim()}
+            className="w-full py-4 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
+          >
+            <Check size={18} />
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function PlayerProfile() {
-  const { user } = useStore()
+  const { user, setUser } = useStore()
   const navigate = useNavigate()
   const { playerId } = useParams()
   // If /profile/:id, show that player; else show logged-in user
   const player   = (playerId ? PLAYERS.find(p => p.id === playerId) : PLAYERS.find(p => p.id === (user?.id || 'p1'))) || PLAYERS[0]
   const isOwnProfile = !playerId || player.id === user?.id
   const [tab, setTab] = useState('Overview')
+  const [showEdit, setShowEdit] = useState(false)
+  const [profileOverride, setProfileOverride] = useState(null) // local edits
+
+  const displayPlayer = profileOverride ? { ...player, ...profileOverride } : player
+
+  const handleSaveProfile = (edits) => {
+    setProfileOverride(edits)
+    if (user && isOwnProfile) {
+      setUser({ ...user, name: edits.name, city: edits.city })
+    }
+  }
   // Which teams is this player in?
   const playerTeams = TEAMS.filter(t => t.squad.includes(player.id))
   const myMatches = MATCHES.filter(m => m.xi1?.includes(player.id) || m.xi2?.includes(player.id))
@@ -48,14 +127,17 @@ export default function PlayerProfile() {
             {initials(player.name)}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="font-extrabold text-navy-900 text-xl">{player.name}</h1>
-            <p className="text-navy-500 text-sm">@{player.username} · {player.city}</p>
+            <h1 className="font-extrabold text-navy-900 text-xl">{displayPlayer.name}</h1>
+            <p className="text-navy-500 text-sm">@{player.username} · {displayPlayer.city}</p>
             <div className="flex flex-wrap gap-1 mt-1">
               {player.roles.map(r => <span key={r} className="badge badge-green text-[10px]">{r.replace('_',' ')}</span>)}
             </div>
           </div>
           {isOwnProfile && (
-            <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 flex-shrink-0">
+            <button
+              onClick={() => setShowEdit(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 flex-shrink-0 hover:bg-slate-100 transition-colors"
+            >
               <Edit size={16} className="text-navy-500" />
             </button>
           )}
@@ -65,7 +147,7 @@ export default function PlayerProfile() {
         {playerTeams.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-3">
             {playerTeams.map(t => (
-              <button key={t.id} onClick={() => navigate('/teams')}
+              <button key={t.id} onClick={() => navigate(`/teams/${t.id}`)}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors">
                 <div className="w-3 h-3 rounded-full flex-shrink-0" style={{background: t.color}} />
                 {t.name}
@@ -236,7 +318,73 @@ export default function PlayerProfile() {
             })}
           </div>
         )}
+
+        {/* MY TEAMS */}
+        {tab === 'My Teams' && (
+          <div className="animate-fade-in space-y-3">
+            {playerTeams.length === 0 ? (
+              <div className="text-center py-12 text-navy-400">
+                <Users size={36} className="mx-auto mb-2" />
+                <p className="font-semibold">Not in any teams yet</p>
+                <button className="btn-primary text-sm mt-4 px-5" onClick={() => navigate('/teams')}>
+                  Find a Team
+                </button>
+              </div>
+            ) : playerTeams.map(team => {
+              const isCap = team.captain === player.id
+              const totalMatches = team.wins + team.losses + team.nr
+              const winPct = totalMatches > 0 ? Math.round((team.wins / totalMatches) * 100) : 0
+              return (
+                <button
+                  key={team.id}
+                  onClick={() => navigate(`/teams/${team.id}`)}
+                  className="card card-hover w-full text-left"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                      style={{ background: team.color }}
+                    >
+                      {initials(team.name)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-navy-900">{team.name}</p>
+                        {isCap && <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full">⭐ Captain</span>}
+                      </div>
+                      <p className="text-navy-500 text-xs">{team.city} · {team.squad.length} players</p>
+                    </div>
+                    <ChevronRight size={15} className="text-navy-300 flex-shrink-0" />
+                  </div>
+                  {/* Team record */}
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    {[
+                      { label:'Played', val: totalMatches },
+                      { label:'Won',    val: team.wins,    color:'#16a34a' },
+                      { label:'Lost',   val: team.losses,  color:'#dc2626' },
+                      { label:'Win%',   val: `${winPct}%`, color: winPct >= 50 ? '#16a34a' : '#dc2626' },
+                    ].map(s => (
+                      <div key={s.label} className="bg-slate-50 rounded-xl py-2">
+                        <p className="font-extrabold text-sm tabular-nums" style={s.color ? { color: s.color } : { color: '#0f172a' }}>{s.val}</p>
+                        <p className="text-navy-400 text-[10px]">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </main>
+
+      {/* Edit Profile Sheet */}
+      {showEdit && (
+        <EditProfileSheet
+          player={displayPlayer}
+          onClose={() => setShowEdit(false)}
+          onSave={handleSaveProfile}
+        />
+      )}
     </div>
   )
 }

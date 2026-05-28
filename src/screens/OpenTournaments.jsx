@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore'
 import { OPEN_TOURNAMENTS_LIST, TEAMS } from '../data/mock'
 import TopBar from '../components/TopBar'
 import ProPaywallSheet from '../components/ProPaywallSheet'
-import { Trophy, Calendar, MapPin, Users, IndianRupee, CheckCircle, AlertCircle, Circle, Gift, UserCheck, X } from 'lucide-react'
+import { Trophy, Calendar, MapPin, Users, IndianRupee, CheckCircle, AlertCircle, Circle, Gift, UserCheck, X, Check } from 'lucide-react'
 
 const MAX_TEAM_REQUESTS = 5
 const MAX_FREE_AGENT_REQUESTS = 5
@@ -11,8 +11,15 @@ const FORMAT_COLORS = { T20:'bg-brand-50 text-brand-700', T10:'bg-purple-50 text
 const POSITIONS = ['Batsman','Bowler','All-rounder','Wicketkeeper']
 
 function FreeAgentModal({ tournament, onClose, onSend }) {
-  const [position, setPosition] = useState('')
+  const [positions, setPositions] = useState([])
   const [note, setNote] = useState('')
+
+  const togglePos = (pos) => {
+    setPositions(prev =>
+      prev.includes(pos) ? prev.filter(p => p !== pos) : [...prev, pos]
+    )
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
@@ -26,18 +33,37 @@ function FreeAgentModal({ tournament, onClose, onSend }) {
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><X size={14} className="text-navy-500" /></button>
         </div>
         <div className="px-5 pb-8">
-          <label className="block text-sm font-semibold text-navy-700 mb-2">Your position *</label>
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            {POSITIONS.map(pos => (
-              <button
-                key={pos}
-                onClick={() => setPosition(pos)}
-                className={`py-3 rounded-xl border-2 font-semibold text-sm transition-all ${position===pos ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-slate-200 bg-white text-navy-600 hover:border-slate-300'}`}
-              >
-                {pos}
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-semibold text-navy-700">Your playing position(s) *</label>
+            <span className="text-xs text-navy-400">Select all that apply</span>
           </div>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {POSITIONS.map(pos => {
+              const selected = positions.includes(pos)
+              return (
+                <button
+                  key={pos}
+                  onClick={() => togglePos(pos)}
+                  className={`py-3 rounded-xl border-2 font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                    selected
+                      ? 'border-brand-400 bg-brand-50 text-brand-700'
+                      : 'border-slate-200 bg-white text-navy-600 hover:border-slate-300'
+                  }`}
+                >
+                  {selected && <CheckCircle size={14} className="text-brand-500 flex-shrink-0" />}
+                  {pos}
+                </button>
+              )
+            })}
+          </div>
+          {positions.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3 px-1">
+              <span className="text-xs text-navy-400">Selected:</span>
+              {positions.map(p => (
+                <span key={p} className="text-xs font-semibold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full">{p}</span>
+              ))}
+            </div>
+          )}
           <label className="block text-sm font-semibold text-navy-700 mb-1.5">Add a note <span className="text-navy-400 font-normal">(optional)</span></label>
           <textarea
             className="cm-input resize-none mb-1"
@@ -51,8 +77,8 @@ function FreeAgentModal({ tournament, onClose, onSend }) {
             The organiser may invite you to a registered team. You can accept or decline their offer.
           </div>
           <button
-            onClick={() => { onSend(tournament, position, note); onClose() }}
-            disabled={!position}
+            onClick={() => { onSend(tournament, positions.join(', '), note); onClose() }}
+            disabled={positions.length === 0}
             className="w-full py-3.5 rounded-xl font-bold text-white bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Register Interest as Free Agent

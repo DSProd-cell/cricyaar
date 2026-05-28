@@ -8,6 +8,7 @@ import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
+import GlobalFAB         from './components/GlobalFAB'
 
 // Screens — auth / onboarding
 import USPScreen      from './screens/USPScreen'
@@ -24,6 +25,7 @@ import Scoring        from './screens/Scoring'
 import GroundSearch   from './screens/GroundSearch'
 import GroundDetail   from './screens/GroundDetail'
 import Teams          from './screens/Teams'
+import TeamProfile    from './screens/TeamProfile'
 import Tournament     from './screens/Tournament'
 import PlayerProfile  from './screens/PlayerProfile'
 import Notifications  from './screens/Notifications'
@@ -80,6 +82,8 @@ function WhatsNewGate({ children }) {
       {showProSheet && <ProSignupSheet />}
       {/* Don't show role modal while WhatsNew is open — it would overlay the screen */}
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
+      {/* Global quick-action FAB — shown on all authenticated pages */}
+      <GlobalFAB />
     </>
   )
 }
@@ -131,6 +135,7 @@ export default function App() {
           <Route path="/grounds"        element={<AuthGuard><GroundSearch /></AuthGuard>} />
           <Route path="/grounds/:id"    element={<AuthGuard><GroundDetail /></AuthGuard>} />
           <Route path="/teams"          element={<AuthGuard><Teams /></AuthGuard>} />
+          <Route path="/teams/:id"      element={<AuthGuard><TeamProfile /></AuthGuard>} />
           <Route path="/tournaments/:id" element={<AuthGuard><Tournament /></AuthGuard>} />
           <Route path="/profile"        element={<AuthGuard><PlayerProfile /></AuthGuard>} />
           <Route path="/notifications"  element={<AuthGuard><Notifications /></AuthGuard>} />
