@@ -40,6 +40,7 @@ import CricYaarPro       from './screens/CricYaarPro'
 import OrganiserInbox    from './screens/OrganiserInbox'
 import BrowseOpenMatches from './screens/BrowseOpenMatches'
 import OpenTournaments   from './screens/OpenTournaments'
+import MyTournaments     from './screens/MyTournaments'
 
 // Screens — v3
 import WhatIsNew         from './screens/WhatIsNew'
@@ -151,7 +152,8 @@ export default function App() {
           <Route path="/pro"              element={<AuthGuard><CricYaarPro /></AuthGuard>} />
           <Route path="/organiser-inbox"  element={<AuthGuard><OrganiserInbox /></AuthGuard>} />
           <Route path="/browse-matches"   element={<AuthGuard><BrowseOpenMatches /></AuthGuard>} />
-          <Route path="/open-tournaments" element={<AuthGuard><OpenTournaments /></AuthGuard>} />
+          <Route path="/open-tournaments"  element={<AuthGuard><OpenTournaments /></AuthGuard>} />
+          <Route path="/my-tournaments"   element={<AuthGuard><MyTournaments /></AuthGuard>} />
 
           {/* v3 */}
           <Route path="/whats-new"           element={<WhatIsNew />} />

@@ -309,7 +309,7 @@ export default function OrganiserHome() {
             title="My Tournaments"
             badge={`${TOURNAMENTS.length} running`}
             sub={<p className="text-navy-500 text-[11px]">Manage your tournaments</p>}
-            onClick={() => navigate('/open-tournaments')}
+            onClick={() => navigate('/my-tournaments')}
           />
 
           <ActiveBlock
@@ -319,7 +319,7 @@ export default function OrganiserHome() {
             title="My Matches"
             badge={liveCount > 0 ? `${liveCount} live` : null}
             sub={<p className="text-navy-500 text-[11px]">{MATCHES.length} matches total</p>}
-            onClick={() => navigate('/my-cricket')}
+            onClick={() => navigate('/my-tournaments')}
           />
 
           <ActiveBlock
