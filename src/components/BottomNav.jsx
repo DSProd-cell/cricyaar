@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Search, User, Settings, Eye, Inbox, MapPin } from 'lucide-react'
+import { Home, Search, User, Settings, Eye, Inbox, MapPin, Trophy } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 // Role-specific 4th nav item
