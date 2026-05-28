@@ -19,7 +19,7 @@ function TournamentCard({ t }) {
 
   return (
     <button
-      onClick={() => navigate(`/tournament/${t.id}`)}
+      onClick={() => navigate(`/tournaments/${t.id}`)}
       className="card w-full text-left animate-fade-in active:scale-[0.98] transition-transform"
     >
       {/* Status + name */}

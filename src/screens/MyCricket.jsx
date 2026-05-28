@@ -107,7 +107,7 @@ export default function MyCricket() {
           </div>
         ) : filtered.map(m => (
           <MatchCard key={m.id} match={m} onClick={() =>
-            m.status === 'upcoming' ? navigate(`/match/${m.id}`) : setScoreMatch(m)
+            m.status !== 'upcoming' && setScoreMatch(m)
           } />
         ))}
       </main>

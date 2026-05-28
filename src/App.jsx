@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useStore } from './store/useStore'
 import { useEffect } from 'react'
 
@@ -61,27 +61,21 @@ function AuthGuard({ children }) {
 }
 
 function WhatsNewGate({ children }) {
-  const { user, showProSheet, showRoleModal, setShowRoleModal } = useStore()
-  const navigate   = useNavigate()
+  const { user, showProSheet, showRoleModal } = useStore()
   const { pathname } = useLocation()
 
+  // Auto-mark whats-new as seen so it never blocks the landing page / home screen.
+  // The /whats-new route still exists and can be linked from Settings.
   useEffect(() => {
-    if (!user) return
-    const skip = ['/whats-new','/welcome','/login','/otp','/setup','/usp','/role-warning','/role-select','/pro-payment']
-    if (skip.includes(pathname) || pathname.startsWith('/score')) return
-    const seen = localStorage.getItem('whats_new_seen_version')
-    if (seen !== 'v3') {
-      // Suppress role modal while WhatsNew is showing — it'll appear after dismissal on home
-      setShowRoleModal(false)
-      navigate('/whats-new', { replace: true })
+    if (!localStorage.getItem('whats_new_seen_version')) {
+      localStorage.setItem('whats_new_seen_version', 'v3')
     }
-  }, [user, pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <>
       {children}
       {showProSheet && <ProSignupSheet />}
-      {/* Don't show role modal while WhatsNew is open — it would overlay the screen */}
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
       {/* Draggable floating actions (+ quick menu + AI chat) */}
       <FloatingActions />
