@@ -862,6 +862,7 @@ function MatchResult({inn1, inn2, result, specialOutcome, onClose}) {
           Back to Assignments
         </button>
       </div>
+
     </div>
   )
 }
@@ -1279,7 +1280,7 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
 }
 
 // ─── Main UmpireMatchSession ──────────────────────────────────────────────────
-export default function UmpireMatchSession({assignment, tossResult, onClose}) {
+export default function UmpireMatchSession({assignment, tossResult, onClose, onMatchSaved}) {
   const [phase,setPhase]=useState('squad')
   const [matchConfig,setMatchConfig]=useState(null)
   const [resultData,setResultData]=useState(null)
@@ -1287,8 +1288,11 @@ export default function UmpireMatchSession({assignment, tossResult, onClose}) {
   const handleStart=cfg=>{setMatchConfig(cfg);setPhase('scoring')}
 
   const handleMatchComplete=(inn1,inn2,result,specialOutcome=null)=>{
-    setResultData({inn1,inn2,result,specialOutcome})
+    const data={inn1,inn2,result,specialOutcome}
+    setResultData(data)
     setPhase('result')
+    // Notify parent immediately so data is persisted
+    if(onMatchSaved) onMatchSaved(data)
   }
 
   if(phase==='squad') return <SquadSetup assignment={assignment} tossResult={tossResult} onStart={handleStart} onClose={onClose}/>

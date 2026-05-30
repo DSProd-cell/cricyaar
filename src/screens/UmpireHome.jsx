@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import {
   MATCHES, UMPIRE_PROFILE, OPEN_MATCHES, UMPIRE_OPEN_TOURNAMENTS,
-  UMPIRE_GROUND_VISITS, UMPIRE_MY_REQUESTS, teamById
+  UMPIRE_GROUND_VISITS, UMPIRE_MY_REQUESTS, teamById, playerById
 } from '../data/mock'
 import UmpireMatchSession from './UmpireMatchSession'
 import TopBar from '../components/TopBar'
@@ -14,7 +14,7 @@ import {
   CheckCircle, Circle, AlertCircle, ChevronRight, Shield,
   Activity, Trophy, Users, ChevronDown, ChevronUp, X,
   Navigation, Home, Bell, BadgeCheck, XCircle, Loader,
-  ArrowRight
+  ArrowRight, Lock, FileText
 } from 'lucide-react'
 
 // ── Format helpers ────────────────────────────────────────────────────────────
@@ -29,17 +29,159 @@ const STATUS_COLORS = {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// Scorecard Viewer — read-only slide-up for a completed match
+// ══════════════════════════════════════════════════════════════════════════════
+function fmtOvers(b) { return `${Math.floor(b/6)}.${b%6}` }
+
+function ScorecardViewer({ match, onClose }) {
+  const { assignment, inn1, inn2, result, specialOutcome, completedAt } = match
+  const winTeam = result?.winner ? teamById(result.winner) : null
+  const t1 = inn1 ? teamById(inn1.battingTeamId) : null
+  const t2 = inn2 ? teamById(inn2.battingTeamId) : null
+
+  const InningsTable = ({ inn, label }) => {
+    if (!inn) return null
+    const team = teamById(inn.battingTeamId)
+    const batters = (inn.battingXi || []).map(id => ({ id, p: playerById(id), b: inn.batters?.[id] || { runs:0, balls:0, fours:0, sixes:0, out:false } })).filter(x => x.p)
+    const bowlers = Object.entries(inn.bowlers || {}).map(([id, b]) => ({ id, p: playerById(id), b })).filter(x => x.p)
+    const extras = (inn.extras?.wd||0) + (inn.extras?.nb||0) + (inn.extras?.b||0) + (inn.extras?.lb||0)
+    return (
+      <div className="mb-4">
+        <div className="flex items-center justify-between bg-navy-900 rounded-t-xl px-3 py-2">
+          <p className="text-white font-bold text-sm">{label} — {team?.name}</p>
+          <p className="text-amber-300 font-extrabold text-sm">{inn.runs}/{inn.wkts} ({fmtOvers(inn.legalBalls)} ov)</p>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-b-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead><tr className="bg-slate-50 border-b border-slate-200">
+                <th className="text-left px-3 py-2 text-navy-500 font-semibold">Batter</th>
+                <th className="px-2 py-2 text-center text-navy-500 font-semibold">R</th>
+                <th className="px-2 py-2 text-center text-navy-500 font-semibold">B</th>
+                <th className="px-2 py-2 text-center text-navy-500 font-semibold">4s</th>
+                <th className="px-2 py-2 text-center text-navy-500 font-semibold">6s</th>
+                <th className="px-2 py-2 text-center text-navy-500 font-semibold">SR</th>
+              </tr></thead>
+              <tbody>
+                {batters.map(({ id, p, b }) => (
+                  <tr key={id} className="border-b border-slate-50">
+                    <td className="px-3 py-2">
+                      <p className="font-semibold text-navy-900">{p.name}</p>
+                      <p className="text-navy-400 text-[10px]">{inn.retiredHurt?.includes(id)?'retired hurt':b.out?b.how||'Out':inn.striker===id?'batting *':inn.nonStriker===id?'batting':'not out'}</p>
+                    </td>
+                    <td className="px-2 py-2 text-center font-bold text-navy-900">{b.runs}</td>
+                    <td className="px-2 py-2 text-center text-navy-500">{b.balls}</td>
+                    <td className="px-2 py-2 text-center text-navy-500">{b.fours}</td>
+                    <td className="px-2 py-2 text-center text-navy-500">{b.sixes}</td>
+                    <td className="px-2 py-2 text-center text-navy-500">{b.balls>0?((b.runs/b.balls)*100).toFixed(0):'-'}</td>
+                  </tr>
+                ))}
+                <tr className="bg-slate-50"><td colSpan={6} className="px-3 py-1.5 text-xs text-navy-500">
+                  Extras: {extras} (wd {inn.extras?.wd||0}, nb {inn.extras?.nb||0}, b {inn.extras?.b||0}, lb {inn.extras?.lb||0})
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+          {bowlers.length > 0 && (
+            <div className="border-t border-slate-200 overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead><tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="text-left px-3 py-2 text-navy-500 font-semibold">Bowler</th>
+                  <th className="px-2 py-2 text-center text-navy-500 font-semibold">O</th>
+                  <th className="px-2 py-2 text-center text-navy-500 font-semibold">R</th>
+                  <th className="px-2 py-2 text-center text-navy-500 font-semibold">W</th>
+                  <th className="px-2 py-2 text-center text-navy-500 font-semibold">Eco</th>
+                </tr></thead>
+                <tbody>
+                  {bowlers.map(({ id, p, b }) => (
+                    <tr key={id} className="border-b border-slate-50">
+                      <td className="px-3 py-2 font-semibold text-navy-900">{p.name}</td>
+                      <td className="px-2 py-2 text-center text-navy-500">{fmtOvers(b.balls)}</td>
+                      <td className="px-2 py-2 text-center text-navy-500">{b.runs}</td>
+                      <td className="px-2 py-2 text-center font-bold text-navy-900">{b.wkts}</td>
+                      <td className="px-2 py-2 text-center text-navy-500">{b.balls>0?(b.runs/(b.balls/6)).toFixed(1):'-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 z-[90] flex flex-col bg-slate-50 animate-slide-up">
+      {/* Header */}
+      <div className="bg-navy-900 px-4 py-5 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-amber-200 text-xs font-bold uppercase tracking-wide">Match Scorecard</p>
+          <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+            <X size={15} className="text-white" />
+          </button>
+        </div>
+        <p className="text-white font-extrabold text-lg mb-1">{assignment?.teams}</p>
+        <p className="text-amber-200 text-xs mb-3">{assignment?.date} · {assignment?.ground}</p>
+
+        {/* Result */}
+        {specialOutcome ? (
+          specialOutcome.type === 'cancelled'
+            ? <p className="text-amber-300 font-semibold text-sm">Match Cancelled — {specialOutcome.reason}</p>
+            : <p className="text-amber-300 font-bold text-sm">{specialOutcome.winner?.name} won by {specialOutcome.type === 'walkover' ? 'Walkover' : 'Declaration'} 🏆</p>
+        ) : result?.winner ? (
+          <p className="text-amber-300 font-bold text-sm">{winTeam?.name} won by {result.margin} 🏆</p>
+        ) : (
+          <p className="text-amber-300 font-bold text-sm">Match Tied</p>
+        )}
+
+        {inn1 && inn2 && (
+          <div className="flex items-center justify-between mt-3 bg-white/10 rounded-xl px-4 py-2 text-xs text-amber-100">
+            <span>{t1?.name}: {inn1.runs}/{inn1.wkts} ({fmtOvers(inn1.legalBalls)})</span>
+            <span className="text-amber-300 font-bold">vs</span>
+            <span>{t2?.name}: {inn2.runs}/{inn2.wkts} ({fmtOvers(inn2.legalBalls)})</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5 mt-2 text-amber-200 text-[11px]">
+          <Lock size={10} /><span>Read-only scorecard</span>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        {inn1 && <InningsTable inn={inn1} label="1st Innings" />}
+        {inn2 && <InningsTable inn={inn2} label="2nd Innings" />}
+        {!inn1 && !inn2 && (
+          <div className="text-center py-12 text-navy-400">
+            <FileText size={32} className="mx-auto mb-3 text-navy-300" />
+            <p className="font-semibold">No ball-by-ball data available</p>
+            <p className="text-sm mt-1">Match ended via {specialOutcome?.type || 'decision'}</p>
+          </div>
+        )}
+      </div>
+      <div className="px-4 pb-6 pt-2 border-t border-slate-100 bg-white flex-shrink-0">
+        <button onClick={onClose} className="w-full py-3.5 rounded-2xl bg-navy-900 text-white font-bold text-sm">
+          Close Scorecard
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // Tab 1 — MY ASSIGNMENTS
 // ══════════════════════════════════════════════════════════════════════════════
 function MyAssignments({ navigate, addToast }) {
+  const { umpireSessionData, setUmpireSession, umpireCompletedMatches, addUmpireCompletedMatch } = useStore()
   const upcoming  = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming')
-  const completed = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
+  const completedMock = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
   const liveMatch = MATCHES.find(m => m.status === 'live')
   const [tossAssignment, setTossAssignment] = useState(null)
   const [scoreMatch, setScoreMatch]         = useState(null)
-  // sessions: { [assignmentId]: { tossResult, phase } }
-  const [sessions, setSessions] = useState({})
-  const [activeSession, setActiveSession] = useState(null) // { assignment, tossResult }
+  const [activeSession, setActiveSession]   = useState(null) // { assignment, tossResult }
+  const [viewScorecard, setViewScorecard]   = useState(null) // stored match object
+
+  // sessions is now driven by the persisted store
+  const sessions = umpireSessionData || {}
 
   const StarRating = ({ n }) => (
     <span className="flex items-center gap-0.5">
@@ -102,10 +244,16 @@ function MyAssignments({ navigate, addToast }) {
               {upcoming.map(a => {
                 const sess = sessions[a.id]
                 const tossComplete = !!sess?.tossResult
+                const completedMatch = umpireCompletedMatches?.find(cm => cm.assignment?.id === a.id)
+                const isMatchDone = !!completedMatch
+
                 return (
-                <div key={a.id} className="border border-amber-200 bg-amber-50 rounded-xl p-3">
+                <div key={a.id} className={`border rounded-xl p-3 ${isMatchDone ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ Assigned</span>
+                    {isMatchDone
+                      ? <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Completed</span>
+                      : <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ Assigned</span>
+                    }
                     <span className="text-[10px] text-navy-400">{a.date}</span>
                   </div>
                   <p className="font-extrabold text-navy-900 text-sm mb-1 leading-tight">{a.teams}</p>
@@ -113,48 +261,73 @@ function MyAssignments({ navigate, addToast }) {
                     <MapPin size={10} className="text-navy-400" />
                     <span>{a.ground}, {a.city}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-navy-500 text-xs mb-2.5">
-                    <Clock size={10} className="text-navy-400" />
-                    <span>Match Day · Arrive 30 min early</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-wrap mb-3">
-                    <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
-                      <Activity size={10} />Score access
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
-                      <CheckCircle size={10} />Result sign-off
-                    </div>
-                  </div>
 
-                  {/* Toss result chip — locked after done */}
-                  {tossComplete && (
-                    <div className="flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-xl px-3 py-2 mb-3">
-                      <CheckCircle size={13} className="text-green-600 flex-shrink-0" />
-                      <p className="text-green-800 text-xs font-semibold flex-1">
-                        Toss done · <strong>{sess.tossResult.winnerName}</strong> elected to{' '}
-                        <strong>{sess.tossResult.choice}</strong> first
-                      </p>
-                      <span className="text-green-600 text-[10px] font-bold uppercase">Locked</span>
-                    </div>
-                  )}
-
-                  {/* Toss button — disabled once done */}
-                  {!tossComplete ? (
-                    <button
-                      onClick={() => setTossAssignment(a)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
-                      style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 12px rgba(251,191,36,0.35)' }}
-                    >
-                      <span>🪙</span> Start Toss
-                    </button>
+                  {/* Completed: show result + view scorecard only */}
+                  {isMatchDone ? (
+                    <>
+                      <div className="flex items-center gap-1.5 bg-green-100 rounded-lg px-3 py-2 mb-3 mt-2">
+                        <Trophy size={12} className="text-green-700" />
+                        <p className="text-green-800 text-xs font-semibold">
+                          {completedMatch.specialOutcome?.type === 'cancelled'
+                            ? `Cancelled — ${completedMatch.specialOutcome.reason}`
+                            : completedMatch.result?.winner
+                              ? `${teamById(completedMatch.result.winner)?.name} won by ${completedMatch.result.margin}`
+                              : completedMatch.specialOutcome?.winner?.name
+                                ? `${completedMatch.specialOutcome.winner.name} won`
+                                : 'Match Tied'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setViewScorecard(completedMatch)}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm border-2 border-green-300 text-green-800 bg-white transition-all active:scale-95"
+                      >
+                        <Eye size={15} /> View Scorecard
+                      </button>
+                    </>
                   ) : (
-                    <button
-                      onClick={() => setActiveSession({ assignment: a, tossResult: sess.tossResult })}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
-                      style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow:'0 4px 12px rgba(34,197,94,0.35)' }}
-                    >
-                      <Activity size={15} /> Resume Match →
-                    </button>
+                    <>
+                      <div className="flex items-center gap-1.5 text-navy-500 text-xs mb-2.5">
+                        <Clock size={10} className="text-navy-400" />
+                        <span>Match Day · Arrive 30 min early</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                        <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
+                          <Activity size={10} />Score access
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded-full">
+                          <CheckCircle size={10} />Result sign-off
+                        </div>
+                      </div>
+
+                      {tossComplete && (
+                        <div className="flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-xl px-3 py-2 mb-3">
+                          <CheckCircle size={13} className="text-green-600 flex-shrink-0" />
+                          <p className="text-green-800 text-xs font-semibold flex-1">
+                            Toss done · <strong>{sess.tossResult.winnerName}</strong> elected to{' '}
+                            <strong>{sess.tossResult.choice}</strong> first
+                          </p>
+                          <span className="text-green-600 text-[10px] font-bold uppercase">Locked</span>
+                        </div>
+                      )}
+
+                      {!tossComplete ? (
+                        <button
+                          onClick={() => setTossAssignment(a)}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
+                          style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 12px rgba(251,191,36,0.35)' }}
+                        >
+                          <span>🪙</span> Start Toss
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setActiveSession({ assignment: a, tossResult: sess.tossResult })}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
+                          style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow:'0 4px 12px rgba(34,197,94,0.35)' }}
+                        >
+                          <Activity size={15} /> Resume Match →
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               )})}
@@ -169,10 +342,7 @@ function MyAssignments({ navigate, addToast }) {
         <TossModal
           assignment={tossAssignment}
           onComplete={(winnerName, winnerIdx, choice) => {
-            setSessions(prev => ({
-              ...prev,
-              [tossAssignment.id]: { tossResult: { winnerName, winnerIdx, choice } }
-            }))
+            setUmpireSession(tossAssignment.id, { tossResult: { winnerName, winnerIdx, choice } })
             addToast(`Toss done! ${winnerName} will ${choice} first.`, 'success')
             setTossAssignment(null)
           }}
@@ -186,19 +356,53 @@ function MyAssignments({ navigate, addToast }) {
         <UmpireMatchSession
           assignment={activeSession.assignment}
           tossResult={activeSession.tossResult}
+          onMatchSaved={(data) => {
+            addUmpireCompletedMatch({
+              id: `cm_${activeSession.assignment.id}_${Date.now()}`,
+              assignment: activeSession.assignment,
+              ...data,
+            })
+            addToast('Match result saved & published! 🏆', 'success')
+          }}
           onClose={() => setActiveSession(null)}
         />
       )}
 
-      {/* Match history */}
+      {/* Scorecard viewer */}
+      {viewScorecard && <ScorecardViewer match={viewScorecard} onClose={() => setViewScorecard(null)} />}
+
+      {/* Match history — store completed + mock completed */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
           <CheckCircle size={15} className="text-green-500" />
           <p className="font-bold text-navy-900 text-sm flex-1">Match History</p>
-          <span className="text-navy-400 text-xs">{completed.length} matches</span>
+          <span className="text-navy-400 text-xs">{(umpireCompletedMatches?.length || 0) + completedMock.length} matches</span>
         </div>
         <div className="divide-y divide-slate-50">
-          {completed.map(a => (
+          {/* Store completed (live matches scored in app) */}
+          {(umpireCompletedMatches || []).map(cm => (
+            <div key={cm.id} className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                <CheckCircle size={15} className="text-green-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy-900 text-sm leading-tight truncate">{cm.assignment?.teams}</p>
+                <p className="text-navy-400 text-xs mt-0.5">
+                  {cm.specialOutcome?.type === 'cancelled' ? 'Cancelled' :
+                   cm.result?.winner ? `${teamById(cm.result.winner)?.name} won by ${cm.result.margin}` :
+                   cm.specialOutcome?.winner?.name ? `${cm.specialOutcome.winner.name} won` : 'Tied'}
+                </p>
+              </div>
+              <button
+                onClick={() => setViewScorecard(cm)}
+                className="flex items-center gap-1 text-xs font-semibold text-brand-600 bg-brand-50 border border-brand-200 rounded-xl px-2.5 py-1.5 flex-shrink-0"
+              >
+                <Eye size={11} /> Scorecard
+              </button>
+            </div>
+          ))}
+          {/* Mock completed */}
+          {completedMock.map(a => (
             <div key={a.id} className="flex items-center gap-3 px-4 py-3">
               <div className="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
                 <CheckCircle size={15} className="text-green-500" />
@@ -231,13 +435,183 @@ function MyAssignments({ navigate, addToast }) {
 // Tab 2 — MY STATS
 // ══════════════════════════════════════════════════════════════════════════════
 function MyStats() {
+  const { umpireSessionData, umpireCompletedMatches, addUmpireCompletedMatch } = useStore()
+  const [subTab, setSubTab]           = useState('upcoming')  // 'upcoming' | 'completed'
+  const [viewScorecard, setViewScorecard] = useState(null)
+
   const totalMatches  = UMPIRE_PROFILE.matchesUmpired
   const totalGrounds  = UMPIRE_GROUND_VISITS.length
   const nearest       = [...UMPIRE_GROUND_VISITS].sort((a, b) => a.distanceKm - b.distanceKm)[0]
   const avgDistance   = Math.round(UMPIRE_GROUND_VISITS.reduce((s, g) => s + g.distanceKm, 0) / UMPIRE_GROUND_VISITS.length)
 
+  const sessions = umpireSessionData || {}
+
+  // Upcoming: mock assignments not yet completed in store
+  const mockUpcoming  = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming')
+  const mockCompleted = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
+
+  // Store completed matches (user-scored)
+  const storeDone = umpireCompletedMatches || []
+
+  // Mark which upcoming assignments are actually done (result declared in store)
+  const doneAssignmentIds = new Set(storeDone.map(cm => cm.assignment?.id).filter(Boolean))
+
+  const upcomingActive = mockUpcoming.filter(a => !doneAssignmentIds.has(a.id))
+  const upcomingDone   = mockUpcoming.filter(a =>  doneAssignmentIds.has(a.id))
+
+  const totalCompleted = storeDone.length + mockCompleted.length + upcomingDone.length
+
   return (
     <div className="space-y-4 animate-slide-up">
+      {/* Scorecard viewer overlay */}
+      {viewScorecard && <ScorecardViewer match={viewScorecard} onClose={() => setViewScorecard(null)} />}
+
+      {/* Sub-tabs: Upcoming / Completed */}
+      <div className="flex gap-1 bg-slate-200 p-1 rounded-2xl">
+        {[
+          { key:'upcoming',  label:'Upcoming',  count: upcomingActive.length },
+          { key:'completed', label:'Completed', count: totalCompleted },
+        ].map(t => (
+          <button key={t.key} onClick={() => setSubTab(t.key)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${subTab === t.key ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500'}`}>
+            {t.label}
+            <span className={`min-w-[16px] h-4 rounded-full text-[9px] font-bold inline-flex items-center justify-center px-1 ${t.count > 0 ? 'bg-amber-500 text-white' : 'bg-slate-300 text-slate-500'}`}>
+              {t.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* ── UPCOMING sub-tab ── */}
+      {subTab === 'upcoming' && (
+        <div className="space-y-3">
+          {upcomingActive.length === 0 ? (
+            <div className="text-center py-10">
+              <CheckCircle size={32} className="mx-auto text-green-400 mb-3" />
+              <p className="font-semibold text-navy-700">All assignments completed!</p>
+              <p className="text-navy-400 text-sm mt-1">Switch to Completed tab to view scorecards.</p>
+            </div>
+          ) : upcomingActive.map(a => {
+            const sess = sessions[a.id]
+            const tossComplete = !!sess?.tossResult
+            return (
+              <div key={a.id} className="bg-white rounded-2xl shadow-card p-4 border border-amber-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ To Umpire</span>
+                  <span className="text-[10px] text-navy-400">{a.date}</span>
+                </div>
+                <p className="font-extrabold text-navy-900 text-sm mb-1">{a.teams}</p>
+                <div className="flex items-center gap-1.5 text-navy-500 text-xs mb-1">
+                  <MapPin size={10} /><span>{a.ground}, {a.city}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  {tossComplete ? (
+                    <span className="flex items-center gap-1 text-[11px] text-green-700 font-semibold bg-green-50 border border-green-200 rounded-full px-2 py-0.5">
+                      <CheckCircle size={10} />Toss done · In progress
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                      <Circle size={10} />Toss pending
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── COMPLETED sub-tab ── */}
+      {subTab === 'completed' && (
+        <div className="space-y-3">
+          {totalCompleted === 0 ? (
+            <div className="text-center py-10">
+              <Trophy size={32} className="mx-auto text-navy-300 mb-3" />
+              <p className="font-semibold text-navy-600">No completed matches yet</p>
+              <p className="text-navy-400 text-sm mt-1">Scored matches will appear here once results are declared.</p>
+            </div>
+          ) : (
+            <>
+              {/* Store completed (with full scorecard) */}
+              {storeDone.map(cm => {
+                const res = cm.specialOutcome?.type === 'cancelled'
+                  ? `Cancelled — ${cm.specialOutcome.reason}`
+                  : cm.result?.winner
+                    ? `${teamById(cm.result.winner)?.name} won by ${cm.result.margin}`
+                    : cm.specialOutcome?.winner?.name
+                      ? `${cm.specialOutcome.winner.name} won`
+                      : 'Tied'
+                return (
+                  <div key={cm.id} className="bg-white rounded-2xl shadow-card p-4 border border-green-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Result Declared</span>
+                      <span className="text-[10px] text-navy-400">{cm.assignment?.date}</span>
+                    </div>
+                    <p className="font-extrabold text-navy-900 text-sm mb-1">{cm.assignment?.teams}</p>
+                    <div className="flex items-center gap-1.5 text-navy-500 text-xs mb-1">
+                      <MapPin size={10} /><span>{cm.assignment?.ground}, {cm.assignment?.city}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-xl px-3 py-2 mt-2 mb-3">
+                      <Trophy size={12} className="text-green-700 flex-shrink-0" />
+                      <p className="text-green-800 text-xs font-semibold flex-1">{res}</p>
+                    </div>
+                    <button
+                      onClick={() => setViewScorecard(cm)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm border-2 border-brand-300 text-brand-700 bg-brand-50 transition-all active:scale-95"
+                    >
+                      <Eye size={15} /> View Full Scorecard
+                    </button>
+                  </div>
+                )
+              })}
+
+              {/* Upcoming that got completed via store */}
+              {upcomingDone.map(a => {
+                const cm = storeDone.find(c => c.assignment?.id === a.id)
+                if (!cm) return null
+                return (
+                  <div key={a.id} className="bg-white rounded-2xl shadow-card p-4 border border-green-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Result Declared</span>
+                      <span className="text-[10px] text-navy-400">{a.date}</span>
+                    </div>
+                    <p className="font-extrabold text-navy-900 text-sm mb-1">{a.teams}</p>
+                    <button onClick={() => setViewScorecard(cm)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm border-2 border-brand-300 text-brand-700 bg-brand-50 mt-2 active:scale-95">
+                      <Eye size={15} /> View Full Scorecard
+                    </button>
+                  </div>
+                )
+              })}
+
+              {/* Mock completed (no scorecard stored, show limited info) */}
+              {mockCompleted.map(a => (
+                <div key={a.id} className="bg-white rounded-2xl shadow-card p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">📋 Past Match</span>
+                    <span className="text-[10px] text-navy-400">{a.date}</span>
+                  </div>
+                  <p className="font-extrabold text-navy-900 text-sm mb-1">{a.teams}</p>
+                  <div className="flex items-center gap-1.5 text-navy-500 text-xs mb-1">
+                    <MapPin size={10} /><span>{a.ground}, {a.city}</span>
+                  </div>
+                  {a.rating != null && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-amber-600 font-bold">{a.rating}.0</span>
+                      <span className="flex">
+                        {[1,2,3,4,5].map(i => <Star key={i} size={10} className={i<=a.rating?'text-amber-400 fill-amber-400':'text-slate-200 fill-slate-200'} />)}
+                      </span>
+                      <span className="text-[10px] text-navy-400 ml-1">Umpire rating</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Career Summary (always visible) ── */}
 
       {/* Headline numbers */}
       <div

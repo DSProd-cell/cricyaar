@@ -215,6 +215,16 @@ export const useStore = create(
         publishedTeams: [...s.publishedTeams, team],
       })),
 
+      // ── Umpire session & completed match store ────────────────────────────────
+      umpireSessionData: {},       // { [assignmentId]: { tossResult } }
+      setUmpireSession: (assignmentId, data) => set(s => ({
+        umpireSessionData: { ...s.umpireSessionData, [assignmentId]: data }
+      })),
+      umpireCompletedMatches: [],  // [{ id, assignment, inn1, inn2, result, specialOutcome, completedAt }]
+      addUmpireCompletedMatch: (match) => set(s => ({
+        umpireCompletedMatches: [...s.umpireCompletedMatches, { ...match, completedAt: Date.now() }]
+      })),
+
       // ── v4: Ground booking requests ───────────────────────────────────────────
       groundBookings: [],
       addGroundBooking: (booking) => set(s => ({
@@ -270,6 +280,8 @@ export const useStore = create(
         followedMatches:           state.followedMatches,
         followedTournaments:       state.followedTournaments,
         followedPlayers:           state.followedPlayers,
+        umpireSessionData:         state.umpireSessionData,
+        umpireCompletedMatches:    state.umpireCompletedMatches,
       }),
     }
   )
