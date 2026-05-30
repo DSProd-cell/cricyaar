@@ -5,6 +5,7 @@
  */
 import { useState } from 'react'
 import { teamById, playerById } from '../data/mock'
+import { useStore } from '../store/useStore'
 import {
   X, Check, Lock, MoreVertical, Phone, Plus, AlertTriangle,
   CloudRain, Swords, UserX, UserCheck, RefreshCcw, Zap,
@@ -553,19 +554,143 @@ function ChangeBatsmanModal({inn, batXi, onSwapEnds, onRetire, onClose}) {
 
 // ─── SquadSetup ───────────────────────────────────────────────────────────────
 function SquadSetup({assignment, tossResult, onStart, onClose}) {
+  const { umpireCompletedMatches } = useStore()
   const t1 = teamById(assignment.team1Id)
   const t2 = teamById(assignment.team2Id)
+
+  // Find most recent XI for a team from completed match history
+  const findPrevXi = (teamId) => {
+    const history = (umpireCompletedMatches || []).slice().reverse()
+    for (const cm of history) {
+      if (cm.inn1?.battingTeamId === teamId && (cm.inn1?.battingXi?.length || 0) >= 11)
+        return { xi: cm.inn1.battingXi, fromHistory: true }
+      if (cm.inn2?.battingTeamId === teamId && (cm.inn2?.battingXi?.length || 0) >= 11)
+        return { xi: cm.inn2.battingXi, fromHistory: true }
+    }
+    // Fall back to first 11 from squad as smart default
+    const def = (teamById(teamId)?.squad || []).slice(0, 11)
+    return def.length >= 11 ? { xi: def, fromHistory: false } : null
+  }
+
+  const prev1 = findPrevXi(t1.id)
+  const prev2 = findPrevXi(t2.id)
+  const hasPrev = !!(prev1 && prev2)
+
   const [overs, setOvers]       = useState(String(assignment.defaultOvers||20))
   const [powerplay, setPowerplay] = useState('6')
-  const [xi, setXi]             = useState({[t1.id]:[],[t2.id]:[]})
+  const [xi, setXi]             = useState({
+    [t1.id]: prev1?.xi || [],
+    [t2.id]: prev2?.xi || [],
+  })
   const [activeTeam, setActiveTeam] = useState(t1.id)
   const [showAddMobile, setShowAddMobile] = useState(false)
-  // Extra players added via mobile lookup (per team)
   const [extraPlayers, setExtraPlayers] = useState({[t1.id]:[], [t2.id]:[]})
+  // Show previous-XI confirmation popup when we have defaults
+  const [showPrevPopup, setShowPrevPopup] = useState(hasPrev)
 
   const winnerBats   = tossResult.choice==='bat'
   const winnerTeamId = tossResult.winnerIdx===0?t1.id:t2.id
   const battingFirst = winnerBats?winnerTeamId:(winnerTeamId===t1.id?t2.id:t1.id)
+
+  // ── Previous XI popup ──
+  if (showPrevPopup) {
+    const label1 = prev1?.fromHistory ? 'Last match XI' : 'Squad default XI'
+    const label2 = prev2?.fromHistory ? 'Last match XI' : 'Squad default XI'
+    const xi1Players = (prev1?.xi || []).map(id => playerById(id)).filter(Boolean)
+    const xi2Players = (prev2?.xi || []).map(id => playerById(id)).filter(Boolean)
+    return (
+      <div className="fixed inset-0 z-[85] bg-slate-50 flex flex-col">
+        {/* Header */}
+        <div className="bg-navy-900 px-4 pt-safe-top pb-4 flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-extrabold text-white text-base">{assignment.teams}</h2>
+            <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <X size={16} className="text-white"/>
+            </button>
+          </div>
+          <div className="bg-white/10 rounded-xl px-3 py-2 flex items-center gap-2">
+            <span className="text-lg">🪙</span>
+            <p className="text-amber-100 text-xs">
+              <strong className="text-white">{tossResult.winnerName}</strong> won toss · elected to{' '}
+              <strong className="text-white">{tossResult.choice==='bat'?'🏏 bat':'🧤 field'} first</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* Overs config */}
+        <div className="bg-white border-b border-slate-100 px-4 py-3 flex gap-4 flex-shrink-0">
+          <div className="flex-1">
+            <p className="text-[10px] text-navy-400 font-semibold uppercase mb-1">Overs</p>
+            <input type="number" min="1" max="50" value={overs} onChange={e=>setOvers(e.target.value)}
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-navy-900 outline-none focus:border-brand-400"/>
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] text-navy-400 font-semibold uppercase mb-1">Powerplay Overs</p>
+            <input type="number" min="0" max="20" value={powerplay} onChange={e=>setPowerplay(e.target.value)}
+              className="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-navy-900 outline-none focus:border-brand-400"/>
+          </div>
+        </div>
+
+        {/* Pop-up content */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-start gap-3">
+            <span className="text-xl flex-shrink-0 mt-0.5">📋</span>
+            <div>
+              <p className="font-bold text-amber-900 text-sm">Previous Playing XI Found</p>
+              <p className="text-amber-700 text-xs mt-0.5 leading-relaxed">
+                We've auto-selected the {prev1?.fromHistory || prev2?.fromHistory ? 'last match' : 'default squad'} XI for both teams.
+                Confirm to start directly, or tap <strong>Re-select</strong> to make changes.
+              </p>
+            </div>
+          </div>
+
+          {/* Team 1 XI */}
+          {[{ team: t1, players: xi1Players, label: label1 }, { team: t2, players: xi2Players, label: label2 }].map(({ team, players, label }) => (
+            <div key={team.id} className="bg-white rounded-2xl shadow-card overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
+                <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: team.color || '#22c55e' }}/>
+                <p className="font-bold text-navy-900 text-sm flex-1">{team.name}</p>
+                <span className="text-[10px] font-semibold text-brand-600 bg-brand-50 border border-brand-200 rounded-full px-2 py-0.5">{label}</span>
+              </div>
+              <div className="px-4 py-2">
+                {players.map((p, i) => (
+                  <div key={p.id} className="flex items-center gap-3 py-1.5 border-b border-slate-50 last:border-0">
+                    <span className="w-5 text-center text-[11px] font-bold text-navy-400">{i+1}</span>
+                    <p className="font-semibold text-navy-900 text-sm flex-1">{p.name}</p>
+                    <p className="text-navy-400 text-xs">
+                      {p.batting?.sr > 0 ? `SR ${p.batting.sr}` : p.bowling?.wkts > 0 ? `${p.bowling.wkts}W` : ''}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        <div className="px-4 pb-6 pt-3 border-t border-slate-100 bg-white flex-shrink-0 space-y-2">
+          <button
+            disabled={!parseInt(overs) >= 1}
+            onClick={() => {
+              onStart({
+                xi1: xi[t1.id], xi2: xi[t2.id],
+                overs: parseInt(overs), powerplay: parseInt(powerplay), battingFirst
+              })
+            }}
+            className="btn-primary w-full py-4 text-base"
+          >
+            ✅ Use This XI & Start Match
+          </button>
+          <button
+            onClick={() => setShowPrevPopup(false)}
+            className="w-full py-3.5 rounded-2xl border-2 border-slate-300 font-bold text-sm text-navy-700 bg-white"
+          >
+            🔄 Re-select Players
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const togglePlayer = pid => {
     setXi(prev=>{
