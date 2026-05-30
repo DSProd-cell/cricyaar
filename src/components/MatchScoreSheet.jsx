@@ -240,12 +240,11 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive, xi }) {
 export default function MatchScoreSheet({ match, onClose }) {
   const { user } = useStore()
   const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
-
   const [inningsTab, setInningsTab] = useState(0)
 
   if (!match) return null
 
-  // Show Pro gate if not subscribed
+  // Full scorecard is a Pro feature — show upgrade prompt to free users
   if (!isPro) return <ProGate onClose={onClose} />
 
   const isLive = match.status === 'live'
