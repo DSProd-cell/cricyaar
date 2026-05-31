@@ -11,10 +11,10 @@ import ProPaywallSheet from '../components/ProPaywallSheet'
 import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
   Eye, BarChart2, Calendar, Send, Star, MapPin, Clock,
-  CheckCircle, Circle, AlertCircle, ChevronRight, Shield,
+  CheckCircle, Circle, AlertCircle, ChevronRight, ChevronLeft, Shield,
   Activity, Trophy, Users, ChevronDown, ChevronUp, X,
   Navigation, Home, Bell, BadgeCheck, XCircle, Loader,
-  ArrowRight, Lock, FileText
+  ArrowRight, Lock, FileText, Settings, Check
 } from 'lucide-react'
 
 // ── Format helpers ────────────────────────────────────────────────────────────
@@ -168,6 +168,221 @@ function ScorecardViewer({ match, onClose }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// Match Config Screen — shown before toss to set up match details
+// ══════════════════════════════════════════════════════════════════════════════
+function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
+  const t1 = teamById(assignment.team1Id)
+  const t2 = teamById(assignment.team2Id)
+
+  const MATCH_TYPES = [
+    { id: 'limited', label: 'Limited Overs' },
+    { id: 'box',     label: 'Box Cricket'   },
+    { id: 'pair',    label: 'Pair Cricket'  },
+    { id: 'test',    label: 'Test Match'    },
+    { id: 'hundred', label: 'The Hundred'   },
+  ]
+  const PITCH_TYPES = ['Turf', 'Concrete', 'Matting', 'Mud', 'Synthetic']
+  const BALL_TYPES = [
+    { id: 'tennis',  label: 'Tennis',  color: '#009B4D', emoji: '🎾' },
+    { id: 'leather', label: 'Leather', color: '#DC2626', emoji: '🏏' },
+    { id: 'other',   label: 'Other',   color: '#D97706', emoji: '🟡' },
+  ]
+
+  const [matchType, setMatchType]   = useState('limited')
+  const [overs, setOvers]           = useState(String(assignment.defaultOvers || 20))
+  const [oversPerBowler, setOPB]    = useState('4')
+  const [city, setCity]             = useState(assignment.city || '')
+  const [ground, setGround]         = useState(assignment.ground || '')
+  const [dateTime, setDateTime]     = useState(assignment.date || '')
+  const [ballType, setBallType]     = useState('tennis')
+  const [wagonWheel, setWagonWheel] = useState(true)
+  const [pitchType, setPitchType]   = useState('Turf')
+
+  const inputCls = "w-full border-b border-slate-300 pb-1.5 pt-0.5 text-sm text-navy-900 outline-none focus:border-brand-500 bg-transparent"
+  const labelCls = "text-xs text-navy-400 mb-0.5 block"
+
+  return (
+    <div className="fixed inset-0 z-[80] bg-white flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 flex-shrink-0 pt-safe-top">
+        <button onClick={onClose} className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
+          <ChevronLeft size={20} className="text-navy-700"/>
+        </button>
+        <h1 className="font-bold text-navy-900 text-base">Start a match</h1>
+        <button className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
+          <Settings size={16} className="text-navy-500"/>
+        </button>
+      </div>
+
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto">
+
+        {/* Teams row */}
+        <div className="flex items-center justify-around px-4 py-6 border-b border-slate-100">
+          {/* Team 1 */}
+          <div className="flex flex-col items-center gap-2 flex-1">
+            <div className="w-16 h-16 rounded-full border-2 border-slate-200 flex items-center justify-center"
+              style={{ background: t1?.color ? `${t1.color}22` : '#f1f5f9' }}>
+              <span className="font-extrabold text-xl" style={{ color: t1?.color || '#64748b' }}>
+                {t1?.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-navy-800 text-center max-w-[90px] truncate">{t1?.name}</p>
+            <button className="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-[11px] font-bold">
+              Select squad
+            </button>
+          </div>
+
+          {/* VS diamond */}
+          <div className="flex-shrink-0 mx-3">
+            <div className="w-10 h-10 bg-slate-200 rotate-45 rounded-sm flex items-center justify-center">
+              <span className="text-[11px] font-extrabold text-navy-600 -rotate-45">VS</span>
+            </div>
+          </div>
+
+          {/* Team 2 */}
+          <div className="flex flex-col items-center gap-2 flex-1">
+            <div className="w-16 h-16 rounded-full border-2 border-slate-200 flex items-center justify-center"
+              style={{ background: t2?.color ? `${t2.color}22` : '#f1f5f9' }}>
+              <span className="font-extrabold text-xl" style={{ color: t2?.color || '#64748b' }}>
+                {t2?.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-navy-800 text-center max-w-[90px] truncate">{t2?.name}</p>
+            <button className="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-[11px] font-bold">
+              Select squad
+            </button>
+          </div>
+        </div>
+
+        <div className="px-4 py-5 space-y-6">
+
+          {/* Match type */}
+          <div>
+            <p className="font-bold text-navy-900 text-sm mb-3">Match type</p>
+            <div className="flex flex-wrap gap-2">
+              {MATCH_TYPES.map(t => (
+                <button key={t.id} onClick={() => setMatchType(t.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                    matchType === t.id
+                      ? 'bg-brand-500 text-white border-brand-500'
+                      : 'bg-white text-navy-700 border-slate-300'
+                  }`}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Overs row */}
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <label className={labelCls}>No. of overs*</label>
+              <input type="number" min="1" max="50" value={overs}
+                onChange={e => setOvers(e.target.value)} className={inputCls}/>
+            </div>
+            <div className="flex-1">
+              <label className={labelCls}>Overs per bowler</label>
+              <input type="number" min="1" max="20" value={oversPerBowler}
+                onChange={e => setOPB(e.target.value)} className={inputCls}/>
+            </div>
+            <button className="flex items-center gap-0.5 text-brand-500 font-bold text-sm pb-2 whitespace-nowrap flex-shrink-0">
+              Power Play<ChevronRight size={14}/>
+            </button>
+          </div>
+
+          {/* City */}
+          <div>
+            <label className={labelCls}>City / town*</label>
+            <input value={city} onChange={e => setCity(e.target.value)}
+              className={inputCls} placeholder="Enter city"/>
+          </div>
+
+          {/* Ground */}
+          <div>
+            <label className={labelCls}>Ground*</label>
+            <input value={ground} onChange={e => setGround(e.target.value)}
+              className={inputCls} placeholder="Enter ground name"/>
+          </div>
+
+          {/* Date and time */}
+          <div>
+            <label className={labelCls}>Date and time</label>
+            <input value={dateTime} onChange={e => setDateTime(e.target.value)}
+              className={inputCls} placeholder="e.g. Sun, May 31 2026 06:30 AM"/>
+          </div>
+
+          {/* Ball type */}
+          <div>
+            <p className="font-bold text-navy-900 text-sm mb-4">Ball type</p>
+            <div className="flex gap-8">
+              {BALL_TYPES.map(b => (
+                <button key={b.id} onClick={() => setBallType(b.id)}
+                  className="flex flex-col items-center gap-2">
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all ${
+                    ballType === b.id ? 'border-transparent' : 'border-slate-300 bg-slate-50'
+                  }`}
+                    style={ballType === b.id ? { background: b.color } : {}}>
+                    {ballType === b.id
+                      ? <Check size={22} className="text-white" strokeWidth={3}/>
+                      : <span className="text-2xl">{b.emoji}</span>
+                    }
+                  </div>
+                  <span className="text-xs font-semibold text-navy-700">{b.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Wagon wheel */}
+          <div>
+            <p className="font-bold text-navy-900 text-sm mb-2">Wagon wheel</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-navy-500">Show Wagon wheel for 1s, 2s and 3s</p>
+              <button onClick={() => setWagonWheel(v => !v)}
+                className={`w-12 h-6 rounded-full transition-colors relative flex-shrink-0 ml-3 ${wagonWheel ? 'bg-brand-500' : 'bg-slate-300'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${wagonWheel ? 'left-6' : 'left-0.5'}`}/>
+              </button>
+            </div>
+          </div>
+
+          {/* Pitch type */}
+          <div className="pb-4">
+            <p className="font-bold text-navy-900 text-sm mb-3">Pitch type</p>
+            <div className="flex flex-wrap gap-2">
+              {PITCH_TYPES.map(p => (
+                <button key={p} onClick={() => setPitchType(p)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                    pitchType === p
+                      ? 'bg-brand-500 text-white border-brand-500'
+                      : 'bg-white text-navy-700 border-slate-300'
+                  }`}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom buttons */}
+      <div className="flex border-t border-slate-200 flex-shrink-0">
+        <button onClick={onSchedule}
+          className="flex-1 py-4 bg-white text-navy-700 font-bold text-sm border-r border-slate-200 active:bg-slate-50">
+          Schedule match
+        </button>
+        <button
+          onClick={() => onNext({ matchType, overs: parseInt(overs), oversPerBowler: parseInt(oversPerBowler), city, ground, dateTime, ballType, wagonWheel, pitchType })}
+          className="flex-1 py-4 text-white font-bold text-sm active:opacity-90"
+          style={{ background: 'linear-gradient(135deg,#0d9488,#0f766e)' }}>
+          Next (Toss)
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // Tab 1 — MY ASSIGNMENTS
 // ══════════════════════════════════════════════════════════════════════════════
 function MyAssignments({ navigate, addToast }) {
@@ -175,10 +390,11 @@ function MyAssignments({ navigate, addToast }) {
   const upcoming  = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming')
   const completedMock = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
   const liveMatch = MATCHES.find(m => m.status === 'live')
-  const [tossAssignment, setTossAssignment] = useState(null)
-  const [scoreMatch, setScoreMatch]         = useState(null)
-  const [activeSession, setActiveSession]   = useState(null) // { assignment, tossResult }
-  const [viewScorecard, setViewScorecard]   = useState(null) // stored match object
+  const [configAssignment, setConfigAssignment] = useState(null) // match config screen
+  const [tossAssignment, setTossAssignment]     = useState(null)
+  const [scoreMatch, setScoreMatch]             = useState(null)
+  const [activeSession, setActiveSession]       = useState(null) // { assignment, tossResult }
+  const [viewScorecard, setViewScorecard]       = useState(null) // stored match object
 
   // sessions is now driven by the persisted store
   const sessions = umpireSessionData || {}
@@ -312,11 +528,11 @@ function MyAssignments({ navigate, addToast }) {
 
                       {!tossComplete ? (
                         <button
-                          onClick={() => setTossAssignment(a)}
+                          onClick={() => setConfigAssignment(a)}
                           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
-                          style={{ background: 'linear-gradient(135deg, #fbbf24, #d97706)', boxShadow: '0 4px 12px rgba(251,191,36,0.35)' }}
+                          style={{ background: 'linear-gradient(135deg, #0d9488, #0f766e)', boxShadow: '0 4px 12px rgba(13,148,136,0.35)' }}
                         >
-                          <span>🪙</span> Start Toss
+                          🏏 Start a Match
                         </button>
                       ) : (
                         <button
@@ -336,6 +552,22 @@ function MyAssignments({ navigate, addToast }) {
           )}
         </div>
       </div>
+
+      {/* Match Config Screen — shown before toss */}
+      {configAssignment && (
+        <MatchConfigScreen
+          assignment={configAssignment}
+          onNext={(_config) => {
+            setTossAssignment(configAssignment)
+            setConfigAssignment(null)
+          }}
+          onSchedule={() => {
+            addToast('Match scheduled!', 'success')
+            setConfigAssignment(null)
+          }}
+          onClose={() => setConfigAssignment(null)}
+        />
+      )}
 
       {/* Toss Modal */}
       {tossAssignment && (
