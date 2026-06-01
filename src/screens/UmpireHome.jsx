@@ -387,9 +387,9 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
 // ══════════════════════════════════════════════════════════════════════════════
 function MyAssignments({ navigate, addToast }) {
   const { umpireSessionData, setUmpireSession, umpireCompletedMatches, addUmpireCompletedMatch } = useStore()
-  const upcoming  = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming')
+  const allUpcoming   = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming')
   const completedMock = UMPIRE_PROFILE.assignments.filter(a => a.status === 'completed')
-  const liveMatch = MATCHES.find(m => m.status === 'live')
+  const liveMatch     = MATCHES.find(m => m.status === 'live')
   const [configAssignment, setConfigAssignment] = useState(null) // match config screen
   const [tossAssignment, setTossAssignment]     = useState(null)
   const [scoreMatch, setScoreMatch]             = useState(null)
@@ -407,12 +407,16 @@ function MyAssignments({ navigate, addToast }) {
     </span>
   )
 
+  // Split upcoming: completed-in-store go to history, rest stay as pending
+  const upcoming = allUpcoming.filter(a => !umpireCompletedMatches?.find(cm => cm.assignment?.id === a.id))
+  const liveMatchCompleted = liveMatch && umpireCompletedMatches?.find(cm => cm.assignment?.id === liveMatch.id)
+
   return (
     <>
     <div className="space-y-4 animate-slide-up">
 
-      {/* Live match banner — Score Now access */}
-      {liveMatch && (
+      {/* Live match banner — only show if NOT already completed */}
+      {liveMatch && !liveMatchCompleted && (
         <button
           onClick={() => setScoreMatch(liveMatch)}
           className="w-full rounded-2xl overflow-hidden text-left active:scale-[0.98] transition-transform"
@@ -439,7 +443,7 @@ function MyAssignments({ navigate, addToast }) {
         </button>
       )}
 
-      {/* Upcoming assignments */}
+      {/* Upcoming assignments — only truly pending/in-progress ones */}
       <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
           <Calendar size={15} className="text-amber-500" />
@@ -460,16 +464,11 @@ function MyAssignments({ navigate, addToast }) {
               {upcoming.map(a => {
                 const sess = sessions[a.id]
                 const tossComplete = !!sess?.tossResult
-                const completedMatch = umpireCompletedMatches?.find(cm => cm.assignment?.id === a.id)
-                const isMatchDone = !!completedMatch
 
                 return (
-                <div key={a.id} className={`border rounded-xl p-3 ${isMatchDone ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
+                <div key={a.id} className="border rounded-xl p-3 border-amber-200 bg-amber-50">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    {isMatchDone
-                      ? <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Completed</span>
-                      : <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ Assigned</span>
-                    }
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ Assigned</span>
                     <span className="text-[10px] text-navy-400">{a.date}</span>
                   </div>
                   <p className="font-extrabold text-navy-900 text-sm mb-1 leading-tight">{a.teams}</p>
@@ -478,30 +477,8 @@ function MyAssignments({ navigate, addToast }) {
                     <span>{a.ground}, {a.city}</span>
                   </div>
 
-                  {/* Completed: show result + view scorecard only */}
-                  {isMatchDone ? (
-                    <>
-                      <div className="flex items-center gap-1.5 bg-green-100 rounded-lg px-3 py-2 mb-3 mt-2">
-                        <Trophy size={12} className="text-green-700" />
-                        <p className="text-green-800 text-xs font-semibold">
-                          {completedMatch.specialOutcome?.type === 'cancelled'
-                            ? `Cancelled — ${completedMatch.specialOutcome.reason}`
-                            : completedMatch.result?.winner
-                              ? `${teamById(completedMatch.result.winner)?.name} won by ${completedMatch.result.margin}`
-                              : completedMatch.specialOutcome?.winner?.name
-                                ? `${completedMatch.specialOutcome.winner.name} won`
-                                : 'Match Tied'}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setViewScorecard(completedMatch)}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm border-2 border-green-300 text-green-800 bg-white transition-all active:scale-95"
-                      >
-                        <Eye size={15} /> View Scorecard
-                      </button>
-                    </>
-                  ) : (
-                    <>
+                  {/* Pending/in-progress only — completed ones filtered out above */}
+                  <>
                       <div className="flex items-center gap-1.5 text-navy-500 text-xs mb-2.5">
                         <Clock size={10} className="text-navy-400" />
                         <span>Match Day · Arrive 30 min early</span>
@@ -543,8 +520,7 @@ function MyAssignments({ navigate, addToast }) {
                           <Activity size={15} /> Resume Match →
                         </button>
                       )}
-                    </>
-                  )}
+                  </>
                 </div>
               )})}
 
