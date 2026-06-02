@@ -94,7 +94,7 @@ export default function Settings() {
               <p className="text-navy-500 text-sm">@{user?.username || 'username'}</p>
               <p className="text-navy-400 text-xs mt-0.5">{user?.phone}</p>
             </div>
-            <button className="btn-secondary text-sm py-2 px-4 flex-shrink-0">Edit</button>
+            <button className="btn-secondary text-sm py-2 px-4 flex-shrink-0" onClick={() => navigate('/profile')}>Edit</button>
           </div>
         </div>
 

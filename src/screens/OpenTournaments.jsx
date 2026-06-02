@@ -294,7 +294,7 @@ export default function OpenTournaments() {
   return (
     <div className="min-h-dvh flex flex-col">
       <TopBar title={isPlayer ? 'Browse Tournaments' : 'Join Tournaments'} showBack />
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-24">
 
         {/* Mode indicator */}
         {isPlayer && (

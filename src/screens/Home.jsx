@@ -193,7 +193,7 @@ export default function Home() {
   return (
     <div className="min-h-dvh flex flex-col">
       <TopBar />
-      <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full">
+      <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full pb-24">
 
         {/* Admin first-login banner */}
         {adminBanner && (

@@ -40,7 +40,7 @@ export default function UmpireProfile() {
   return (
     <div className="min-h-dvh flex flex-col">
       <TopBar title="Umpire Profile" showBack />
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full space-y-4">
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full space-y-4 pb-24">
 
         {/* Profile header */}
         <div className="card animate-fade-in">

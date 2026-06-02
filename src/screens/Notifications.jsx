@@ -33,7 +33,7 @@ export default function Notifications() {
   return (
     <div className="min-h-dvh flex flex-col">
       <TopBar title="Notifications" showBack />
-      <main className="flex-1 max-w-2xl mx-auto w-full">
+      <main className="flex-1 max-w-2xl mx-auto w-full pb-24">
         {/* Header row */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
           <span className="text-navy-500 text-sm font-medium">{unread > 0 ? `${unread} unread` : 'All caught up'}</span>

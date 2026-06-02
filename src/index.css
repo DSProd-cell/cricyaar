@@ -124,17 +124,17 @@
     background: #fff;
     border: 1.5px solid #e2e8f0;
     border-radius: 20px;
-    padding: 24px;
+    padding: 20px;
     cursor: pointer;
     transition: all 0.2s;
     min-height: 120px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    active:scale-95;
   }
+  .home-block:active { transform: scale(0.97); }
   .home-block:hover {
     border-color: #22c55e;
     box-shadow: 0 8px 24px rgb(34 197 94 / 0.12);
@@ -287,10 +287,10 @@
   .tab-item.active { color: #22c55e; border-bottom-color: #22c55e; font-weight: 600; }
 
   /* ── Toast ── */
-  .toast { padding: 14px 18px; border-radius: 16px; font-size: 15px; font-weight: 700; pointer-events: auto; animation: slideUp 0.25s ease-out; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgb(0 0 0 / 0.22); min-width: 260px; max-width: 360px; letter-spacing: -0.01em; }
-  .toast-success { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+  .toast { padding: 14px 18px; border-radius: 16px; font-size: 14px; font-weight: 600; pointer-events: auto; animation: slideUp 0.25s ease-out; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgb(0 0 0 / 0.22); min-width: 260px; max-width: 360px; letter-spacing: -0.01em; }
+  .toast-success { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; }
   .toast-error   { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; }
-  .toast-info    { background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; }
+  .toast-info    { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }
 
   /* ── Ground facilities ── */
   .facility-icon { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; }
@@ -324,4 +324,6 @@
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .pt-safe-top { padding-top: env(safe-area-inset-top, 12px); }
+  .pb-safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
 }

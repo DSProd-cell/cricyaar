@@ -285,7 +285,7 @@ export default function Teams() {
         <button className={`tab-item flex-shrink-0 whitespace-nowrap ${teamsTab==='tournaments'?'active':''}`} onClick={() => setTeamsTab('tournaments')}>Tournaments</button>
       </div>
 
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-24">
 
         {/* ── MY TEAMS TAB ── */}
         {teamsTab === 'teams' && (

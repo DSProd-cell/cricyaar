@@ -140,13 +140,13 @@ export default function PlayerHome() {
 
           <ActiveBlock
             icon={Activity}
-            color="#2563eb"
-            bg="#dbeafe30"
+            color="#16a34a"
+            bg="#dcfce730"
             title="Live Scores"
             sub={
               <div className="space-y-0.5">
                 <p className="text-navy-500 text-[11px]">{MATCHES.filter(m => m.status === 'live').length} live now</p>
-                <p className="text-blue-600 text-[10px] font-semibold">Full scorecard</p>
+                <p className="text-green-600 text-[10px] font-semibold flex items-center gap-0.5"><Crown size={9} className="inline" /> Scorecard (Pro)</p>
               </div>
             }
             onClick={() => liveMatch ? setScoreMatch(liveMatch) : navigate('/my-cricket')}
@@ -154,17 +154,17 @@ export default function PlayerHome() {
 
           <ActiveBlock
             icon={MapPin}
-            color="#2563eb"
-            bg="#dbeafe30"
+            color="#d97706"
+            bg="#fef3c730"
             title="Find a Ground"
-            sub={<p className="text-navy-500 text-[11px] leading-tight">Search, browse & book grounds for your match</p>}
+            sub={<p className="text-navy-500 text-[11px] leading-tight">Search, browse & book grounds nearby</p>}
             onClick={() => navigate('/grounds')}
           />
 
           <ActiveBlock
             icon={Users}
-            color="#2563eb"
-            bg="#dbeafe30"
+            color="#7c3aed"
+            bg="#f3e8ff30"
             title="My Teams"
             badge={myTeams.length > 0 ? `${myTeams.length} team${myTeams.length > 1 ? 's' : ''}` : null}
             sub={<p className="text-navy-500 text-[11px] leading-tight">Join or manage your squad</p>}

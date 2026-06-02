@@ -233,7 +233,7 @@ export default function MyTournaments() {
         ))}
       </div>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full">
+      <main className="flex-1 max-w-2xl mx-auto w-full pb-24">
 
         {/* ── TAB 0: MY TOURNAMENTS ── */}
         {tab === 0 && (

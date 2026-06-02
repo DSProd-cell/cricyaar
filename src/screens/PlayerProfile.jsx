@@ -211,7 +211,7 @@ export default function PlayerProfile() {
         </div>
       </div>
 
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-24">
         {/* OVERVIEW */}
         {tab === 'Overview' && (
           <div className="space-y-4 animate-fade-in">

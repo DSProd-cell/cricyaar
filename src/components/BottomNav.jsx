@@ -4,12 +4,13 @@ import { useStore } from '../store/useStore'
 
 // Role-specific 4th nav item
 const ROLE_FOURTH = {
-  player:       { label:'Settings',  icon:Settings, path:'/settings'        },
-  umpire:       { label:'Matches',   icon:Eye,    path:'/browse-matches'   },
-  organiser:    { label:'Inbox',     icon:Inbox,  path:'/organiser-inbox', badge:'inbox' },
-  admin:        { label:'Teams',     icon:Trophy, path:'/teams'            },
-  ground_owner: { label:'My Ground', icon:MapPin, path:'/ground-owner'     },
-  fan:          null,
+  player:       { label:'Settings',    icon:Settings, path:'/settings'         },
+  captain:      { label:'Tournaments', icon:Trophy,   path:'/open-tournaments'  },
+  umpire:       { label:'Matches',     icon:Eye,      path:'/browse-matches'    },
+  organiser:    { label:'Inbox',       icon:Inbox,    path:'/organiser-inbox', badge:'inbox' },
+  admin:        { label:'Teams',       icon:Trophy,   path:'/teams'             },
+  ground_owner: { label:'My Ground',   icon:MapPin,   path:'/ground-owner'      },
+  fan:          { label:'Settings',    icon:Settings, path:'/settings'          },
 }
 
 export default function BottomNav() {

@@ -59,7 +59,7 @@ export default function OrganiserInbox() {
   return (
     <div className="min-h-dvh flex flex-col">
       <TopBar title="Organiser Inbox" showBack />
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full">
+      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-24">
 
         {/* Tab switcher */}
         <div className="flex gap-1 bg-slate-100 rounded-2xl p-1 mb-5 animate-fade-in">
