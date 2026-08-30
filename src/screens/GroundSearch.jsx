@@ -6,32 +6,27 @@ import TopBar from '../components/TopBar'
 import { Search, Star, MapPin, Sun, Droplets, Plus, SlidersHorizontal, X, Check } from 'lucide-react'
 
 const PITCH_TYPES = ['Turf', 'Matting', 'Cement', 'Red Soil', 'Astro Turf']
-const CITIES = ['Mumbai', 'Delhi', 'Chennai', 'Bengaluru', 'Chandigarh', 'Hyderabad']
+const LIVE_CITY = 'Bengaluru'
 
 // ─── Filter Bottom-Sheet ──────────────────────────────────────────────────────
-function FilterSheet({ pitchFilters, cityFilters, floodlights, onApply, onClose }) {
-  const [tab, setTab]     = useState('pitch')
+function FilterSheet({ pitchFilters, floodlights, onApply, onClose }) {
   const [localPitch, setLocalPitch] = useState([...pitchFilters])
-  const [localCity, setLocalCity]   = useState([...cityFilters])
   const [localFlood, setLocalFlood] = useState(floodlights)
 
   const togglePitch = (p) =>
     setLocalPitch(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])
-  const toggleCity = (c) =>
-    setLocalCity(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
 
   const handleApply = () => {
-    onApply({ pitchFilters: localPitch, cityFilters: localCity, floodlights: localFlood })
+    onApply({ pitchFilters: localPitch, floodlights: localFlood })
     onClose()
   }
 
   const handleReset = () => {
     setLocalPitch([])
-    setLocalCity([])
     setLocalFlood(false)
   }
 
-  const activeCount = localPitch.length + localCity.length + (localFlood ? 1 : 0)
+  const activeCount = localPitch.length + (localFlood ? 1 : 0)
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col" onClick={onClose}>
@@ -51,78 +46,33 @@ function FilterSheet({ pitchFilters, cityFilters, floodlights, onApply, onClose 
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-slate-100 px-5 gap-4">
-          {[
-            { id: 'pitch', label: 'Pitch Type', count: localPitch.length },
-            { id: 'city',  label: 'Location',   count: localCity.length  },
-          ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 pb-3 pt-3 text-sm font-semibold border-b-2 transition-colors ${
-                tab === t.id
-                  ? 'border-brand-500 text-brand-600'
-                  : 'border-transparent text-navy-400 hover:text-navy-600'
-              }`}
-            >
-              {t.label}
-              {t.count > 0 && (
-                <span className="w-5 h-5 rounded-full bg-brand-500 text-white text-[10px] flex items-center justify-center font-bold">
-                  {t.count}
-                </span>
-              )}
-            </button>
-          ))}
+        {/* Header label */}
+        <div className="px-5 pt-3">
+          <p className="text-xs font-bold text-navy-400 uppercase tracking-wider">Pitch Type</p>
         </div>
 
-        {/* Tab content */}
-        <div className="px-5 py-4 max-h-60 overflow-y-auto">
-          {tab === 'pitch' && (
-            <div className="space-y-2">
-              {PITCH_TYPES.map(p => (
-                <button
-                  key={p}
-                  onClick={() => togglePitch(p)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
-                  style={{
-                    background: localPitch.includes(p) ? '#eff6ff' : '#f8fafc',
-                    borderColor: localPitch.includes(p) ? '#3b82f6' : '#e2e8f0',
-                  }}
-                >
-                  <span className={`text-sm font-semibold ${localPitch.includes(p) ? 'text-brand-700' : 'text-navy-700'}`}>{p}</span>
-                  {localPitch.includes(p) && (
-                    <div className="w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Check size={11} className="text-white" strokeWidth={3} />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {tab === 'city' && (
-            <div className="space-y-2">
-              {CITIES.map(c => (
-                <button
-                  key={c}
-                  onClick={() => toggleCity(c)}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
-                  style={{
-                    background: localCity.includes(c) ? '#eff6ff' : '#f8fafc',
-                    borderColor: localCity.includes(c) ? '#3b82f6' : '#e2e8f0',
-                  }}
-                >
-                  <span className={`text-sm font-semibold ${localCity.includes(c) ? 'text-brand-700' : 'text-navy-700'}`}>{c}</span>
-                  {localCity.includes(c) && (
-                    <div className="w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Check size={11} className="text-white" strokeWidth={3} />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+        {/* Pitch type options */}
+        <div className="px-5 py-3 max-h-60 overflow-y-auto">
+          <div className="space-y-2">
+            {PITCH_TYPES.map(p => (
+              <button
+                key={p}
+                onClick={() => togglePitch(p)}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
+                style={{
+                  background: localPitch.includes(p) ? '#eff6ff' : '#f8fafc',
+                  borderColor: localPitch.includes(p) ? '#3b82f6' : '#e2e8f0',
+                }}
+              >
+                <span className={`text-sm font-semibold ${localPitch.includes(p) ? 'text-brand-700' : 'text-navy-700'}`}>{p}</span>
+                {localPitch.includes(p) && (
+                  <div className="w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check size={11} className="text-white" strokeWidth={3} />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Floodlights toggle */}
@@ -170,8 +120,8 @@ function FilterSheet({ pitchFilters, cityFilters, floodlights, onApply, onClose 
 
 // ─── Ground Card ──────────────────────────────────────────────────────────────
 function GroundCard({ ground, onClick }) {
-  const condColors = { Fresh:'text-green-600 bg-green-50', Worn:'text-amber-600 bg-amber-50', Damp:'text-blue-600 bg-blue-50', Unknown:'text-gray-500 bg-gray-50' }
-  const condIcons  = { Fresh:Sun, Worn:Sun, Damp:Droplets, Unknown:MapPin }
+  const condColors = { Fresh:'text-green-600 bg-green-50', Worn:'text-amber-600 bg-amber-50', Damp:'text-blue-600 bg-blue-50', Dusty:'text-orange-600 bg-orange-50', Unknown:'text-gray-500 bg-gray-50' }
+  const condIcons  = { Fresh:Sun, Worn:Sun, Damp:Droplets, Dusty:Sun, Unknown:MapPin }
   const CondIcon   = condIcons[ground.pitchCondition] || MapPin
 
   return (
@@ -189,9 +139,15 @@ function GroundCard({ ground, onClick }) {
           <p className="text-navy-500 text-xs mt-0.5 truncate">{ground.area}, {ground.city}</p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 text-amber-500">
-          <Star size={13} fill="currentColor" />
-          <span className="font-semibold text-sm text-navy-900">{ground.rating}</span>
-          <span className="text-navy-400 text-xs">({ground.ratingCount})</span>
+          {ground.ratingCount > 0 ? (
+            <>
+              <Star size={13} fill="currentColor" />
+              <span className="font-semibold text-sm text-navy-900">{ground.rating}</span>
+              <span className="text-navy-400 text-xs">({ground.ratingCount})</span>
+            </>
+          ) : (
+            <span className="badge badge-navy text-[10px]">New</span>
+          )}
         </div>
       </div>
 
@@ -225,27 +181,24 @@ export default function GroundSearch() {
 
   const [search,      setSearch]      = useState('')
   const [pitchFilters, setPitchFilters] = useState([])
-  const [cityFilters,  setCityFilters]  = useState([])
   const [floodlights,  setFloodlights]  = useState(false)
   const [showFilter,   setShowFilter]   = useState(false)
 
-  const activeFilterCount = pitchFilters.length + cityFilters.length + (floodlights ? 1 : 0)
+  const activeFilterCount = pitchFilters.length + (floodlights ? 1 : 0)
 
   const filtered = useMemo(() => {
     return GROUNDS.filter(g => {
+      if (g.city !== LIVE_CITY) return false
       if (search && !g.name.toLowerCase().includes(search.toLowerCase())
-        && !g.area.toLowerCase().includes(search.toLowerCase())
-        && !g.city.toLowerCase().includes(search.toLowerCase())) return false
+        && !g.area.toLowerCase().includes(search.toLowerCase())) return false
       if (pitchFilters.length > 0 && !pitchFilters.includes(g.pitchType)) return false
-      if (cityFilters.length  > 0 && !cityFilters.includes(g.city))       return false
       if (floodlights && !g.floodlights)                                    return false
       return true
     })
-  }, [search, pitchFilters, cityFilters, floodlights])
+  }, [search, pitchFilters, floodlights])
 
-  const handleApplyFilters = ({ pitchFilters: pf, cityFilters: cf, floodlights: fl }) => {
+  const handleApplyFilters = ({ pitchFilters: pf, floodlights: fl }) => {
     setPitchFilters(pf)
-    setCityFilters(cf)
     setFloodlights(fl)
   }
 
@@ -260,7 +213,7 @@ export default function GroundSearch() {
           <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             className="cm-input pl-10 h-11"
-            placeholder="Search grounds, areas, cities…"
+            placeholder="Search grounds, areas…"
             value={search}
             onChange={e => setSearch(e.target.value)}
             autoComplete="off"
@@ -312,17 +265,6 @@ export default function GroundSearch() {
               </button>
             </span>
           ))}
-          {cityFilters.map(c => (
-            <span
-              key={c}
-              className="flex items-center gap-1 text-xs bg-brand-50 text-brand-700 border border-brand-200 rounded-full px-2.5 py-0.5 font-medium"
-            >
-              {c}
-              <button onClick={() => setCityFilters(prev => prev.filter(x => x !== c))} className="ml-0.5">
-                <X size={10} strokeWidth={2.5} />
-              </button>
-            </span>
-          ))}
           {floodlights && (
             <span className="flex items-center gap-1 text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2.5 py-0.5 font-medium">
               Floodlights
@@ -332,7 +274,7 @@ export default function GroundSearch() {
             </span>
           )}
           <button
-            onClick={() => { setPitchFilters([]); setCityFilters([]); setFloodlights(false) }}
+            onClick={() => { setPitchFilters([]); setFloodlights(false) }}
             className="text-xs text-navy-400 underline underline-offset-2 font-medium ml-1"
           >
             Clear all
@@ -342,6 +284,10 @@ export default function GroundSearch() {
 
       {/* Ground cards */}
       <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-28">
+        <div className="flex items-center gap-1.5 text-brand-600 text-xs font-medium mb-3">
+          <MapPin size={12} />
+          <span>Live in Bengaluru only — other cities coming soon</span>
+        </div>
         <p className="text-navy-500 text-sm mb-3 font-medium">
           {filtered.length} ground{filtered.length !== 1 ? 's' : ''} found
         </p>
@@ -352,7 +298,7 @@ export default function GroundSearch() {
             <p className="text-navy-400 text-sm mt-1">Try different filters or search nearby city</p>
             {activeFilterCount > 0 && (
               <button
-                onClick={() => { setPitchFilters([]); setCityFilters([]); setFloodlights(false) }}
+                onClick={() => { setPitchFilters([]); setFloodlights(false) }}
                 className="mt-3 px-4 py-2 rounded-xl bg-brand-50 text-brand-600 font-semibold text-sm"
               >
                 Clear filters
@@ -370,7 +316,6 @@ export default function GroundSearch() {
       {showFilter && (
         <FilterSheet
           pitchFilters={pitchFilters}
-          cityFilters={cityFilters}
           floodlights={floodlights}
           onApply={handleApplyFilters}
           onClose={() => setShowFilter(false)}

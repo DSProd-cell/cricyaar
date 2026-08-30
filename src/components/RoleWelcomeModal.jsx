@@ -3,15 +3,15 @@ import { useStore } from '../store/useStore'
 import { ROLE_META } from '../data/mock'
 import {
   AlertTriangle, Zap, CheckCircle, RefreshCw,
-  Eye, Activity, BarChart2, MapPin, Tv
+  Eye, Swords, ClipboardList, Scale, Building2, Megaphone
 } from 'lucide-react'
 
 const ROLE_ICONS = {
-  player:       Activity,
-  organiser:    BarChart2,
-  umpire:       Eye,
-  ground_owner: MapPin,
-  fan:          Tv,
+  player:       Swords,
+  organiser:    ClipboardList,
+  umpire:       Scale,
+  ground_owner: Building2,
+  fan:          Megaphone,
 }
 
 const ROLE_READ_ONLY_PERKS = {
@@ -31,7 +31,7 @@ export default function RoleWelcomeModal() {
   const isFan    = role === 'fan'
   const isPro    = user?.subscription === 'pro_active'
   const meta     = ROLE_META[role] || ROLE_META.fan
-  const RoleIcon = ROLE_ICONS[role] || Tv
+  const RoleIcon = ROLE_ICONS[role] || Megaphone
   const perks    = ROLE_READ_ONLY_PERKS[role] || []
 
   const handleClose = () => setShowRoleModal(false)

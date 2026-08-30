@@ -99,6 +99,7 @@ const CONDITION_STYLE = {
   Fresh:   'bg-green-100 text-green-700',
   Worn:    'bg-amber-100 text-amber-700',
   Damp:    'bg-blue-100 text-blue-700',
+  Dusty:   'bg-orange-100 text-orange-700',
   Unknown: 'bg-gray-100 text-gray-600',
 }
 
@@ -137,7 +138,7 @@ const GROUND_HISTORY = {
 export default function GroundDetail() {
   const { id }    = useParams()
   const navigate  = useNavigate()
-  const { user }  = useStore()
+  const { user, addToast } = useStore()
   const ground    = groundById(id)
   const [photoIdx, setPhotoIdx] = useState(0)
   const [userRating, setUserRating] = useState(0)
@@ -178,16 +179,24 @@ export default function GroundDetail() {
 
   const recentMatches = ground.recentMatches?.map(id => MATCHES.find(m => m.id === id)).filter(Boolean) || []
 
+  const isMaskedPhone = ground.ownerPhone?.includes('X')
+
   const handleWhatsApp = () => {
+    if (isMaskedPhone) { addToast('Full contact number coming soon — book via app for now.', 'info'); return }
     const phone = ground.ownerPhone?.replace(/\D/g, '') || '919999999999'
     const msg   = encodeURIComponent(`Hi, I'm interested in booking ${ground.name} via CricYaar. Is tomorrow available?`)
     window.open(`https://wa.me/${phone}?text=${msg}`, '_blank')
   }
 
-  const handleCall = () => { window.location.href = `tel:${ground.ownerPhone || '+919999999999'}` }
+  const handleCall = () => {
+    if (isMaskedPhone) { addToast('Full contact number coming soon — book via app for now.', 'info'); return }
+    window.location.href = `tel:${ground.ownerPhone || '+919999999999'}`
+  }
 
   const handleDirections = () => {
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${ground.lat},${ground.lng}`
+    const url = ground.lat && ground.lng
+      ? `https://www.google.com/maps/dir/?api=1&destination=${ground.lat},${ground.lng}`
+      : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${ground.name}, ${ground.area}, ${ground.city}`)}`
     window.open(url, '_blank')
   }
 
@@ -215,9 +224,15 @@ export default function GroundDetail() {
               <p className="text-navy-500 text-sm mt-0.5">{ground.area}, {ground.city}, {ground.state}</p>
             </div>
             <div className="flex items-center gap-1 flex-shrink-0 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
-              <Star size={14} fill="#f59e0b" className="text-amber-400" />
-              <span className="font-bold text-navy-900">{ground.rating}</span>
-              <span className="text-navy-400 text-xs">({ground.ratingCount})</span>
+              {ground.ratingCount > 0 ? (
+                <>
+                  <Star size={14} fill="#f59e0b" className="text-amber-400" />
+                  <span className="font-bold text-navy-900">{ground.rating}</span>
+                  <span className="text-navy-400 text-xs">({ground.ratingCount})</span>
+                </>
+              ) : (
+                <span className="text-amber-600 font-semibold text-sm">New listing</span>
+              )}
             </div>
           </div>
 
@@ -287,9 +302,9 @@ export default function GroundDetail() {
             <div className="stat-tile">
               <div className="flex items-center justify-center gap-1 text-amber-500">
                 <Star size={20} fill="currentColor" />
-                <span className="text-3xl font-extrabold text-navy-900 tabular-nums">{ground.rating}</span>
+                <span className="text-3xl font-extrabold text-navy-900 tabular-nums">{ground.ratingCount > 0 ? ground.rating : '—'}</span>
               </div>
-              <p className="text-navy-500 text-xs mt-0.5">{ground.ratingCount} ratings</p>
+              <p className="text-navy-500 text-xs mt-0.5">{ground.ratingCount > 0 ? `${ground.ratingCount} ratings` : 'No ratings yet'}</p>
             </div>
           </div>
 

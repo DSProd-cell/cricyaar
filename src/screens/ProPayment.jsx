@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { ROLE_META } from '../data/mock'
-import { Crown, Check, Shield, Zap, Lock, RefreshCw, ChevronRight, Activity, BarChart2, Eye, MapPin, Tv } from 'lucide-react'
+import { Crown, Check, Shield, Zap, Lock, RefreshCw, ChevronRight, Swords, ClipboardList, Scale, Building2, Megaphone } from 'lucide-react'
 
 const PRO_HIGHLIGHTS = [
   'Ball-by-ball live scorecard (read-only)',
@@ -18,11 +18,11 @@ const PRO_HIGHLIGHTS = [
 const UPI_APPS = ['GPay', 'PhonePe', 'Paytm', 'BHIM']
 
 const ROLE_ICONS = {
-  player:       Activity,
-  organiser:    BarChart2,
-  umpire:       Eye,
-  ground_owner: MapPin,
-  fan:          Tv,
+  player:       Swords,
+  organiser:    ClipboardList,
+  umpire:       Scale,
+  ground_owner: Building2,
+  fan:          Megaphone,
 }
 
 // Pro features unlocked per role — shown in the "continue same role" section
@@ -42,7 +42,7 @@ export default function ProPayment() {
 
   const currentRole   = user?.role || 'fan'
   const roleMeta      = ROLE_META[currentRole] || ROLE_META.fan
-  const RoleIcon      = ROLE_ICONS[currentRole] || Tv
+  const RoleIcon      = ROLE_ICONS[currentRole] || Megaphone
   const proFeatures   = ROLE_PRO_FEATURES[currentRole] || ROLE_PRO_FEATURES.fan
 
   const handlePay = async () => {

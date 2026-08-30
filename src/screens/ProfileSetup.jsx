@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Check, Activity, BarChart2, Shield, Eye, Tv } from 'lucide-react'
+import { Check, Swords, ClipboardList, Shield, Scale, Megaphone } from 'lucide-react'
 import { ROLE_META } from '../data/mock'
 
 const ROLES = [
-  { id:'player',    label:'Player',    Icon:Activity,  desc:'Track your stats, join teams, and play in matches.' },
-  { id:'organiser', label:'Organiser', Icon:BarChart2, desc:'Create matches and tournaments, manage teams, and score live.' },
-  { id:'umpire',    label:'Umpire',    Icon:Eye,       desc:'Get assigned to matches and track your umpiring record.' },
-  { id:'fan',       label:'Fan',       Icon:Tv,        desc:'Follow live scores and match results.' },
-  { id:'admin',     label:'Admin',     Icon:Shield,    desc:'Full access to all features and the admin panel.' },
+  { id:'player',    label:'Player',    Icon:Swords,        desc:'Track your stats, join teams, and play in matches.' },
+  { id:'organiser', label:'Organiser', Icon:ClipboardList, desc:'Create matches and tournaments, manage teams, and score live.' },
+  { id:'umpire',    label:'Umpire',    Icon:Scale,          desc:'Get assigned to matches and track your umpiring record.' },
+  { id:'fan',       label:'Fan',       Icon:Megaphone,      desc:'Follow live scores and match results.' },
+  { id:'admin',     label:'Admin',     Icon:Shield,         desc:'Full access to all features and the admin panel.' },
 ]
 
 export default function ProfileSetup() {
@@ -17,7 +17,7 @@ export default function ProfileSetup() {
   const { setUser, addToast } = useStore()
   const [name, setName]         = useState('')
   const [username, setUsername] = useState('')
-  const [city, setCity]         = useState('')
+  const [city, setCity]         = useState('Bengaluru')
   const [selectedRole, setSelectedRole] = useState('')   // v1: single string
   const [errors, setErrors]     = useState({})
   const [loading, setLoading]   = useState(false)
@@ -93,7 +93,8 @@ export default function ProfileSetup() {
           {/* City */}
           <div>
             <label className="block text-sm font-semibold text-navy-700 mb-1.5">City <span className="text-navy-400 font-normal">(optional)</span></label>
-            <input className="cm-input" placeholder="Mumbai" value={city} onChange={e => setCity(e.target.value)} maxLength={40} />
+            <input className="cm-input" placeholder="Bengaluru" value={city} onChange={e => setCity(e.target.value)} maxLength={40} />
+            <p className="text-navy-400 text-xs mt-1">CricYaar is live in Bengaluru only for now — more cities coming soon.</p>
           </div>
 
           {/* Single-select role */}

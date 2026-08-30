@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { CITY_LIVE_DATA, ALL_CITIES, TOURNAMENTS } from '../data/mock'
+import { CITY_LIVE_DATA, ALL_CITIES, LIVE_CITIES, isCityLive, TOURNAMENTS } from '../data/mock'
 import {
   MapPin, Settings, Search, X, RefreshCw, Circle, ArrowRight,
   Lock, Activity, Eye, Trophy, BarChart2, Building2, Users,
-  Crown, ChevronRight, Calendar, Users2
+  Crown, ChevronRight, Calendar, Users2, Clock
 } from 'lucide-react'
 import FollowButton from '../components/FollowButton'
 
@@ -32,17 +32,36 @@ function CityPickerModal({ currentCity, onSelect, onClose }) {
           <input ref={inputRef} className="cm-input pl-9" placeholder="Search city…" value={query} onChange={e => setQuery(e.target.value)} />
         </div>
         <div className="space-y-1 max-h-60 overflow-y-auto">
-          {filtered.map(city => (
-            <button key={city} onClick={() => { onSelect(city); onClose() }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${city === currentCity ? 'bg-brand-50 text-brand-700 font-semibold' : 'hover:bg-slate-50 text-navy-700'}`}>
-              <MapPin size={15} className={city === currentCity ? 'text-brand-500' : 'text-slate-400'} />
-              {city}
-              {city === currentCity && <span className="ml-auto text-xs text-brand-500 font-medium">Current</span>}
-            </button>
-          ))}
+          {filtered.map(city => {
+            const live = isCityLive(city)
+            return (
+              <button key={city} onClick={() => { onSelect(city); onClose() }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${city === currentCity ? 'bg-brand-50 text-brand-700 font-semibold' : 'hover:bg-slate-50 text-navy-700'}`}>
+                <MapPin size={15} className={city === currentCity ? 'text-brand-500' : 'text-slate-400'} />
+                {city}
+                {city === currentCity && <span className="ml-auto text-xs text-brand-500 font-medium">Current</span>}
+                {city !== currentCity && !live && <span className="ml-auto text-[10px] text-navy-400 font-semibold uppercase tracking-wide">Coming Soon</span>}
+              </button>
+            )
+          })}
           {filtered.length === 0 && <p className="text-center text-navy-400 py-6 text-sm">No cities found</p>}
         </div>
       </div>
+    </div>
+  )
+}
+
+// ─── Coming Soon (non-live city) ───────────────────────────────────────────────
+function ComingSoonCity({ city }) {
+  return (
+    <div className="card text-center py-10 animate-fade-in">
+      <div className="w-14 h-14 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-3">
+        <Clock size={24} className="text-brand-500" />
+      </div>
+      <h3 className="font-bold text-navy-900 text-base mb-1">Coming Soon to {city}</h3>
+      <p className="text-navy-500 text-sm max-w-xs mx-auto">
+        CricYaar is currently live in <span className="font-semibold text-navy-700">Bengaluru</span> only. We're working on bringing live scores, grounds, and tournaments to {city} next.
+      </p>
     </div>
   )
 }
@@ -424,7 +443,7 @@ export default function FanHome() {
   const navigate = useNavigate()
   const { user } = useStore()
 
-  const [city, setCity]               = useState(user?.city || 'Mumbai')
+  const [city, setCity]               = useState(isCityLive(user?.city) ? user.city : LIVE_CITIES[0])
   const [showPicker, setShowPicker]   = useState(false)
   const [lastRefresh, setLastRefresh] = useState(new Date())
   const [ticking, setTicking]         = useState(false)
@@ -501,7 +520,8 @@ export default function FanHome() {
       <main className="flex-1 px-4 py-4 space-y-4 pb-44">
 
         {/* ── MATCHES TAB ── */}
-        {activeTab === 'matches' && (
+        {activeTab === 'matches' && !isCityLive(city) && <ComingSoonCity city={city} />}
+        {activeTab === 'matches' && isCityLive(city) && (
           <>
             {/* Live now card */}
             <div className="card animate-fade-in">

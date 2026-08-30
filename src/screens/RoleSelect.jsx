@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { ROLE_META } from '../data/mock'
-import { Check, Activity, BarChart2, Eye, Tv, MapPin, ChevronRight, ArrowLeft, Users, Trophy } from 'lucide-react'
+import { Check, Activity, Swords, ClipboardList, Scale, Megaphone, Building2, ChevronRight, ArrowLeft, Users, Trophy, X } from 'lucide-react'
 
 const PLAY_POSITIONS = ['Batsman', 'Bowler', 'Wicketkeeper', 'All-rounder']
 
@@ -10,7 +10,7 @@ const ROLES = [
   {
     id: 'fan',
     label: 'Fan',
-    Icon: Tv,
+    Icon: Megaphone,
     tagline: 'Follow cricket. Free forever.',
     gradient: 'linear-gradient(145deg, #334155 0%, #0f172a 100%)',
     accentColor: '#64748b',
@@ -20,7 +20,7 @@ const ROLES = [
   {
     id: 'player',
     label: 'Player',
-    Icon: Activity,
+    Icon: Swords,
     tagline: 'Play. Track. Grow.',
     gradient: 'linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%)',
     accentColor: '#3b82f6',
@@ -30,7 +30,7 @@ const ROLES = [
   {
     id: 'organiser',
     label: 'Organiser',
-    Icon: BarChart2,
+    Icon: ClipboardList,
     tagline: 'Create. Manage. Organise.',
     gradient: 'linear-gradient(145deg, #15803d 0%, #14532d 100%)',
     accentColor: '#16a34a',
@@ -40,7 +40,7 @@ const ROLES = [
   {
     id: 'umpire',
     label: 'Umpire',
-    Icon: Eye,
+    Icon: Scale,
     tagline: 'Officiate. Earn. Rise.',
     gradient: 'linear-gradient(145deg, #b45309 0%, #78350f 100%)',
     accentColor: '#d97706',
@@ -50,7 +50,7 @@ const ROLES = [
   {
     id: 'ground_owner',
     label: 'Ground Owner',
-    Icon: MapPin,
+    Icon: Building2,
     tagline: 'List. Earn. Grow.',
     gradient: 'linear-gradient(145deg, #0e7490 0%, #164e63 100%)',
     accentColor: '#0891b2',
@@ -116,13 +116,22 @@ export default function RoleSelect() {
       >
         {/* Header */}
         <div className="px-5 pt-12 pb-4 flex-shrink-0">
-          <button
-            onClick={() => setStep(1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            <span className="text-sm">Back</span>
-          </button>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setStep(1)}
+              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+            >
+              <ArrowLeft size={16} />
+              <span className="text-sm">Back</span>
+            </button>
+            <button
+              onClick={() => navigate(-1)}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              aria-label="Close"
+            >
+              <X size={15} className="text-white/80" />
+            </button>
+          </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
               <Activity size={18} className="text-white" />
@@ -267,14 +276,23 @@ export default function RoleSelect() {
     >
       {/* Header */}
       <div className="px-5 pt-12 pb-4 flex-shrink-0">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-            <span className="text-white font-black text-sm">CY</span>
+        <div className="flex items-center justify-between gap-3 mb-1">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-black text-sm">CY</span>
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-white font-extrabold text-xl leading-tight">Who are you?</h1>
+              <p className="text-white/60 text-xs">Choose your role — change anytime, no OTP needed.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-white font-extrabold text-xl leading-tight">Who are you?</h1>
-            <p className="text-white/60 text-xs">Choose your role — change anytime, no OTP needed.</p>
-          </div>
+          <button
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors flex-shrink-0"
+            aria-label="Close"
+          >
+            <X size={15} className="text-white/80" />
+          </button>
         </div>
       </div>
 

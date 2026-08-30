@@ -2,11 +2,11 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { initials, ROLE_META } from '../data/mock'
 import TopBar from '../components/TopBar'
-import { User, Bell, Globe, Shield, Info, LogOut, ChevronRight, Camera, Phone, RefreshCw, Activity, BarChart2, Eye, Tv, Crown, Import, Sparkles, Gift, ShieldCheck, BarChart3 } from 'lucide-react'
+import { User, Bell, Globe, Shield, Info, LogOut, ChevronRight, Camera, Phone, RefreshCw, Swords, ClipboardList, Scale, Megaphone, Building2, Crown, Import, Sparkles, Gift, ShieldCheck, BarChart3 } from 'lucide-react'
 import { useState, useRef } from 'react'
 
 const ROLE_ICONS = {
-  player: Activity, organiser: BarChart2, umpire: Eye, fan: Tv, admin: Shield,
+  player: Swords, organiser: ClipboardList, umpire: Scale, fan: Megaphone, ground_owner: Building2, admin: Shield,
 }
 
 export default function Settings() {
@@ -27,7 +27,7 @@ export default function Settings() {
 
   const role = user?.role || 'fan'
   const roleMeta = ROLE_META[role] || { label: role, color: '#64748b', bg: '#f1f5f9', desc: '' }
-  const RoleIcon = ROLE_ICONS[role] || Activity
+  const RoleIcon = ROLE_ICONS[role] || Swords
   const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
   const isCancelled = user?.subscription === 'pro_cancelled'
 
