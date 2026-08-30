@@ -9,13 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.446.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
-    "zustand": "^4.5.5",
-    "lucide-react": "^0.446.0",
     "recharts": "^2.12.7",
-    "clsx": "^2.1.1"
+    "zustand": "^4.5.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",

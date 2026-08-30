@@ -1,0 +1,6 @@
+{
+  "appId": "com.cricyaar.app",
+  "appName": "CricYaar",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

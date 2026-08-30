@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CricYaar</string>
+    <string name="title_activity_main">CricYaar</string>
+    <string name="package_name">com.cricyaar.app</string>
+    <string name="custom_url_scheme">com.cricyaar.app</string>
+</resources>
