@@ -128,7 +128,7 @@ export default function PlayerProfile() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
-      <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack />
+      <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack={!isOwnProfile} />
 
       {/* Profile header */}
       <div className="bg-white px-4 pt-4 pb-0 border-b border-slate-100">

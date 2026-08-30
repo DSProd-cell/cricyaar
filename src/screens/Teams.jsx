@@ -274,7 +274,7 @@ export default function Teams() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
-      <TopBar title="Teams & Tournaments" showBack />
+      <TopBar title="Teams & Tournaments" />
 
       <div className="tab-bar overflow-x-auto no-scrollbar">
         <button className={`tab-item flex-shrink-0 whitespace-nowrap ${teamsTab==='teams'?'active':''}`} onClick={() => setTeamsTab('teams')}>My Teams</button>

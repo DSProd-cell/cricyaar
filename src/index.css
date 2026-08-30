@@ -48,6 +48,7 @@
   }
   .main-area {
     flex: 1;
+    min-width: 0;
     min-height: 100dvh;
     padding-bottom: env(safe-area-inset-bottom, 72px);
   }
@@ -282,8 +283,9 @@
   .over-ball-nb   { background: #f97316; color: #fff; font-size: 10px; }
 
   /* ── Tab bar ── */
-  .tab-bar { display: flex; border-bottom: 1.5px solid #e2e8f0; }
-  .tab-item { flex: 1; padding: 12px 8px; text-align: center; font-size: 14px; font-weight: 500; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: color 0.15s, border-color 0.15s; }
+  .tab-bar { display: flex; border-bottom: 1.5px solid #e2e8f0; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-item { flex: 0 0 auto; padding: 12px 14px; text-align: center; font-size: 14px; font-weight: 500; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
   .tab-item.active { color: #22c55e; border-bottom-color: #22c55e; font-weight: 600; }
 
   /* ── Toast ── */
@@ -304,7 +306,7 @@
   .filter-chip:hover:not(.active) { border-color: #cbd5e1; }
 
   /* ── OTP input boxes ── */
-  .otp-input { width: 48px; height: 56px; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; font-size: 24px; font-weight: 700; color: #0f172a; background: #f8fafc; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+  .otp-input { flex: 1 1 0; min-width: 0; max-width: 48px; aspect-ratio: 6 / 7; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; font-size: clamp(16px, 6vw, 24px); font-weight: 700; color: #0f172a; background: #f8fafc; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
   .otp-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgb(34 197 94 / 0.12); background: #fff; }
   .otp-input.filled { border-color: #22c55e; background: #f0fdf4; }
   .otp-input.error { border-color: #dc2626; }

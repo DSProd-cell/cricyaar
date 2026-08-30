@@ -2,7 +2,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { groundById, MATCHES, teamById, TEAMS } from '../data/mock'
 import { useStore } from '../store/useStore'
 import TopBar from '../components/TopBar'
-import { Star, MapPin, Sun, Moon, Car, ShowerHead, Dumbbell, Droplets, Coffee, HeartPulse, Phone, MessageCircle, ChevronRight, Navigation, Crown, Lock, Zap, Calendar, X, CheckCircle, Shield } from 'lucide-react'
+import { Star, MapPin, Sun, Moon, Car, ShowerHead, Dumbbell, Droplets, Coffee, HeartPulse, Phone, MessageCircle, ChevronRight, Navigation, Crown, Lock, Zap, Calendar, X, Check, CheckCircle, Shield } from 'lucide-react'
 import { useState } from 'react'
 
 // ── Booking Modal ─────────────────────────────────────────────────────────────
@@ -171,7 +171,7 @@ export default function GroundDetail() {
   ]
 
   if (!ground) return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden">
       <TopBar title="Ground" showBack />
       <div className="flex-1 flex items-center justify-center text-navy-400">Ground not found.</div>
     </div>
@@ -201,9 +201,9 @@ export default function GroundDetail() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col">
+    <div className="min-h-dvh flex flex-col overflow-x-hidden">
       <TopBar title={ground.name} showBack />
-      <main className="flex-1 max-w-2xl mx-auto w-full">
+      <main className="flex-1 max-w-2xl mx-auto w-full min-w-0">
         {/* Photo carousel */}
         <div className="relative w-full h-48 bg-gradient-to-br from-brand-100 to-brand-50 overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center flex-col">
@@ -275,15 +275,21 @@ export default function GroundDetail() {
           {/* Facilities */}
           <div className="card">
             <h3 className="font-semibold text-navy-900 mb-3 text-sm">Facilities</h3>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {Object.entries(FACILITY_ICONS).map(([key, { icon: Icon, label }]) => {
                 const avail = ground.facilities[key]
                 return (
-                  <div key={key} className={`facility-icon ${avail ? 'text-navy-700' : 'text-navy-300'}`}>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${avail ? 'bg-brand-50' : 'bg-slate-50'}`}>
+                  <div key={key} className={`facility-icon ${avail ? 'text-navy-700' : 'text-navy-400'}`}>
+                    <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center ${avail ? 'bg-brand-50' : 'bg-slate-100'}`}>
                       <Icon size={18} className={avail ? 'text-brand-600' : 'text-navy-300'} />
+                      <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border-2 border-white ${avail ? 'bg-brand-500' : 'bg-slate-400'}`}>
+                        {avail
+                          ? <Check size={9} className="text-white" strokeWidth={3.5} />
+                          : <X size={9} className="text-white" strokeWidth={3.5} />
+                        }
+                      </span>
                     </div>
-                    <span className="text-center leading-tight">{label}</span>
+                    <span className={`text-center leading-tight ${avail ? 'font-semibold' : ''}`}>{label}</span>
                   </div>
                 )
               })}

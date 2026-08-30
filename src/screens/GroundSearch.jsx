@@ -204,7 +204,7 @@ export default function GroundSearch() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
-      <TopBar title="Find a Ground" showBack />
+      <TopBar title="Find a Ground" />
 
       {/* Sticky search + filter row */}
       <div className="bg-white border-b border-slate-100 sticky top-14 z-10 px-4 py-3 flex items-center gap-2">

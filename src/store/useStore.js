@@ -63,9 +63,22 @@ export const useStore = create(
       removeToast: (id) => set(s => ({ toasts: s.toasts.filter(t => t.id !== id) })),
 
       // ── Notifications ─────────────────────────────────────────────────────────
+      // readNotificationIds is the single source of truth for what's been read —
+      // screens must not keep their own local copy, or a remount (e.g. navigating
+      // away and back) forgets it was ever read and the badge decrements again.
       notificationCount: 2,
+      readNotificationIds: [],
       decrementNotifications: () => set(s => ({ notificationCount: Math.max(0, s.notificationCount - 1) })),
       clearNotifications: () => set({ notificationCount: 0 }),
+      markNotificationRead: (id) => set(s =>
+        s.readNotificationIds.includes(id)
+          ? {}
+          : { readNotificationIds: [...s.readNotificationIds, id], notificationCount: Math.max(0, s.notificationCount - 1) }
+      ),
+      markAllNotificationsRead: (ids) => set(s => ({
+        readNotificationIds: [...new Set([...s.readNotificationIds, ...ids])],
+        notificationCount: 0,
+      })),
 
       // ── Live Scoring State ────────────────────────────────────────────────────
       scoring: {
@@ -277,6 +290,7 @@ export const useStore = create(
         aiQueryResetDate:          state.aiQueryResetDate,
         proIntent:                 state.proIntent,
         notificationCount:         state.notificationCount,
+        readNotificationIds:       state.readNotificationIds,
         followedMatches:           state.followedMatches,
         followedTournaments:       state.followedTournaments,
         followedPlayers:           state.followedPlayers,

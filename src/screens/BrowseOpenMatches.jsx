@@ -115,7 +115,7 @@ export default function BrowseOpenMatches() {
 
   return (
     <div className="min-h-dvh flex flex-col">
-      <TopBar title="Browse as Umpire" showBack />
+      <TopBar title="Browse as Umpire" />
 
       {/* Tab switcher */}
       <div className="flex bg-slate-100 rounded-2xl p-1 mx-4 mt-3 mb-0 animate-fade-in gap-1">

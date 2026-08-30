@@ -61,7 +61,7 @@ export default function Settings() {
 
   return (
     <div className="min-h-dvh flex flex-col">
-      <TopBar title="Settings" showBack />
+      <TopBar title="Settings" />
       <main className="flex-1 px-4 py-4 pb-24 max-w-2xl mx-auto w-full">
 
         {/* Profile */}
