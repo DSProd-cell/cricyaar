@@ -39,7 +39,7 @@ const ITEMS = [
 export default function GlobalFAB() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const { user, setUser, addToast } = useStore()
+  const { user, setUser, logout, addToast } = useStore()
   const [open, setOpen] = useState(false)
   const [confirmLogout, setConfirmLogout] = useState(false)
 
@@ -67,7 +67,7 @@ export default function GlobalFAB() {
 
   const handleLogout = () => {
     if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
-    setUser(null)
+    logout()
     setConfirmLogout(false)
     addToast('Logged out. Sign in to continue.', 'info')
     navigate('/login')

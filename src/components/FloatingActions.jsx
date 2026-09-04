@@ -131,7 +131,7 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
 export default function FloatingActions() {
   const navigate     = useNavigate()
   const { pathname } = useLocation()
-  const { user, setUser, addToast } = useStore()
+  const { user, setUser, logout, addToast } = useStore()
 
   // ── UI states ──
   const [fabOpen,  setFabOpen]  = useState(false)  // + quick actions
@@ -270,7 +270,7 @@ export default function FloatingActions() {
 
   const handleLogout = () => {
     if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
-    setUser(null)
+    logout()
     setConfirmLogout(false)
     addToast('Logged out. Sign in to continue.', 'info')
     navigate('/login')

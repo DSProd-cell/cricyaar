@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { CITY_LIVE_DATA, ALL_CITIES, LIVE_CITIES, isCityLive, TOURNAMENTS } from '../data/mock'
+import { fetchLiveMatches } from '../lib/matchesApi'
 import {
   MapPin, Settings, Search, X, RefreshCw, Circle, ArrowRight,
   Lock, Activity, Eye, Trophy, BarChart2, Building2, Users,
@@ -451,6 +452,9 @@ export default function FanHome() {
   const [selectedMatch, setSelectedMatch]       = useState(null)
   const [selectedTournament, setSelectedTournament] = useState(null)
   const [locked, setLocked]           = useState(false)
+  const [realLiveMatches, setRealLiveMatches] = useState([])
+
+  useEffect(() => { fetchLiveMatches().then(setRealLiveMatches).catch(() => {}) }, [])
 
   const data = CITY_LIVE_DATA[city] || { live: [], today: 0 }
   const activeTournaments = TOURNAMENTS.filter(t => t.status === 'active')
@@ -520,6 +524,28 @@ export default function FanHome() {
       <main className="flex-1 px-4 py-4 space-y-4 pb-44">
 
         {/* ── MATCHES TAB ── */}
+        {activeTab === 'matches' && realLiveMatches.length > 0 && (
+          <div className="space-y-2 animate-fade-in">
+            {realLiveMatches.map(m => (
+              <button
+                key={m.id}
+                onClick={() => navigate(`/live/${m.id}`)}
+                className="w-full bg-navy-900 rounded-xl px-4 py-3 text-left active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Circle size={6} fill="#ef4444" className="text-red-500 animate-pulse flex-shrink-0" />
+                  <span className="text-red-400 font-semibold text-xs uppercase tracking-wide">Live now</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-white font-semibold truncate flex-1">{m.team1Name}</span>
+                  <span className="text-navy-500 text-xs">vs</span>
+                  <span className="text-white font-semibold truncate flex-1 text-right">{m.team2Name}</span>
+                </div>
+                <p className="text-navy-600 text-[10px] mt-1.5 text-right">Tap to watch live →</p>
+              </button>
+            ))}
+          </div>
+        )}
         {activeTab === 'matches' && !isCityLive(city) && <ComingSoonCity city={city} />}
         {activeTab === 'matches' && isCityLive(city) && (
           <>

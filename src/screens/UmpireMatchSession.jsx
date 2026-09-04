@@ -3,9 +3,11 @@
  * Features: squad + mobile lookup · ball-by-ball scoring · undo ·
  *   change bat/bowl · retired hurt · declare out · DLS · cancel · walkover · declare winner
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { teamById, playerById } from '../data/mock'
 import { useStore } from '../store/useStore'
+import { useBackButtonClose } from '../hooks/useBackButtonClose'
+import { createLiveMatch, updateMatchInnings } from '../lib/matchesApi'
 import {
   X, Check, Lock, MoreVertical, Phone, Plus, AlertTriangle,
   CloudRain, Swords, UserX, UserCheck, RefreshCcw, Zap,
@@ -554,6 +556,7 @@ function ChangeBatsmanModal({inn, batXi, onSwapEnds, onRetire, onClose}) {
 
 // ─── SquadSetup ───────────────────────────────────────────────────────────────
 function SquadSetup({assignment, tossResult, onStart, onClose}) {
+  useBackButtonClose(onClose)
   const { umpireCompletedMatches } = useStore()
   const t1 = teamById(assignment.team1Id)
   const t2 = teamById(assignment.team2Id)
@@ -855,6 +858,7 @@ function InningsBreak({inn1, config, onContinue}) {
 
 // ─── MatchResult ──────────────────────────────────────────────────────────────
 function MatchResult({inn1, inn2, result, specialOutcome, onClose}) {
+  useBackButtonClose(onClose)
   const winTeam=result?.winner?teamById(result.winner):null
   const t1=inn1?teamById(inn1.battingTeamId):null
   const t2=inn2?teamById(inn2.battingTeamId):null
@@ -993,7 +997,9 @@ function MatchResult({inn1, inn2, result, specialOutcome, onClose}) {
 }
 
 // ─── ScoringScreen ────────────────────────────────────────────────────────────
-function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, onClose}) {
+function ScoringScreen({assignment, config, xi1, xi2, battingFirst, tossResult, onComplete, onClose}) {
+  useBackButtonClose(onClose)
+  const { user } = useStore()
   const t1=teamById(assignment.team1Id), t2=teamById(assignment.team2Id)
   const team1Id=assignment.team1Id, team2Id=assignment.team2Id
   const inn1BatTeam=battingFirst, inn1BowTeam=battingFirst===team1Id?team2Id:team1Id
@@ -1009,6 +1015,43 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
   const [modal,setModal]=useState(null) // 'cancel'|'walkover'|'declare_win'|'dls'|'change_bat'|'change_bowl'|'retired_hurt'|'declare_out'
   const [history,setHistory]=useState([]) // undo stack — snapshots of inn state
   const [dlsPending,setDlsPending]=useState(null) // {target, overs} for 2nd innings
+
+  // ── Live DB sync — creates the match row once, then pushes every ball ──
+  // Innings reference teams by the app's internal team ids (e.g. 't1'), which
+  // mean nothing outside this engine. Relabel to 'team1'/'team2' — matching
+  // the team1Name/team2Name stored alongside — so any viewer can tell who's
+  // batting without needing the mock team-id lookup.
+  const forDb=inning=>inning&&{
+    ...inning,
+    battingTeamId:inning.battingTeamId===team1Id?'team1':'team2',
+    bowlingTeamId:inning.bowlingTeamId===team1Id?'team1':'team2',
+  }
+  const dbMatchId=useRef(null)
+  useEffect(()=>{
+    let cancelled=false
+    createLiveMatch({
+      scorerId:user.id,
+      team1Name:t1?.name||'Team A', team2Name:t2?.name||'Team B',
+      ground:assignment.ground, city:assignment.city, overs:config.overs,
+      tossWinnerName:tossResult?.winnerName, tossChoice:tossResult?.choice,
+      innings:[forDb(innings[0])],
+    }).then(id=>{ if(!cancelled) dbMatchId.current=id }).catch(()=>{})
+    return ()=>{cancelled=true}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
+  useEffect(()=>{
+    if(!dbMatchId.current)return
+    updateMatchInnings(dbMatchId.current,{innings:innings.map(forDb),inningsIdx:innIdx}).catch(()=>{})
+  },[innings,innIdx])
+  const finishMatch=(inn1,inn2,result,specialOutcome=null)=>{
+    if(dbMatchId.current){
+      const dbResult=result&&{...result,winner:result.winner===team1Id?'team1':result.winner===team2Id?'team2':result.winner}
+      updateMatchInnings(dbMatchId.current,{
+        innings:[inn1,inn2].filter(Boolean).map(forDb), status:'completed', result:dbResult, specialOutcome,
+      }).catch(()=>{})
+    }
+    onComplete(inn1,inn2,result,specialOutcome)
+  }
 
   const inn=innings[innIdx]
   const batTeam=inn?teamById(inn.battingTeamId):null
@@ -1043,7 +1086,7 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
     updateInn(updated)
     if(updated.completed){
       if(innIdx===0){setStep('inning_break')}
-      else{const r=computeResult(innings[0],updated);onComplete(innings[0],updated,r)}
+      else{const r=computeResult(innings[0],updated);finishMatch(innings[0],updated,r)}
       return
     }
     if(updated.currentBowler===null&&!updated.completed)setStep('select_bowler')
@@ -1062,9 +1105,9 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
       if(innIdx===0){setStep('inning_break');return}
       // Check DLS
       if(dlsPending&&updated.runs>=dlsPending.target){
-        const r=computeResult(innings[0],updated);onComplete(innings[0],updated,r);return
+        const r=computeResult(innings[0],updated);finishMatch(innings[0],updated,r);return
       }
-      const r=computeResult(innings[0],updated);onComplete(innings[0],updated,r);return
+      const r=computeResult(innings[0],updated);finishMatch(innings[0],updated,r);return
     }
     if(updated.currentBowler===null){setStep('select_bowler');return}
     setStep('scoring')
@@ -1097,7 +1140,7 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
 
   const handleCancelMatch=reason=>{
     setModal(null)
-    onComplete(
+    finishMatch(
       innings[0]||createInning(inn1BatTeam,inn1BowTeam,inn1Xi),
       innings[1]||createInning(inn1BowTeam,inn1BatTeam,inn2Xi),
       null,
@@ -1107,7 +1150,7 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
 
   const handleWalkover=winner=>{
     setModal(null)
-    onComplete(
+    finishMatch(
       innings[0]||createInning(inn1BatTeam,inn1BowTeam,inn1Xi),
       innings[1]||createInning(inn1BowTeam,inn1BatTeam,inn2Xi),
       null,
@@ -1117,7 +1160,7 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
 
   const handleDeclareWinner=(winner,reason)=>{
     setModal(null)
-    onComplete(
+    finishMatch(
       innings[0]||createInning(inn1BatTeam,inn1BowTeam,inn1Xi),
       innings[1]||createInning(inn1BowTeam,inn1BatTeam,inn2Xi),
       null,
@@ -1186,7 +1229,7 @@ function ScoringScreen({assignment, config, xi1, xi2, battingFirst, onComplete, 
     updateInn(updated)
     if(updated.completed){
       if(innIdx===0){setStep('inning_break');return}
-      const r=computeResult(innings[0],updated);onComplete(innings[0],updated,r);return
+      const r=computeResult(innings[0],updated);finishMatch(innings[0],updated,r);return
     }
     if(updated.currentBowler===null){setStep('select_bowler');return}
     setStep('new_batsman')

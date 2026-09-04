@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { useBackButtonClose } from '../hooks/useBackButtonClose'
 import {
   MATCHES, UMPIRE_PROFILE, OPEN_MATCHES, UMPIRE_OPEN_TOURNAMENTS,
-  UMPIRE_GROUND_VISITS, UMPIRE_MY_REQUESTS, teamById, playerById
+  UMPIRE_GROUND_VISITS, UMPIRE_MY_REQUESTS, teamById, playerById, LIVE_CITIES
 } from '../data/mock'
+import { fetchApprovedGrounds } from '../lib/groundsApi'
 import UmpireMatchSession from './UmpireMatchSession'
 import TopBar from '../components/TopBar'
 import ProPaywallSheet from '../components/ProPaywallSheet'
@@ -32,6 +34,44 @@ const STATUS_COLORS = {
 // Scorecard Viewer — read-only slide-up for a completed match
 // ══════════════════════════════════════════════════════════════════════════════
 function fmtOvers(b) { return `${Math.floor(b/6)}.${b%6}` }
+
+// Shaded sphere with a seam, styled per ball type — used instead of emoji so
+// all three ball-type options look like one consistent icon set. Layered
+// gradients (bright highlight → base → dark rim) plus a drop shadow to read
+// as a glossy 3D sphere rather than a flat tinted circle.
+const BALL_SHADING = {
+  tennis:  { base: '#c7e83a', edge: '#5c7a15', seam: '#f7ffe0' },
+  leather: { base: '#d63a2f', edge: '#5c0f0a', seam: '#fbe9e8' },
+  other:   { base: '#9aa3ae', edge: '#39424d', seam: '#f1f3f5' },
+}
+function BallIcon({ type, size = 40 }) {
+  const g = BALL_SHADING[type] || BALL_SHADING.other
+  const gid = `ball-grad-${type}`
+  const sid = `ball-shadow-${type}`
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40">
+      <defs>
+        <radialGradient id={gid} cx="32%" cy="26%" r="80%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="18%" stopColor={g.base} />
+          <stop offset="75%" stopColor={g.base} />
+          <stop offset="100%" stopColor={g.edge} />
+        </radialGradient>
+        <filter id={sid} x="-30%" y="-20%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor={g.edge} floodOpacity="0.45" />
+        </filter>
+      </defs>
+      <circle cx="20" cy="20" r="18" fill={`url(#${gid})`} filter={`url(#${sid})`} />
+      <ellipse cx="14" cy="12" rx="5.5" ry="3.5" fill="#ffffff" opacity="0.55" />
+      {type === 'leather' && (
+        <path d="M6 11 Q19 20 6 29 M34 11 Q21 20 34 29" stroke={g.seam} strokeWidth="1.4" fill="none" strokeDasharray="1.6 1.6" strokeLinecap="round" />
+      )}
+      {type === 'tennis' && (
+        <path d="M3 15 Q20 3 37 15 M3 25 Q20 37 37 25" stroke={g.seam} strokeWidth="2" fill="none" strokeLinecap="round" />
+      )}
+    </svg>
+  )
+}
 
 function ScorecardViewer({ match, onClose }) {
   const { assignment, inn1, inn2, result, specialOutcome, completedAt } = match
@@ -171,6 +211,7 @@ function ScorecardViewer({ match, onClose }) {
 // Match Config Screen — shown before toss to set up match details
 // ══════════════════════════════════════════════════════════════════════════════
 function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
+  useBackButtonClose(onClose)
   const t1 = teamById(assignment.team1Id)
   const t2 = teamById(assignment.team2Id)
 
@@ -184,19 +225,37 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
   const PITCH_TYPES = ['Turf', 'Concrete', 'Matting', 'Mud', 'Synthetic']
   const BALL_TYPES = [
     { id: 'tennis',  label: 'Tennis',  color: '#009B4D', emoji: '🎾' },
-    { id: 'leather', label: 'Leather', color: '#DC2626', emoji: '🏏' },
+    { id: 'leather', label: 'Leather', color: '#DC2626', emoji: '🔴' },
     { id: 'other',   label: 'Other',   color: '#D97706', emoji: '🟡' },
   ]
 
   const [matchType, setMatchType]   = useState('limited')
   const [overs, setOvers]           = useState(String(assignment.defaultOvers || 20))
   const [oversPerBowler, setOPB]    = useState('4')
-  const [city, setCity]             = useState(assignment.city || '')
-  const [ground, setGround]         = useState(assignment.ground || '')
-  const [dateTime, setDateTime]     = useState(assignment.date || '')
+  const [city, setCity]             = useState(LIVE_CITIES.includes(assignment.city) ? assignment.city : LIVE_CITIES[0])
+  // Left blank rather than pre-filled from the assignment: the assignment's
+  // ground is often a stale placeholder from a different city, which would
+  // always trip the "not in this city's list" fallback below and make the
+  // picker look broken (a text box) on first open.
+  const [ground, setGround]         = useState('')
+  const [groundOther, setGroundOther] = useState(false)
+  const [realGrounds, setRealGrounds] = useState([])
+  const [groundsLoading, setGroundsLoading] = useState(true)
+  const [dateTime, setDateTime]     = useState('')
   const [ballType, setBallType]     = useState('tennis')
   const [wagonWheel, setWagonWheel] = useState(true)
   const [pitchType, setPitchType]   = useState('Turf')
+
+  useEffect(() => {
+    setGroundsLoading(true)
+    fetchApprovedGrounds(city).then(gs => {
+      setRealGrounds(gs)
+      // If the current ground isn't in this city's real list, fall back to
+      // manual entry rather than silently clearing what was picked before.
+      if (ground && !gs.some(g => g.name === ground)) setGroundOther(true)
+    }).catch(() => setRealGrounds([])).finally(() => setGroundsLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city])
 
   const inputCls = "w-full border-b border-slate-300 pb-1.5 pt-0.5 text-sm text-navy-900 outline-none focus:border-brand-500 bg-transparent"
   const labelCls = "text-xs text-navy-400 mb-0.5 block"
@@ -209,9 +268,7 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
           <ChevronLeft size={20} className="text-navy-700"/>
         </button>
         <h1 className="font-bold text-navy-900 text-base">Start a match</h1>
-        <button className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
-          <Settings size={16} className="text-navy-500"/>
-        </button>
+        <div className="w-9 h-9"/>
       </div>
 
       {/* Scrollable content */}
@@ -228,9 +285,6 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
               </span>
             </div>
             <p className="text-xs font-semibold text-navy-800 text-center max-w-[90px] truncate">{t1?.name}</p>
-            <button className="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-[11px] font-bold">
-              Select squad
-            </button>
           </div>
 
           {/* VS diamond */}
@@ -249,11 +303,9 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
               </span>
             </div>
             <p className="text-xs font-semibold text-navy-800 text-center max-w-[90px] truncate">{t2?.name}</p>
-            <button className="px-4 py-1.5 bg-brand-500 text-white rounded-lg text-[11px] font-bold">
-              Select squad
-            </button>
           </div>
         </div>
+        <p className="text-navy-400 text-xs text-center -mt-4 pb-2">Playing XI is picked after the toss</p>
 
         <div className="px-4 py-5 space-y-6">
 
@@ -286,30 +338,40 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
               <input type="number" min="1" max="20" value={oversPerBowler}
                 onChange={e => setOPB(e.target.value)} className={inputCls}/>
             </div>
-            <button className="flex items-center gap-0.5 text-brand-500 font-bold text-sm pb-2 whitespace-nowrap flex-shrink-0">
-              Power Play<ChevronRight size={14}/>
-            </button>
           </div>
 
           {/* City */}
           <div>
             <label className={labelCls}>City / town*</label>
-            <input value={city} onChange={e => setCity(e.target.value)}
-              className={inputCls} placeholder="Enter city"/>
+            <select value={city} onChange={e => { setCity(e.target.value); setGround(''); setGroundOther(false) }}
+              className={inputCls}>
+              {LIVE_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
 
           {/* Ground */}
           <div>
             <label className={labelCls}>Ground*</label>
-            <input value={ground} onChange={e => setGround(e.target.value)}
-              className={inputCls} placeholder="Enter ground name"/>
+            {!groundOther ? (
+              <select value={ground} onChange={e => {
+                if (e.target.value === '__other__') { setGroundOther(true); setGround('') }
+                else setGround(e.target.value)
+              }} className={inputCls} disabled={groundsLoading}>
+                <option value="" disabled>{groundsLoading ? 'Loading grounds…' : 'Select a ground'}</option>
+                {realGrounds.map(g => <option key={g.id} value={g.name}>{g.name} — {g.area}</option>)}
+                <option value="__other__">Other (not listed)</option>
+              </select>
+            ) : (
+              <input value={ground} onChange={e => setGround(e.target.value)}
+                className={inputCls} placeholder="Enter ground name" autoFocus/>
+            )}
           </div>
 
           {/* Date and time */}
           <div>
             <label className={labelCls}>Date and time</label>
-            <input value={dateTime} onChange={e => setDateTime(e.target.value)}
-              className={inputCls} placeholder="e.g. Sun, May 31 2026 06:30 AM"/>
+            <input type="datetime-local" value={dateTime} onChange={e => setDateTime(e.target.value)}
+              className={inputCls}/>
           </div>
 
           {/* Ball type */}
@@ -319,14 +381,17 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
               {BALL_TYPES.map(b => (
                 <button key={b.id} onClick={() => setBallType(b.id)}
                   className="flex flex-col items-center gap-2">
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all ${
-                    ballType === b.id ? 'border-transparent' : 'border-slate-300 bg-slate-50'
+                  <div className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                    ballType === b.id ? 'ring-2 ring-offset-2' : ''
                   }`}
-                    style={ballType === b.id ? { background: b.color } : {}}>
-                    {ballType === b.id
-                      ? <Check size={22} className="text-white" strokeWidth={3}/>
-                      : <span className="text-2xl">{b.emoji}</span>
-                    }
+                    style={ballType === b.id ? { '--tw-ring-color': b.color } : {}}>
+                    <BallIcon type={b.id} size={44} />
+                    {ballType === b.id && (
+                      <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-white"
+                        style={{ background: b.color }}>
+                        <Check size={11} className="text-white" strokeWidth={3.5}/>
+                      </span>
+                    )}
                   </div>
                   <span className="text-xs font-semibold text-navy-700">{b.label}</span>
                 </button>
@@ -372,7 +437,12 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
           Schedule match
         </button>
         <button
-          onClick={() => onNext({ matchType, overs: parseInt(overs), oversPerBowler: parseInt(oversPerBowler), city, ground, dateTime, ballType, wagonWheel, pitchType })}
+          onClick={() => onNext({
+            matchType, overs: parseInt(overs), oversPerBowler: parseInt(oversPerBowler),
+            city, ground,
+            dateTime: dateTime ? new Date(dateTime).toLocaleString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '',
+            ballType, wagonWheel, pitchType,
+          })}
           className="flex-1 py-4 text-white font-bold text-sm active:opacity-90"
           style={{ background: 'linear-gradient(135deg,#0d9488,#0f766e)' }}>
           Next (Toss)
@@ -513,7 +583,7 @@ function MyAssignments({ navigate, addToast }) {
                         </button>
                       ) : (
                         <button
-                          onClick={() => setActiveSession({ assignment: a, tossResult: sess.tossResult })}
+                          onClick={() => setActiveSession({ assignment: sess.matchConfig || a, tossResult: sess.tossResult })}
                           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm text-white transition-all active:scale-95"
                           style={{ background: 'linear-gradient(135deg,#22c55e,#16a34a)', boxShadow:'0 4px 12px rgba(34,197,94,0.35)' }}
                         >
@@ -533,8 +603,19 @@ function MyAssignments({ navigate, addToast }) {
       {configAssignment && (
         <MatchConfigScreen
           assignment={configAssignment}
-          onNext={(_config) => {
-            setTossAssignment(configAssignment)
+          onNext={(config) => {
+            const merged = {
+              ...configAssignment,
+              city: config.city,
+              ground: config.ground,
+              date: config.dateTime || configAssignment.date,
+              defaultOvers: config.overs,
+            }
+            // Persisted (not just held in this screen's local state) so it
+            // survives the umpire leaving and returning via "Resume Match",
+            // which otherwise re-derives the assignment from scratch.
+            setUmpireSession(configAssignment.id, { matchConfig: merged })
+            setTossAssignment(merged)
             setConfigAssignment(null)
           }}
           onSchedule={() => {
@@ -1178,6 +1259,7 @@ function OngoingMatches({ user, addToast, umpireRequests, addUmpireRequest, with
 // TOSS MODAL — Online Coin Toss
 // ══════════════════════════════════════════════════════════════════════════════
 function TossModal({ assignment, onComplete, onClose, addToast }) {
+  useBackButtonClose(onClose)
   const [step, setStep]           = useState('caller')   // caller | call | flipping | result | choice | final
   const [caller, setCaller]       = useState(null)        // 0 or 1
   const [call, setCall]           = useState(null)        // 'heads' | 'tails'
@@ -1438,22 +1520,7 @@ function TournamentRequestModal({ tournament, onClose, onSend }) {
 // ══════════════════════════════════════════════════════════════════════════════
 function MyRequests({ umpireRequests, umpireTournamentRequests, addToast }) {
   // Merge store requests + pre-seeded mock requests
-  const [seenIds, setSeenIds]   = useState([])
-  const [requests, setRequests] = useState(UMPIRE_MY_REQUESTS)
-
-  // Fire notifications for any unseen approved/rejected on first render
-  useEffect(() => {
-    const unseen = requests.filter(r => !r.seen && r.status !== 'pending')
-    if (unseen.length > 0) {
-      setTimeout(() => {
-        unseen.forEach(r => {
-          if (r.status === 'approved') addToast(`✅ Request approved: "${r.name}"`, 'success')
-          if (r.status === 'rejected') addToast(`Request rejected: "${r.name}". ${r.reason || ''}`, 'error')
-        })
-        setRequests(prev => prev.map(r => ({ ...r, seen: true })))
-      }, 500)
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const [requests] = useState(UMPIRE_MY_REQUESTS)
 
   // Merge in store's live requests
   const storeMatchRequests = umpireRequests.map(r => ({

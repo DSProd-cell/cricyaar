@@ -1,7 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
+import { initStatusBar } from './lib/statusBar'
 import './index.css'
+
+initStatusBar()
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null } }

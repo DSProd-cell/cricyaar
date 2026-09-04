@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { supabase } from '../lib/supabase'
 
 export const useStore = create(
   persist(
@@ -11,11 +12,14 @@ export const useStore = create(
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
-      logout: () => set({
-        user: null, isAuthenticated: false, pendingPhone: null, otpMode: 'login',
-        umpireRequests: [], tournamentRequests: [], teamJoinRequests: [], freeAgentRequests: [],
-        umpireTournamentRequests: [], proIntent: false, showProSheet: false, showRoleModal: false,
-      }),
+      logout: () => {
+        supabase.auth.signOut()
+        set({
+          user: null, isAuthenticated: false, pendingPhone: null, otpMode: 'login',
+          umpireRequests: [], tournamentRequests: [], teamJoinRequests: [], freeAgentRequests: [],
+          umpireTournamentRequests: [], proIntent: false, showProSheet: false, showRoleModal: false,
+        })
+      },
 
       // Role management
       otpMode: 'login',   // 'login' | 'role-switch'
@@ -229,9 +233,9 @@ export const useStore = create(
       })),
 
       // ── Umpire session & completed match store ────────────────────────────────
-      umpireSessionData: {},       // { [assignmentId]: { tossResult } }
+      umpireSessionData: {},       // { [assignmentId]: { matchConfig, tossResult } }
       setUmpireSession: (assignmentId, data) => set(s => ({
-        umpireSessionData: { ...s.umpireSessionData, [assignmentId]: data }
+        umpireSessionData: { ...s.umpireSessionData, [assignmentId]: { ...s.umpireSessionData[assignmentId], ...data } }
       })),
       umpireCompletedMatches: [],  // [{ id, assignment, inn1, inn2, result, specialOutcome, completedAt }]
       addUmpireCompletedMatch: (match) => set(s => ({

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Bell, ArrowLeft, Home } from 'lucide-react'
+import { Bell, ArrowLeft, Home, Settings } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 /**
@@ -8,7 +8,12 @@ import { useStore } from '../store/useStore'
  * Three-zone layout:
  *   LEFT  — ← Back  (or ⌂ Home icon if showHome prop, or nothing on root screens)
  *   CENTRE — CY logo mark (always tappable → Home, except on Home screen itself)
- *   RIGHT  — PRO badge + Bell
+ *   RIGHT  — PRO badge + Settings + Bell
+ *
+ * Settings lives here (not just in the bottom nav's 4th slot) because that
+ * slot is role-specific — umpire/organiser/ground_owner use it for their own
+ * shortcut, which left them with no path to Settings at all. This one is
+ * always here regardless of role.
  *
  * Logging out lives in My Profile, not here — it's a rare, deliberate action,
  * not something that needs a permanent slot on every screen.
@@ -63,8 +68,8 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
         </button>
       </div>
 
-      {/* RIGHT — PRO badge + Bell */}
-      <div className="w-24 flex-shrink-0 flex items-center justify-end gap-1">
+      {/* RIGHT — PRO badge + Settings + Bell */}
+      <div className="w-32 flex-shrink-0 flex items-center justify-end gap-1">
         {(user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled') && (
           <span
             className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white tracking-wide select-none flex-shrink-0"
@@ -74,6 +79,13 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
             👑 PRO
           </span>
         )}
+        <button
+          onClick={() => navigate('/settings')}
+          className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0"
+          aria-label="Settings"
+        >
+          <Settings size={19} className="text-navy-600" />
+        </button>
         <button
           onClick={() => navigate('/notifications')}
           className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0"

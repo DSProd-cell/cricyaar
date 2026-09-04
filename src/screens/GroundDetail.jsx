@@ -1,9 +1,10 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { groundById, MATCHES, teamById, TEAMS } from '../data/mock'
+import { MATCHES, teamById, TEAMS } from '../data/mock'
+import { fetchGroundById } from '../lib/groundsApi'
 import { useStore } from '../store/useStore'
 import TopBar from '../components/TopBar'
 import { Star, MapPin, Sun, Moon, Car, ShowerHead, Dumbbell, Droplets, Coffee, HeartPulse, Phone, MessageCircle, ChevronRight, Navigation, Crown, Lock, Zap, Calendar, X, Check, CheckCircle, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // ── Booking Modal ─────────────────────────────────────────────────────────────
 function BookingModal({ ground, day, slot, onClose, onConfirm }) {
@@ -139,8 +140,19 @@ export default function GroundDetail() {
   const { id }    = useParams()
   const navigate  = useNavigate()
   const { user, addToast } = useStore()
-  const ground    = groundById(id)
+  const [ground, setGround] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [photoIdx, setPhotoIdx] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    fetchGroundById(id)
+      .then(g => { if (!cancelled) setGround(g) })
+      .catch(() => { if (!cancelled) setGround(null) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [id])
   const [userRating, setUserRating] = useState(0)
   const [bookingTarget, setBookingTarget] = useState(null) // { day, slot }
 
@@ -169,6 +181,13 @@ export default function GroundDetail() {
     { teams:'Team C vs Team D', date:'Mar 12', result:'Team C won', format:'T10' },
     { teams:'Team E vs Team F', date:'Mar 6',  result:'Team F won', format:'T20' },
   ]
+
+  if (loading) return (
+    <div className="min-h-dvh flex flex-col overflow-x-hidden">
+      <TopBar title="Ground" showBack />
+      <div className="flex-1 flex items-center justify-center text-navy-400">Loading ground…</div>
+    </div>
+  )
 
   if (!ground) return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden">
@@ -206,14 +225,22 @@ export default function GroundDetail() {
       <main className="flex-1 max-w-2xl mx-auto w-full min-w-0">
         {/* Photo carousel */}
         <div className="relative w-full h-48 bg-gradient-to-br from-brand-100 to-brand-50 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center flex-col">
-            <MapPin size={36} className="text-brand-400 mb-2" />
-            <p className="text-brand-500 font-semibold">{ground.area}, {ground.city}</p>
-          </div>
+          {ground.photos?.length > 0 ? (
+            <img src={ground.photos[photoIdx]} alt={ground.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center flex-col">
+              <MapPin size={36} className="text-brand-400 mb-2" />
+              <p className="text-brand-500 font-semibold">{ground.area}, {ground.city}</p>
+            </div>
+          )}
           {/* dot indicators */}
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-            {[0].map(i => <div key={i} className={`w-1.5 h-1.5 rounded-full ${i===photoIdx?'bg-white':'bg-white/40'}`} />)}
-          </div>
+          {ground.photos?.length > 1 && (
+            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+              {ground.photos.map((_, i) => (
+                <button key={i} onClick={() => setPhotoIdx(i)} className={`w-1.5 h-1.5 rounded-full ${i===photoIdx?'bg-white':'bg-white/40'}`} />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="px-4 py-4 space-y-4">

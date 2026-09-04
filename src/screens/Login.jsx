@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { supabase, toE164 } from '../lib/supabase'
 import { Phone, ChevronDown, ArrowLeft } from 'lucide-react'
 
 export default function Login() {
@@ -26,9 +27,14 @@ export default function Login() {
     }
     setError('')
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    setPendingPhone(`${code} ${cleaned}`)
+    const fullPhone = `${code} ${cleaned}`
+    const { error: sendError } = await supabase.auth.signInWithOtp({ phone: toE164(fullPhone) })
     setLoading(false)
+    if (sendError) {
+      setError(sendError.message)
+      return
+    }
+    setPendingPhone(fullPhone)
     navigate('/otp')
   }
 
@@ -138,11 +144,6 @@ export default function Login() {
           <button className="text-brand-600 font-medium underline-offset-2 hover:underline">Privacy Policy</button>
         </p>
       </div>
-
-      {/* Demo hint */}
-      <p className="mt-6 text-xs text-navy-400 text-center animate-fade-in" style={{animationDelay:'0.3s'}}>
-        Demo mode — enter any number to continue
-      </p>
     </div>
   )
 }

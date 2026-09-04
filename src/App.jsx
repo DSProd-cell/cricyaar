@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useStore } from './store/useStore'
 import { useEffect } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { App as CapApp } from '@capacitor/app'
+import { Haptics, ImpactStyle } from '@capacitor/haptics'
+import { registerPush } from './lib/push'
+import { closeTopOverlay } from './hooks/useBackButtonClose'
 
 // Components
 import Toast           from './components/Toast'
@@ -8,7 +13,6 @@ import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
-import FloatingActions   from './components/FloatingActions'
 
 // Screens — auth / onboarding
 import USPScreen      from './screens/USPScreen'
@@ -22,6 +26,7 @@ import ProPayment     from './screens/ProPayment'
 import Home           from './screens/Home'
 import MyCricket      from './screens/MyCricket'
 import Scoring        from './screens/Scoring'
+import LiveMatch      from './screens/LiveMatch'
 import GroundSearch   from './screens/GroundSearch'
 import GroundDetail   from './screens/GroundDetail'
 import Teams          from './screens/Teams'
@@ -72,13 +77,58 @@ function WhatsNewGate({ children }) {
     }
   }, [])
 
+  useEffect(() => { if (user?.id) registerPush(user.id) }, [user?.id])
+
+  // Re-check push registration whenever the app comes back to the foreground —
+  // covers the case where the user grants the notification permission from
+  // system Settings mid-session instead of the in-app prompt.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    const sub = CapApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive && user?.id) registerPush(user.id)
+    })
+    return () => { sub.remove() }
+  }, [user?.id])
+
+  // Android hardware back button.
+  //  1. An open overlay (MatchConfigScreen, TossModal, etc. — see
+  //     useBackButtonClose) always gets first claim: close just that overlay.
+  //  2. Otherwise step back through in-app route history.
+  //  3. At the true root (Home, or the pre-login screens, with nothing left
+  //     to pop) — require a second press within 2s to actually exit, same as
+  //     most native apps, instead of exiting on the first tap. Home is still
+  //     a hard floor for *route* history: it won't walk back into the
+  //     pre-login welcome/login/OTP screens sitting behind it. To switch
+  //     accounts, log out instead.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    let lastBackPress = 0
+    const sub = CapApp.addListener('backButton', () => {
+      if (closeTopOverlay()) return
+      const atHome = window.location.pathname === '/'
+      if (!atHome && window.history.state && window.history.state.idx > 0) {
+        window.history.back()
+        return
+      }
+      const now = Date.now()
+      if (now - lastBackPress < 2000) {
+        CapApp.exitApp()
+        return
+      }
+      lastBackPress = now
+      Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})
+      useStore.getState().addToast('Press back again to exit', 'info')
+    })
+    return () => { sub.remove() }
+  }, [])
+
   return (
     <>
       {children}
       {showProSheet && <ProSignupSheet />}
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
-      {/* Draggable floating actions (+ quick menu + AI chat) */}
-      <FloatingActions />
+      {/* FloatingActions (AI guide + quick actions) is parked for a future
+          release — not wired to real functionality yet, so it's not shown. */}
     </>
   )
 }
@@ -126,6 +176,7 @@ export default function App() {
           <Route path="/"               element={<AuthGuard><Home /></AuthGuard>} />
           <Route path="/my-cricket"     element={<AuthGuard><MyCricket /></AuthGuard>} />
           <Route path="/score/:matchId" element={<AuthGuard><Scoring /></AuthGuard>} />
+          <Route path="/live/:id"       element={<AuthGuard><LiveMatch /></AuthGuard>} />
           <Route path="/score"          element={<AuthGuard><Scoring /></AuthGuard>} />
           <Route path="/grounds"        element={<AuthGuard><GroundSearch /></AuthGuard>} />
           <Route path="/grounds/:id"    element={<AuthGuard><GroundDetail /></AuthGuard>} />

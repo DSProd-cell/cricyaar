@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { supabase, toE164 } from '../lib/supabase'
 import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 export default function OtpVerify() {
@@ -62,42 +63,16 @@ export default function OtpVerify() {
   }
 
   const handleVerify = async (code) => {
-    if (locked) return
+    if (locked || code.length !== 6) return
     setLoading(true)
-    await new Promise(r => setTimeout(r, 700))
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      phone: toE164(pendingPhone),
+      token: code,
+      type: 'sms',
+    })
     setLoading(false)
 
-    // Any 6-digit code is accepted in mock mode
-    if (code.length === 6) {
-      if (otpMode === 'role-switch') {
-        // Upgrade guest user with real phone → then role select with limited access
-        if (!user?.phone) {
-          setUser({ ...user, phone: pendingPhone, id: 'p1', name: user?.name || 'Cricket Fan' })
-        }
-        addToast('Account created! Now choose your role.', 'success')
-        navigate('/role-select')
-      } else {
-        // Restore previously selected role for returning users
-        const savedRole = localStorage.getItem('cricyaar_last_role')
-        const restoredRole = savedRole || 'fan'
-        setUser({ id:'p1', phone: pendingPhone, name:'Rohit Sharma', username:'rohit_s', city:'Mumbai', role: restoredRole, roles:['player'], isNew:false, avatar:null, lastRoleChangedAt:null, subscription:'free' })
-        // Mark What's New as seen so returning users skip it
-        localStorage.setItem('whats_new_seen_version', 'v3')
-        if (proIntent) {
-          addToast('Phone verified! Complete your Pro setup.', 'success')
-          navigate('/pro-payment')
-        } else if (restoredRole !== 'fan') {
-          // Returning user with a saved role — go straight home
-          addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
-          navigate('/')
-        } else {
-          // New / fan user — show role welcome modal
-          setShowRoleModal(true)
-          addToast('Welcome to CricYaar! You\'re browsing as a Fan.', 'success')
-          navigate('/')
-        }
-      }
-    } else {
+    if (verifyError) {
       const newAttempts = attempts + 1
       setAttempts(newAttempts)
       if (newAttempts >= 3) {
@@ -106,11 +81,67 @@ export default function OtpVerify() {
         setLockEnd(end)
         setError('Too many failed attempts. Try again in 10 minutes.')
       } else {
-        setError(`Incorrect code. ${3 - newAttempts} attempt(s) remaining.`)
+        setError(verifyError.message || `Incorrect code. ${3 - newAttempts} attempt(s) remaining.`)
       }
       setDigits(['','','','','',''])
       refs[0]?.current?.focus()
+      return
     }
+
+    const authUser = data.user
+    // The database trigger (see supabase/schema.sql) already created this
+    // row the moment the auth user was first created — this just reads it.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .single()
+
+    if (otpMode === 'role-switch') {
+      // Upgrade guest user with real phone → then role select with limited access
+      if (!user?.phone) {
+        setUser({
+          id: authUser.id, phone: authUser.phone, name: profile?.name || user?.name || '',
+          city: profile?.city || '', role: profile?.role || 'fan', roles: profile?.roles || ['fan'],
+          isNew: !profile?.onboarded, avatar: profile?.avatar_url || null,
+          lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
+        })
+      }
+      addToast('Account created! Now choose your role.', 'success')
+      navigate('/role-select')
+    } else {
+      const isNewUser = !profile?.onboarded
+      // Restore previously selected role for returning users
+      const savedRole = localStorage.getItem('cricyaar_last_role')
+      const restoredRole = profile?.role || savedRole || 'fan'
+      setUser({
+        id: authUser.id, phone: authUser.phone, name: profile?.name || '', username: profile?.username || '',
+        city: profile?.city || '', role: restoredRole, roles: profile?.roles || [restoredRole],
+        isNew: isNewUser, avatar: profile?.avatar_url || null,
+        lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
+      })
+      // Mark What's New as seen so returning users skip it
+      localStorage.setItem('whats_new_seen_version', 'v3')
+      if (proIntent) {
+        addToast('Phone verified! Complete your Pro setup.', 'success')
+        navigate('/pro-payment')
+      } else if (restoredRole !== 'fan') {
+        // Returning user with a saved role — go straight home
+        addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
+        navigate('/')
+      } else {
+        // New / fan user — show role welcome modal
+        setShowRoleModal(true)
+        addToast('Welcome to CricYaar! You\'re browsing as a Fan.', 'success')
+        navigate('/')
+      }
+    }
+  }
+
+  const handleResend = async () => {
+    setCountdown(60)
+    const { error: resendError } = await supabase.auth.signInWithOtp({ phone: toE164(pendingPhone) })
+    addToast(resendError ? resendError.message : 'OTP resent!', resendError ? 'error' : 'info')
   }
 
   const lockMinutes = lockEnd ? Math.ceil((lockEnd - Date.now()) / 60000) : 0
@@ -180,7 +211,7 @@ export default function OtpVerify() {
               <p className="text-sm text-navy-400">Resend OTP in <span className="font-semibold">{countdown}s</span></p>
             ) : (
               <button
-                onClick={() => { setCountdown(60); addToast('OTP resent!', 'info') }}
+                onClick={handleResend}
                 className="flex items-center gap-1.5 text-brand-600 font-medium text-sm mx-auto hover:text-brand-700 transition-colors"
               >
                 <RefreshCw size={14} />
@@ -189,10 +220,6 @@ export default function OtpVerify() {
             )}
           </div>
         </div>
-
-        <p className="mt-4 text-center text-xs text-navy-400">
-          Demo mode — any 6-digit code works
-        </p>
       </div>
     </div>
   )

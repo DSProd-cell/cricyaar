@@ -1,14 +1,248 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { MY_GROUNDS_DATA, GROUND_DEMAND_LIST } from '../data/mock'
+import { useBackButtonClose } from '../hooks/useBackButtonClose'
+import { GROUND_DEMAND_LIST } from '../data/mock'
+import { supabase } from '../lib/supabase'
+import { toGroundRow, fetchMyGrounds } from '../lib/groundsApi'
+import { uploadGroundPhoto } from '../lib/uploads'
 import TopBar from '../components/TopBar'
 import {
   MapPin, BarChart2, Send, ChevronRight, CheckCircle, Clock,
   Building2, Star, Trophy, Calendar, IndianRupee, Users,
   TrendingUp, Zap, Phone, ArrowRight, Lock, Shield,
-  Activity, Eye, Layers
+  Activity, Eye, Layers, X, Check, Camera, ImagePlus
 } from 'lucide-react'
+
+const PITCH_TYPES = ['Turf', 'Matting', 'Cement', 'Red Soil', 'Astro Turf']
+const PITCH_CONDITIONS = ['Fresh', 'Worn', 'Damp', 'Dusty', 'Unknown']
+const FACILITY_OPTIONS = [
+  { key:'parking',      label:'Parking' },
+  { key:'changingRoom', label:'Changing Room' },
+  { key:'practiceNets', label:'Practice Nets' },
+  { key:'washrooms',    label:'Washrooms' },
+  { key:'cafeteria',    label:'Cafeteria' },
+  { key:'firstAid',     label:'First Aid' },
+]
+
+// ── Add Ground sheet ─────────────────────────────────────────────────────────
+function AddGroundSheet({ user, onClose, onSubmitted }) {
+  useBackButtonClose(onClose)
+  const [name, setName]   = useState('')
+  const [area, setArea]   = useState('')
+  const [pitchType, setPitchType] = useState('Turf')
+  const [pitchCondition, setPitchCondition] = useState('Fresh')
+  const [floodlights, setFloodlights] = useState(false)
+  const [floodlightHours, setFloodlightHours] = useState('')
+  const [rentPerHour, setRentPerHour] = useState('')
+  const [rentPerMatch, setRentPerMatch] = useState('')
+  const [facilities, setFacilities] = useState({})
+  const [ownerName, setOwnerName]   = useState(user?.name || '')
+  const [ownerPhone, setOwnerPhone] = useState(user?.phone || '')
+  const [photoUrl, setPhotoUrl]     = useState(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const photoRef = useRef(null)
+
+  const toggleFacility = (key) => setFacilities(f => ({ ...f, [key]: !f[key] }))
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPhoto(true)
+    setError('')
+    try {
+      const url = await uploadGroundPhoto(user.id, file)
+      setPhotoUrl(url)
+    } catch (err) {
+      setError(`Couldn't upload photo: ${err.message}`)
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
+  const canSubmit = name.trim() && area.trim() && ownerPhone.trim() && !submitting && !uploadingPhoto
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return
+    setSubmitting(true)
+    setError('')
+    const row = toGroundRow({
+      ownerId: user.id,
+      name: name.trim(),
+      area: area.trim(),
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pitchType,
+      pitchCondition,
+      floodlights,
+      floodlightHours: floodlights ? floodlightHours.trim() : null,
+      rentPerHour: rentPerHour ? Number(rentPerHour) : null,
+      rentPerMatch: rentPerMatch ? Number(rentPerMatch) : null,
+      facilities,
+      ownerName: ownerName.trim(),
+      ownerPhone: ownerPhone.trim(),
+    })
+    if (photoUrl) row.photos = [photoUrl]
+    const { error: insertError } = await supabase.from('grounds').insert(row)
+    setSubmitting(false)
+    if (insertError) {
+      setError(insertError.message)
+      return
+    }
+    onSubmitted()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up max-h-[90vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-center pt-3 flex-shrink-0"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
+        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 flex-shrink-0">
+          <h2 className="font-extrabold text-navy-900 text-lg">List Your Ground</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+            <X size={15} className="text-navy-500" />
+          </button>
+        </div>
+
+        <div className="px-5 py-4 space-y-4 overflow-y-auto">
+          <p className="text-navy-400 text-xs -mt-1">
+            We're live in Bengaluru only right now — your ground will show there once approved.
+          </p>
+
+          <div>
+            <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+            <button
+              onClick={() => photoRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="w-full h-36 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden relative"
+            >
+              {photoUrl ? (
+                <img src={photoUrl} alt="Ground" className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center gap-1.5 text-navy-400">
+                  {uploadingPhoto ? <Camera size={22} className="animate-pulse" /> : <ImagePlus size={22} />}
+                  <span className="text-xs font-semibold">{uploadingPhoto ? 'Uploading…' : 'Add a photo'}</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">Ground name</label>
+            <input className="cm-input" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Green Park Cricket Ground" maxLength={80} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">Area</label>
+            <input className="cm-input" value={area} onChange={e => setArea(e.target.value)} placeholder="e.g. Sarjapur Road" maxLength={80} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">Pitch type</label>
+              <select className="cm-select w-full" value={pitchType} onChange={e => setPitchType(e.target.value)}>
+                {PITCH_TYPES.map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">Outfield</label>
+              <select className="cm-select w-full" value={pitchCondition} onChange={e => setPitchCondition(e.target.value)}>
+                {PITCH_CONDITIONS.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <button
+              onClick={() => setFloodlights(f => !f)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
+              style={{ background: floodlights ? '#fffbeb' : '#f8fafc', borderColor: floodlights ? '#f59e0b' : '#e2e8f0' }}
+            >
+              <span className={`text-sm font-semibold ${floodlights ? 'text-amber-700' : 'text-navy-700'}`}>Has floodlights</span>
+              {floodlights && (
+                <div className="w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Check size={11} className="text-white" strokeWidth={3} />
+                </div>
+              )}
+            </button>
+            {floodlights && (
+              <input
+                className="cm-input mt-2"
+                value={floodlightHours}
+                onChange={e => setFloodlightHours(e.target.value)}
+                placeholder="e.g. 6 PM – 11 PM"
+                maxLength={40}
+              />
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">Rent / hour <span className="font-normal text-navy-400">(optional)</span></label>
+              <input className="cm-input" type="number" inputMode="numeric" value={rentPerHour} onChange={e => setRentPerHour(e.target.value)} placeholder="₹" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">Rent / match <span className="font-normal text-navy-400">(optional)</span></label>
+              <input className="cm-input" type="number" inputMode="numeric" value={rentPerMatch} onChange={e => setRentPerMatch(e.target.value)} placeholder="₹" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-2">Facilities</label>
+            <div className="grid grid-cols-2 gap-2">
+              {FACILITY_OPTIONS.map(f => {
+                const sel = !!facilities[f.key]
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => toggleFacility(f.key)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 border transition-colors"
+                    style={{ background: sel ? '#f0fdf4' : '#f8fafc', borderColor: sel ? '#22c55e' : '#e2e8f0' }}
+                  >
+                    <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${sel ? 'bg-brand-500 border-brand-500' : 'border-slate-300'}`}>
+                      {sel && <Check size={10} className="text-white" strokeWidth={3} />}
+                    </div>
+                    <span className="text-navy-700 text-xs font-medium">{f.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">Your name</label>
+              <input className="cm-input" value={ownerName} onChange={e => setOwnerName(e.target.value)} placeholder="Full name" maxLength={60} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">Contact number</label>
+              <input className="cm-input" value={ownerPhone} onChange={e => setOwnerPhone(e.target.value)} placeholder="+91…" maxLength={20} />
+            </div>
+          </div>
+
+          {error && <p className="text-red-600 text-sm" role="alert">{error}</p>}
+        </div>
+
+        <div className="px-5 pb-8 pt-2 flex-shrink-0 border-t border-slate-100">
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="w-full py-4 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-[0.98]"
+            style={{ background: 'linear-gradient(135deg, #0891b2, #0e7490)' }}
+          >
+            {submitting ? 'Submitting…' : 'Submit for Review'}
+          </button>
+          <p className="text-center text-navy-400 text-xs mt-2.5">We review new grounds before they go live — usually within a day.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const PITCH_COLORS = {
   Turf:       { bg:'#dcfce7', color:'#16a34a' },
@@ -43,9 +277,19 @@ function GroundCard({ ground, onPress }) {
               {ground.floodlights && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">⚡ Floodlit</span>
               )}
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
-                ● Live
-              </span>
+              {ground.status === 'pending' ? (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                  ● Under Review
+                </span>
+              ) : ground.status === 'rejected' ? (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+                  ● Not Approved
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">
+                  ● Live
+                </span>
+              )}
             </div>
             <p className="font-extrabold text-navy-900 text-sm leading-tight">{ground.name}</p>
             <div className="flex items-center gap-1 mt-0.5">
@@ -107,7 +351,7 @@ function GroundCard({ ground, onPress }) {
 function MyStats({ grounds }) {
   const totalMatches  = grounds.reduce((s, g) => s + g.totalMatches, 0)
   const thisMonthMatches = grounds.reduce((s, g) => s + g.thisMonth.matches, 0)
-  const avgRating     = (grounds.reduce((s, g) => s + g.rating, 0) / grounds.length).toFixed(1)
+  const avgRating     = grounds.length > 0 ? (grounds.reduce((s, g) => s + g.rating, 0) / grounds.length).toFixed(1) : '—'
 
   return (
     <div className="bg-white rounded-2xl shadow-card overflow-hidden">
@@ -259,9 +503,22 @@ export default function GroundOwnerHome() {
 
   const [activeTab, setActiveTab] = useState('grounds') // 'grounds' | 'stats' | 'demand'
   const [sentOffers, setSentOffers] = useState([])
+  const [showAddGround, setShowAddGround] = useState(false)
+  const [grounds, setGrounds] = useState([])
+  const [groundsLoading, setGroundsLoading] = useState(true)
 
   const isVerified = user?.groundOwnerVerified
-  const grounds    = MY_GROUNDS_DATA
+
+  const loadMyGrounds = () => {
+    if (!user?.id) return
+    setGroundsLoading(true)
+    fetchMyGrounds(user.id)
+      .then(setGrounds)
+      .catch(() => setGrounds([]))
+      .finally(() => setGroundsLoading(false))
+  }
+
+  useEffect(loadMyGrounds, [user?.id])
 
   const handleSendOffer = (item) => {
     if (sentOffers.includes(item.id)) {
@@ -297,7 +554,7 @@ export default function GroundOwnerHome() {
         {/* Verification banner (only if not verified) */}
         {!isVerified && (
           <button
-            onClick={() => navigate('/ground-owner')}
+            onClick={() => navigate('/aadhaar-verify')}
             className="w-full mb-4 rounded-2xl p-4 text-left animate-slide-up border-2 border-dashed border-cyan-300 bg-cyan-50"
           >
             <div className="flex items-center gap-3">
@@ -341,15 +598,23 @@ export default function GroundOwnerHome() {
           <div className="space-y-3 animate-slide-up">
             <div className="flex items-center justify-between mb-1">
               <p className="text-xs font-bold text-navy-500 uppercase tracking-wider">
-                {grounds.length} Ground{grounds.length !== 1 ? 's' : ''} Listed
+                {groundsLoading ? 'Loading…' : `${grounds.length} Ground${grounds.length !== 1 ? 's' : ''} Listed`}
               </p>
               <button
-                onClick={() => navigate('/ground-owner')}
+                onClick={() => setShowAddGround(true)}
                 className="text-xs font-semibold text-cyan-600 flex items-center gap-1"
               >
                 + Add Ground
               </button>
             </div>
+
+            {!groundsLoading && grounds.length === 0 && (
+              <div className="text-center py-10 bg-white rounded-2xl shadow-card">
+                <Building2 size={28} className="mx-auto text-navy-300 mb-2" />
+                <p className="font-semibold text-navy-600 text-sm">No grounds listed yet</p>
+                <p className="text-navy-400 text-xs mt-1">Tap "+ Add Ground" to list your first one.</p>
+              </div>
+            )}
 
             {grounds.map(g => (
               <GroundCard
@@ -361,7 +626,7 @@ export default function GroundOwnerHome() {
 
             {/* Upgrade ground listing CTA */}
             <button
-              onClick={() => navigate('/ground-owner')}
+              onClick={() => setShowAddGround(true)}
               className="w-full rounded-2xl border-2 border-dashed border-cyan-300 bg-cyan-50 px-4 py-4 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
             >
               <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center flex-shrink-0">
@@ -444,6 +709,18 @@ export default function GroundOwnerHome() {
         )}
 
       </main>
+
+      {showAddGround && (
+        <AddGroundSheet
+          user={user}
+          onClose={() => setShowAddGround(false)}
+          onSubmitted={() => {
+            setShowAddGround(false)
+            addToast('Ground submitted! We\'ll review it and let you know.', 'success')
+            loadMyGrounds()
+          }}
+        />
+      )}
     </div>
   )
 }

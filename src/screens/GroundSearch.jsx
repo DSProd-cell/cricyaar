@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { GROUNDS } from '../data/mock'
+import { fetchApprovedGrounds } from '../lib/groundsApi'
 import TopBar from '../components/TopBar'
 import { Search, Star, MapPin, Sun, Droplets, Plus, SlidersHorizontal, X, Check } from 'lucide-react'
 
@@ -127,10 +127,14 @@ function GroundCard({ ground, onClick }) {
   return (
     <button onClick={onClick} className="card card-hover w-full text-left mb-3 animate-fade-in overflow-hidden">
       <div className="w-full h-32 rounded-xl bg-gradient-to-br from-brand-100 to-brand-50 flex items-center justify-center mb-3 overflow-hidden">
-        <div className="text-center">
-          <MapPin size={28} className="text-brand-400 mx-auto mb-1" />
-          <p className="text-brand-500 font-semibold text-xs">{ground.city}</p>
-        </div>
+        {ground.photos?.length > 0 ? (
+          <img src={ground.photos[0]} alt={ground.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="text-center">
+            <MapPin size={28} className="text-brand-400 mx-auto mb-1" />
+            <p className="text-brand-500 font-semibold text-xs">{ground.city}</p>
+          </div>
+        )}
       </div>
 
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -183,19 +187,31 @@ export default function GroundSearch() {
   const [pitchFilters, setPitchFilters] = useState([])
   const [floodlights,  setFloodlights]  = useState(false)
   const [showFilter,   setShowFilter]   = useState(false)
+  const [grounds,      setGrounds]      = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [loadError,    setLoadError]    = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    fetchApprovedGrounds(LIVE_CITY)
+      .then(rows => { if (!cancelled) { setGrounds(rows); setLoadError('') } })
+      .catch(err => { if (!cancelled) setLoadError(err.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
 
   const activeFilterCount = pitchFilters.length + (floodlights ? 1 : 0)
 
   const filtered = useMemo(() => {
-    return GROUNDS.filter(g => {
-      if (g.city !== LIVE_CITY) return false
+    return grounds.filter(g => {
       if (search && !g.name.toLowerCase().includes(search.toLowerCase())
         && !g.area.toLowerCase().includes(search.toLowerCase())) return false
       if (pitchFilters.length > 0 && !pitchFilters.includes(g.pitchType)) return false
       if (floodlights && !g.floodlights)                                    return false
       return true
     })
-  }, [search, pitchFilters, floodlights])
+  }, [grounds, search, pitchFilters, floodlights])
 
   const handleApplyFilters = ({ pitchFilters: pf, floodlights: fl }) => {
     setPitchFilters(pf)
@@ -288,27 +304,38 @@ export default function GroundSearch() {
           <MapPin size={12} />
           <span>Live in Bengaluru only — other cities coming soon</span>
         </div>
-        <p className="text-navy-500 text-sm mb-3 font-medium">
-          {filtered.length} ground{filtered.length !== 1 ? 's' : ''} found
-        </p>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16 text-navy-400 text-sm">Loading grounds…</div>
+        ) : loadError ? (
           <div className="text-center py-16">
-            <MapPin size={40} className="mx-auto text-navy-300 mb-3" />
-            <p className="font-semibold text-navy-500">No grounds found</p>
-            <p className="text-navy-400 text-sm mt-1">Try different filters or search nearby city</p>
-            {activeFilterCount > 0 && (
-              <button
-                onClick={() => { setPitchFilters([]); setFloodlights(false) }}
-                className="mt-3 px-4 py-2 rounded-xl bg-brand-50 text-brand-600 font-semibold text-sm"
-              >
-                Clear filters
-              </button>
-            )}
+            <p className="font-semibold text-red-500">Couldn't load grounds</p>
+            <p className="text-navy-400 text-sm mt-1">{loadError}</p>
           </div>
         ) : (
-          filtered.map(g => (
-            <GroundCard key={g.id} ground={g} onClick={() => navigate(`/grounds/${g.id}`)} />
-          ))
+          <>
+            <p className="text-navy-500 text-sm mb-3 font-medium">
+              {filtered.length} ground{filtered.length !== 1 ? 's' : ''} found
+            </p>
+            {filtered.length === 0 ? (
+              <div className="text-center py-16">
+                <MapPin size={40} className="mx-auto text-navy-300 mb-3" />
+                <p className="font-semibold text-navy-500">No grounds found</p>
+                <p className="text-navy-400 text-sm mt-1">Try different filters or search nearby city</p>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => { setPitchFilters([]); setFloodlights(false) }}
+                    className="mt-3 px-4 py-2 rounded-xl bg-brand-50 text-brand-600 font-semibold text-sm"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            ) : (
+              filtered.map(g => (
+                <GroundCard key={g.id} ground={g} onClick={() => navigate(`/grounds/${g.id}`)} />
+              ))
+            )}
+          </>
         )}
       </main>
 
