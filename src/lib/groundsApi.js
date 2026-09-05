@@ -67,7 +67,7 @@ export async function fetchGroundById(id) {
 
 /** Snake_case payload ready for `.insert()` — the reverse of mapGround. */
 export function toGroundRow({ ownerId, name, area, city, state, pitchType, pitchCondition,
-  floodlights, floodlightHours, rentPerHour, rentPerMatch, facilities, ownerName, ownerPhone }) {
+  floodlights, floodlightHours, rentPerHour, rentPerMatch, facilities, ownerName, ownerPhone, lat, lng }) {
   return {
     owner_id: ownerId,
     name, area, city, state,
@@ -80,6 +80,8 @@ export function toGroundRow({ ownerId, name, area, city, state, pitchType, pitch
     facilities: facilities || {},
     owner_name: ownerName || null,
     owner_phone: ownerPhone || null,
+    lat: lat ?? null,
+    lng: lng ?? null,
     status: 'pending',
   }
 }

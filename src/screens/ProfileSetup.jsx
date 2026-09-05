@@ -1,24 +1,25 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Check, Swords, ClipboardList, Shield, Scale, Megaphone } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { Check, Swords, ClipboardList, Scale, Megaphone, Building2 } from 'lucide-react'
 import { ROLE_META } from '../data/mock'
 
 const ROLES = [
-  { id:'player',    label:'Player',    Icon:Swords,        desc:'Track your stats, join teams, and play in matches.' },
-  { id:'organiser', label:'Organiser', Icon:ClipboardList, desc:'Create matches and tournaments, manage teams, and score live.' },
-  { id:'umpire',    label:'Umpire',    Icon:Scale,          desc:'Get assigned to matches and track your umpiring record.' },
-  { id:'fan',       label:'Fan',       Icon:Megaphone,      desc:'Follow live scores and match results.' },
-  { id:'admin',     label:'Admin',     Icon:Shield,         desc:'Full access to all features and the admin panel.' },
+  { id:'fan',          label:'Fan',          Icon:Megaphone,      desc:'Follow live scores and match results.' },
+  { id:'player',       label:'Player',       Icon:Swords,         desc:'Track your stats, join teams, and play in matches.' },
+  { id:'organiser',    label:'Organiser',    Icon:ClipboardList,  desc:'Create matches and tournaments, manage teams, and score live.' },
+  { id:'umpire',       label:'Umpire',       Icon:Scale,          desc:'Get assigned to matches and track your umpiring record.' },
+  { id:'ground_owner', label:'Ground Owner', Icon:Building2,      desc:'List your ground, set pricing, and manage bookings.' },
 ]
 
 export default function ProfileSetup() {
   const navigate = useNavigate()
-  const { setUser, addToast } = useStore()
+  const { user, setUser, addToast } = useStore()
   const [name, setName]         = useState('')
   const [username, setUsername] = useState('')
   const [city, setCity]         = useState('Bengaluru')
-  const [selectedRole, setSelectedRole] = useState('')   // v1: single string
+  const [selectedRole, setSelectedRole] = useState('')
   const [errors, setErrors]     = useState({})
   const [loading, setLoading]   = useState(false)
 
@@ -38,23 +39,38 @@ export default function ProfileSetup() {
     setErrors(e)
     if (Object.keys(e).length) return
     setLoading(true)
-    await new Promise(r => setTimeout(r, 900))
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        name: name.trim(),
+        username,
+        city,
+        role: selectedRole,
+        roles: [selectedRole],
+        onboarded: true,
+        last_role_changed_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+
+    setLoading(false)
+    if (error) {
+      if (error.code === '23505') setErrors({ username: `@${username} is already taken — try another.` })
+      else addToast(error.message || 'Something went wrong saving your profile.', 'error')
+      return
+    }
+
     setUser({
-      id: 'p_new',
-      name: name.trim(),
-      username,
-      city,
-      role: selectedRole,
-      roles: [selectedRole],
+      ...user,
+      name: name.trim(), username, city,
+      role: selectedRole, roles: [selectedRole],
       isNew: false,
-      avatar: null,
-      lastRoleChangedAt: null,
     })
-    addToast(`Welcome to CricYaar, ${name.split(' ')[0]}!`, 'success')
+    localStorage.setItem('cricyaar_last_role', selectedRole)
+    addToast(`Welcome to CricYaar, ${name.trim().split(' ')[0]}!`, 'success')
     // New users don't need to see "What's New" — everything is new to them
     localStorage.setItem('whats_new_seen_version', 'v3')
-    setLoading(false)
-    navigate('/role-select')
+    navigate('/')
   }
 
   const canSubmit = name.trim().length >= 2 && username.length >= 3 && !!selectedRole
@@ -86,7 +102,7 @@ export default function ProfileSetup() {
               onChange={e => { setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,'')); setErrors(x => ({...x, username:''})) }} maxLength={20} />
             {errors.username && <p className="text-red-600 text-xs mt-1" role="alert">{errors.username}</p>}
             {username.length >= 3 && !errors.username && (
-              <p className="text-brand-600 text-xs mt-1 flex items-center gap-1"><Check size={12} /> @{username} is available</p>
+              <p className="text-brand-600 text-xs mt-1 flex items-center gap-1"><Check size={12} /> @{username}</p>
             )}
           </div>
 

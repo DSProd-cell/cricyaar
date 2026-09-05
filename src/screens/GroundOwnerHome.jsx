@@ -6,12 +6,13 @@ import { GROUND_DEMAND_LIST } from '../data/mock'
 import { supabase } from '../lib/supabase'
 import { toGroundRow, fetchMyGrounds } from '../lib/groundsApi'
 import { uploadGroundPhoto } from '../lib/uploads'
+import { getCurrentCoords } from '../lib/geolocation'
 import TopBar from '../components/TopBar'
 import {
   MapPin, BarChart2, Send, ChevronRight, CheckCircle, Clock,
   Building2, Star, Trophy, Calendar, IndianRupee, Users,
   TrendingUp, Zap, Phone, ArrowRight, Lock, Shield,
-  Activity, Eye, Layers, X, Check, Camera, ImagePlus
+  Activity, Eye, Layers, X, Check, Camera, ImagePlus, LocateFixed
 } from 'lucide-react'
 
 const PITCH_TYPES = ['Turf', 'Matting', 'Cement', 'Red Soil', 'Astro Turf']
@@ -43,9 +44,20 @@ function AddGroundSheet({ user, onClose, onSubmitted }) {
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [coords, setCoords] = useState(null) // { lat, lng } — from device GPS
+  const [locating, setLocating] = useState(false)
   const photoRef = useRef(null)
 
   const toggleFacility = (key) => setFacilities(f => ({ ...f, [key]: !f[key] }))
+
+  const handleUseLocation = async () => {
+    setLocating(true)
+    const c = await getCurrentCoords()
+    setLocating(false)
+    if (!c) { setError('Could not get your location — check location permission and try again.'); return }
+    setError('')
+    setCoords(c)
+  }
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files?.[0]
@@ -81,6 +93,7 @@ function AddGroundSheet({ user, onClose, onSubmitted }) {
       rentPerHour: rentPerHour ? Number(rentPerHour) : null,
       rentPerMatch: rentPerMatch ? Number(rentPerMatch) : null,
       facilities,
+      lat: coords?.lat, lng: coords?.lng,
       ownerName: ownerName.trim(),
       ownerPhone: ownerPhone.trim(),
     })
@@ -140,6 +153,22 @@ function AddGroundSheet({ user, onClose, onSubmitted }) {
           <div>
             <label className="block text-sm font-bold text-navy-700 mb-1.5">Area</label>
             <input className="cm-input" value={area} onChange={e => setArea(e.target.value)} placeholder="e.g. Sarjapur Road" maxLength={80} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-navy-700 mb-1.5">Location</label>
+            <button
+              type="button"
+              onClick={handleUseLocation}
+              disabled={locating}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border transition-colors ${
+                coords ? 'bg-brand-50 border-brand-200 text-brand-700' : 'bg-slate-50 border-slate-200 text-navy-700'
+              }`}
+            >
+              <LocateFixed size={15} className={locating ? 'animate-spin' : ''} />
+              {locating ? 'Getting location…' : coords ? 'Location captured ✓' : 'Use my current location'}
+            </button>
+            <p className="text-navy-400 text-xs mt-1">Helps players sort "grounds near me" by distance. Optional, but recommended — stand at the ground when you tap this.</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

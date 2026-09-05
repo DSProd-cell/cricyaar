@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { fetchApprovedGrounds } from '../lib/groundsApi'
+import { getCurrentCoords, distanceKm } from '../lib/geolocation'
 import TopBar from '../components/TopBar'
-import { Search, Star, MapPin, Sun, Droplets, Plus, SlidersHorizontal, X, Check } from 'lucide-react'
+import { Search, Star, MapPin, Sun, Droplets, Plus, SlidersHorizontal, X, Check, LocateFixed } from 'lucide-react'
 
 const PITCH_TYPES = ['Turf', 'Matting', 'Cement', 'Red Soil', 'Astro Turf']
 const LIVE_CITY = 'Bengaluru'
@@ -123,6 +124,7 @@ function GroundCard({ ground, onClick }) {
   const condColors = { Fresh:'text-green-600 bg-green-50', Worn:'text-amber-600 bg-amber-50', Damp:'text-blue-600 bg-blue-50', Dusty:'text-orange-600 bg-orange-50', Unknown:'text-gray-500 bg-gray-50' }
   const condIcons  = { Fresh:Sun, Worn:Sun, Damp:Droplets, Dusty:Sun, Unknown:MapPin }
   const CondIcon   = condIcons[ground.pitchCondition] || MapPin
+  const dist = ground._distanceKm
 
   return (
     <button onClick={onClick} className="card card-hover w-full text-left mb-3 animate-fade-in overflow-hidden">
@@ -140,7 +142,10 @@ function GroundCard({ ground, onClick }) {
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-navy-900 text-base leading-tight truncate">{ground.name}</h3>
-          <p className="text-navy-500 text-xs mt-0.5 truncate">{ground.area}, {ground.city}</p>
+          <p className="text-navy-500 text-xs mt-0.5 truncate">
+            {ground.area}, {ground.city}
+            {dist != null && <span className="text-brand-600 font-semibold"> · {dist < 1 ? `${Math.round(dist * 1000)} m` : `${dist.toFixed(1)} km`}</span>}
+          </p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 text-amber-500">
           {ground.ratingCount > 0 ? (
@@ -190,6 +195,17 @@ export default function GroundSearch() {
   const [grounds,      setGrounds]      = useState([])
   const [loading,      setLoading]      = useState(true)
   const [loadError,    setLoadError]    = useState('')
+  const [myCoords,     setMyCoords]     = useState(null)
+  const [locating,     setLocating]     = useState(false)
+
+  const handleNearMe = async () => {
+    if (myCoords) { setMyCoords(null); return } // toggle off
+    setLocating(true)
+    const c = await getCurrentCoords()
+    setLocating(false)
+    if (!c) return
+    setMyCoords(c)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -204,14 +220,30 @@ export default function GroundSearch() {
   const activeFilterCount = pitchFilters.length + (floodlights ? 1 : 0)
 
   const filtered = useMemo(() => {
-    return grounds.filter(g => {
+    const matches = grounds.filter(g => {
       if (search && !g.name.toLowerCase().includes(search.toLowerCase())
         && !g.area.toLowerCase().includes(search.toLowerCase())) return false
       if (pitchFilters.length > 0 && !pitchFilters.includes(g.pitchType)) return false
       if (floodlights && !g.floodlights)                                    return false
       return true
     })
-  }, [grounds, search, pitchFilters, floodlights])
+    if (!myCoords) return matches
+    // Grounds without real coordinates (most of the seeded ones — added
+    // before owners could capture GPS on listing) can't be placed on a
+    // distance scale, so they sort after every ground that can, rather than
+    // guessing or hiding them.
+    const withDist = matches.map(g => ({
+      ...g,
+      _distanceKm: (g.lat != null && g.lng != null) ? distanceKm(myCoords.lat, myCoords.lng, g.lat, g.lng) : null,
+    }))
+    withDist.sort((a, b) => {
+      if (a._distanceKm == null && b._distanceKm == null) return 0
+      if (a._distanceKm == null) return 1
+      if (b._distanceKm == null) return -1
+      return a._distanceKm - b._distanceKm
+    })
+    return withDist
+  }, [grounds, search, pitchFilters, floodlights, myCoords])
 
   const handleApplyFilters = ({ pitchFilters: pf, floodlights: fl }) => {
     setPitchFilters(pf)
@@ -235,6 +267,20 @@ export default function GroundSearch() {
             autoComplete="off"
           />
         </div>
+
+        {/* Near me toggle */}
+        <button
+          onClick={handleNearMe}
+          disabled={locating}
+          className={`relative flex-shrink-0 flex items-center gap-1.5 h-11 px-3.5 rounded-xl border font-semibold text-sm transition-colors ${
+            myCoords
+              ? 'bg-brand-50 border-brand-400 text-brand-700'
+              : 'bg-slate-50 border-slate-200 text-navy-600 hover:border-brand-300'
+          }`}
+          aria-label="Sort by distance from me"
+        >
+          <LocateFixed size={15} className={locating ? 'animate-spin' : ''} />
+        </button>
 
         {/* Filter button */}
         <button
@@ -315,6 +361,7 @@ export default function GroundSearch() {
           <>
             <p className="text-navy-500 text-sm mb-3 font-medium">
               {filtered.length} ground{filtered.length !== 1 ? 's' : ''} found
+              {myCoords && <span className="text-brand-600"> · sorted by distance</span>}
             </p>
             {filtered.length === 0 ? (
               <div className="text-center py-16">

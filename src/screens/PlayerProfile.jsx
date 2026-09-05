@@ -2,10 +2,29 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { PLAYERS, MATCHES, TEAMS, teamById, initials } from '../data/mock'
 import { avg, sr, eco } from '../utils/cricket'
+import { supabase } from '../lib/supabase'
+import { uploadAvatar } from '../lib/uploads'
 import TopBar from '../components/TopBar'
 import { BarChart2, Activity, Star, Edit, Users, Trophy, X, MapPin, Check, ChevronRight, Camera } from 'lucide-react'
 import { useState, useMemo, useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+
+// Real user, no match/stat history yet — honest zeros rather than borrowing
+// a mock player's numbers. Same shape as a PLAYERS entry so every tab below
+// (Overview/Batting/Bowling/.../My Teams) renders unchanged either way.
+function realProfileShape(user) {
+  return {
+    id: user?.id,
+    name: user?.name || 'Player',
+    username: user?.username || '',
+    city: user?.city || '',
+    bio: user?.bio || '',
+    roles: user?.roles?.length ? user.roles : [user?.role || 'fan'],
+    batting: { runs: 0, innings: 0, dismissed: 0, notOut: 0, hs: 0, fifties: 0, hundreds: 0, ducks: 0 },
+    bowling: { wkts: 0, overs: 0, runs: 0, best: '—', threeWickets: 0, fiveWickets: 0 },
+    fielding: { catches: 0, runOuts: 0, stumpings: 0 },
+  }
+}
 
 const CITIES = ['Mumbai','Delhi','Bengaluru','Chennai','Hyderabad','Kolkata','Pune','Chandigarh','Rajkot','Other']
 const TABS = ['Overview','Batting','Bowling','Fielding','Matches','My Teams']
@@ -14,6 +33,7 @@ function EditProfileSheet({ player, onClose, onSave }) {
   const [name, setName]   = useState(player.name)
   const [city, setCity]   = useState(player.city)
   const [bio, setBio]     = useState(player.bio || '')
+  const [saving, setSaving] = useState(false)
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
@@ -63,13 +83,13 @@ function EditProfileSheet({ player, onClose, onSave }) {
             <p className="text-navy-400 text-xs text-right mt-0.5">{bio.length}/160</p>
           </div>
           <button
-            onClick={() => { onSave({ name, city, bio }); onClose() }}
-            disabled={!name.trim()}
+            onClick={async () => { setSaving(true); await onSave({ name, city, bio }); setSaving(false); onClose() }}
+            disabled={!name.trim() || saving}
             className="w-full py-4 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-[0.98]"
             style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
           >
             <Check size={18} />
-            Save Changes
+            {saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
       </div>
@@ -78,33 +98,51 @@ function EditProfileSheet({ player, onClose, onSave }) {
 }
 
 export default function PlayerProfile() {
-  const { user, setUser } = useStore()
+  const { user, setUser, addToast } = useStore()
   const navigate = useNavigate()
   const { playerId } = useParams()
-  // If /profile/:id, show that player; else show logged-in user
-  const player   = (playerId ? PLAYERS.find(p => p.id === playerId) : PLAYERS.find(p => p.id === (user?.id || 'p1'))) || PLAYERS[0]
+  // Viewing someone else (/profile/:id) still shows mock demo data — there's
+  // no real player directory to browse yet. Your own profile (no :id) is
+  // real: your actual name/role/etc, with honest zeros where we don't have
+  // real match history to back a stat up.
+  const player = playerId ? (PLAYERS.find(p => p.id === playerId) || PLAYERS[0]) : realProfileShape(user)
   const isOwnProfile = !playerId || player.id === user?.id
   const [tab, setTab] = useState('Overview')
   const [showEdit, setShowEdit] = useState(false)
-  const [profileOverride, setProfileOverride] = useState(null) // local edits
-  const [photoUrl, setPhotoUrl] = useState(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
   const photoRef = useRef(null)
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => setPhotoUrl(ev.target.result)
-    reader.readAsDataURL(file)
+    if (!file || !user) return
+    setPhotoUploading(true)
+    try {
+      const url = await uploadAvatar(user.id, file)
+      const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('id', user.id)
+      if (error) throw error
+      setUser({ ...user, avatar: url })
+      addToast('Profile photo updated!', 'success')
+    } catch (err) {
+      addToast(err.message || 'Failed to upload photo.', 'error')
+    } finally {
+      setPhotoUploading(false)
+    }
   }
 
-  const displayPlayer = profileOverride ? { ...player, ...profileOverride } : player
+  const displayPlayer = player
 
-  const handleSaveProfile = (edits) => {
-    setProfileOverride(edits)
-    if (user && isOwnProfile) {
-      setUser({ ...user, name: edits.name, city: edits.city })
+  const handleSaveProfile = async (edits) => {
+    if (!user || !isOwnProfile) return
+    const { error } = await supabase
+      .from('profiles')
+      .update({ name: edits.name, city: edits.city, bio: edits.bio })
+      .eq('id', user.id)
+    if (error) {
+      addToast(error.message || 'Failed to save profile.', 'error')
+      return
     }
+    setUser({ ...user, name: edits.name, city: edits.city, bio: edits.bio })
+    addToast('Profile updated!', 'success')
   }
   // Which teams is this player in?
   const playerTeams = TEAMS.filter(t => t.squad.includes(player.id))
@@ -143,9 +181,11 @@ export default function PlayerProfile() {
               onChange={handlePhotoChange}
             />
             <div className="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center text-white font-extrabold text-xl overflow-hidden">
-              {photoUrl
-                ? <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
-                : initials(player.name)
+              {photoUploading
+                ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                : (isOwnProfile ? user?.avatar : null)
+                  ? <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                  : initials(player.name)
               }
             </div>
             {isOwnProfile && (
@@ -195,7 +235,7 @@ export default function PlayerProfile() {
             { label:'Runs',    val:player.batting.runs   },
             { label:'Innings', val:player.batting.innings },
             { label:'Wickets', val:player.bowling.wkts   },
-            { label:'Matches', val:myMatches.length || 4  },
+            { label:'Matches', val:myMatches.length  },
           ].map(s => (
             <div key={s.label} className="flex-1">
               <p className="font-extrabold text-navy-900 text-lg tabular-nums">{s.val}</p>

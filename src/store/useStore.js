@@ -24,10 +24,17 @@ export const useStore = create(
       // Role management
       otpMode: 'login',   // 'login' | 'role-switch'
       setOtpMode: (mode) => set({ otpMode: mode }),
-      setRole: (role) => set(s => ({
-        user: s.user ? { ...s.user, role, lastRoleChangedAt: Date.now() } : s.user,
-        otpMode: 'login',
-      })),
+      setRole: (role) => {
+        const userId = get().user?.id
+        set(s => ({
+          user: s.user ? { ...s.user, role, lastRoleChangedAt: Date.now() } : s.user,
+          otpMode: 'login',
+        }))
+        if (userId) {
+          supabase.from('profiles').update({ role, last_role_changed_at: new Date().toISOString() }).eq('id', userId)
+            .then(({ error }) => { if (error) console.error('Failed to persist role change', error) })
+        }
+      },
 
       // Role welcome modal (shown once after role selection)
       showRoleModal: false,

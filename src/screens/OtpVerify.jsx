@@ -6,7 +6,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
-  const { pendingPhone, setUser, setShowRoleModal, addToast, otpMode, proIntent, user } = useStore()
+  const { pendingPhone, setUser, addToast, otpMode, proIntent, user } = useStore()
   const [digits, setDigits]     = useState(['','','','','',''])
   const [error, setError]       = useState('')
   const [attempts, setAttempts] = useState(0)
@@ -122,17 +122,16 @@ export default function OtpVerify() {
       })
       // Mark What's New as seen so returning users skip it
       localStorage.setItem('whats_new_seen_version', 'v3')
-      if (proIntent) {
+      if (isNewUser) {
+        // Never logged in before — collect name/username/city/role before
+        // they see anything else (no Pro nag, no role-welcome modal yet).
+        addToast('Phone verified! Let\'s set up your profile.', 'success')
+        navigate('/setup')
+      } else if (proIntent) {
         addToast('Phone verified! Complete your Pro setup.', 'success')
         navigate('/pro-payment')
-      } else if (restoredRole !== 'fan') {
-        // Returning user with a saved role — go straight home
-        addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
-        navigate('/')
       } else {
-        // New / fan user — show role welcome modal
-        setShowRoleModal(true)
-        addToast('Welcome to CricYaar! You\'re browsing as a Fan.', 'success')
+        addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
         navigate('/')
       }
     }
