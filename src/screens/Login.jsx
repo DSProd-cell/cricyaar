@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase, toE164 } from '../lib/supabase'
+import { LEGAL_URL } from '../lib/constants'
 import { Phone, ChevronDown, ArrowLeft } from 'lucide-react'
 
 export default function Login() {
@@ -139,9 +140,9 @@ export default function Login() {
 
         <p className="text-center text-xs text-navy-400 mt-3">
           By continuing you agree to our{' '}
-          <button className="text-brand-600 font-medium underline-offset-2 hover:underline">Terms of Service</button>
+          <a href={`${LEGAL_URL}#terms`} target="_blank" rel="noopener noreferrer" className="text-brand-600 font-medium underline-offset-2 hover:underline">Terms of Service</a>
           {' '}and{' '}
-          <button className="text-brand-600 font-medium underline-offset-2 hover:underline">Privacy Policy</button>
+          <a href={`${LEGAL_URL}#privacy`} target="_blank" rel="noopener noreferrer" className="text-brand-600 font-medium underline-offset-2 hover:underline">Privacy Policy</a>
         </p>
       </div>
     </div>

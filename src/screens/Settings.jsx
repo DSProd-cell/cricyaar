@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { initials, ROLE_META } from '../data/mock'
 import TopBar from '../components/TopBar'
+import { LEGAL_URL } from '../lib/constants'
 import { User, Bell, Globe, Shield, Info, LogOut, ChevronRight, Camera, Phone, RefreshCw, Swords, ClipboardList, Scale, Megaphone, Building2, Crown, Import, Sparkles, Gift, ShieldCheck, BarChart3 } from 'lucide-react'
 import { useState, useRef } from 'react'
 
@@ -55,7 +56,7 @@ export default function Settings() {
     { icon:Bell,   label:'Push notifications', desc:pushNotifs ? 'On' : 'Off', action:() => setPushNotifs(p => !p), toggle:true, value:pushNotifs },
     { icon:Phone,  label:'Change phone number', desc:user?.phone || '+91 —',    action:() => addToast('OTP flow would open here', 'info') },
     { icon:Globe,  label:'Language',            desc:'English (India)',          action:() => {} },
-    { icon:Shield, label:'Privacy & data',      desc:'',                         action:() => {} },
+    { icon:Shield, label:'Privacy & data',      desc:'',                         action:() => window.open(`${LEGAL_URL}#privacy`, '_blank', 'noopener,noreferrer') },
     { icon:Info,   label:'About CricYaar',      desc:'v1.0.0 — Demo build',     action:() => {} },
   ]
 
