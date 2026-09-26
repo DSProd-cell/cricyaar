@@ -1,23 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
 // Called by the sign-out handler to force the splash to show again.
 export function resetSplash() { useStore.getState().setShowSplash(true) }
 
-const TAGLINES = [
-  "India's First Fraud-Free Cricket Platform",
-  "Every Match Recorded. Every Player Verified.",
-  "Your Innings Deserve to Be Remembered.",
-]
-
-const PLATFORM_STATS = [
-  { emoji: '🏏', label: 'Matches Live',       value: 142   },
-  { emoji: '🏆', label: 'Tournaments',        value: 28    },
-  { emoji: '👤', label: 'Players',            value: 15420 },
-  { emoji: '⚖️', label: 'Umpires',            value: 892   },
-  { emoji: '🌐', label: 'Total Users',        value: 24680 },
-]
+const TAGLINE = "India's First Fraud-Free Cricket Platform"
 
 // Deterministic particles — no Math.random so no layout shift
 const PARTICLES = [
@@ -32,15 +20,11 @@ const PARTICLES = [
   { size: 7,  left: '46%', delay: 8,   dur: 10 },
 ]
 
-function easeOut(t) { return 1 - Math.pow(1 - t, 3) }
-
 export default function SplashOverlay() {
   const { user, showSplash, setShowSplash } = useStore()
-  const navigate  = useNavigate()
-  const [fading, setFading]   = useState(false)
-  const [phase, setPhase]     = useState(0)
-  const [progress, setProgress] = useState(0)
-  const rafRef = useRef(null)
+  const navigate = useNavigate()
+  const [fading, setFading] = useState(false)
+  const [ready, setReady]   = useState(false)
 
   const dismissTo = (path) => {
     setFading(true)
@@ -48,35 +32,14 @@ export default function SplashOverlay() {
     setTimeout(() => { setShowSplash(false); setFading(false) }, 600)
   }
 
-  // Stats counter
-  useEffect(() => {
-    if (phase < 3) return
-    const start = performance.now()
-    const dur   = 1800
-    const tick  = (now) => {
-      const p = Math.min((now - start) / dur, 1)
-      setProgress(easeOut(p))
-      if (p < 1) rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafRef.current)
-  }, [phase])
-
   useEffect(() => {
     if (!showSplash) return
-    setPhase(0)
-    setProgress(0)
-    const T = [
-      setTimeout(() => setPhase(1), 600),
-      setTimeout(() => setPhase(2), 2000),
-      setTimeout(() => setPhase(3), 3100),
-    ]
-    return () => T.forEach(clearTimeout)
-  }, [showSplash]) // eslint-disable-line react-hooks/exhaustive-deps
+    setReady(false)
+    const t = setTimeout(() => setReady(true), 500)
+    return () => clearTimeout(t)
+  }, [showSplash])
 
   if (!showSplash) return null
-
-  const show = (minPhase) => phase >= minPhase
 
   return (
     <div
@@ -177,9 +140,9 @@ export default function SplashOverlay() {
             background: '#7C3AED',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginBottom: 16,
-            animation: show(0) ? 'splashPulse 3s ease-in-out infinite' : 'none',
+            animation: 'splashPulse 3s ease-in-out infinite',
             opacity: 1,
-            transform: show(0) ? 'scale(1) translateY(0)' : 'scale(0.4) translateY(24px)',
+            transform: ready ? 'scale(1) translateY(0)' : 'scale(0.4) translateY(24px)',
             transition: 'transform 0.75s cubic-bezier(0.34,1.56,0.64,1)',
           }}
         >
@@ -195,100 +158,39 @@ export default function SplashOverlay() {
             letterSpacing: '-0.025em',
             lineHeight: 1,
             marginBottom: 14,
-            opacity: show(0) ? 1 : 0,
-            transform: show(0) ? 'translateY(0)' : 'translateY(20px)',
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'translateY(0)' : 'translateY(20px)',
             transition: 'opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s',
           }}
         >
           CricYaar
         </h1>
 
-        {/* Rotating taglines */}
-        <div className="relative w-full flex items-center justify-center" style={{ height: 52 }}>
-          {TAGLINES.map((line, i) => {
-            const active = (i === 0 && phase === 1) || (i === 1 && phase === 2) || (i === 2 && phase >= 3)
-            return (
-              <p
-                key={i}
-                className="absolute inset-x-4 text-center font-medium"
-                style={{
-                  color: 'rgba(255,255,255,0.72)',
-                  fontSize: 15,
-                  lineHeight: 1.45,
-                  opacity: active ? 1 : 0,
-                  transform: active ? 'translateY(0)' : 'translateY(10px)',
-                  transition: 'opacity 0.6s ease, transform 0.6s ease',
-                }}
-              >
-                {line}
-              </p>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* ── Bottom: stats + CTA ── */}
-      <div className="px-5 pb-12 pt-2 flex flex-col gap-3 max-w-sm mx-auto w-full relative z-10">
-        {/* Stats */}
-        <div
+        {/* Static tagline */}
+        <p
           style={{
-            opacity: phase >= 3 ? 1 : 0,
-            transform: phase >= 3 ? 'translateY(0)' : 'translateY(24px)',
-            transition: 'opacity 0.55s ease, transform 0.55s ease',
+            color: 'rgba(255,255,255,0.72)',
+            fontSize: 15,
+            lineHeight: 1.45,
+            textAlign: 'center',
+            padding: '0 16px',
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.6s ease, transform 0.6s ease',
           }}
         >
-          <p style={{
-            color: 'rgba(255,255,255,0.35)',
-            fontSize: 10, fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.18em',
-            textAlign: 'center', marginBottom: 12,
-          }}>
-            Live Platform
-          </p>
-          <div className="grid grid-cols-5 gap-1.5">
-            {PLATFORM_STATS.map((s, i) => {
-              const raw = Math.floor(progress * s.value)
-              const display = raw >= 1000
-                ? (raw / 1000).toFixed(raw >= 10000 ? 0 : 1) + 'K+'
-                : raw + (s.value >= 100 ? '+' : '')
-              return (
-                <div
-                  key={s.label}
-                  className="flex flex-col items-center gap-1 py-3 rounded-2xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.07)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    opacity: progress > i * 0.14 ? 1 : 0,
-                    transform: progress > i * 0.14 ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(8px)',
-                    transition: 'opacity 0.4s ease, transform 0.4s ease',
-                  }}
-                >
-                  <span style={{ fontSize: 18, lineHeight: 1 }}>{s.emoji}</span>
-                  <span style={{
-                    color: '#fff', fontWeight: 800, fontSize: 14,
-                    lineHeight: 1, fontVariantNumeric: 'tabular-nums',
-                  }}>
-                    {display}
-                  </span>
-                  <span style={{
-                    color: 'rgba(255,255,255,0.42)', fontSize: 8, fontWeight: 600,
-                    textTransform: 'uppercase', letterSpacing: '0.04em',
-                    textAlign: 'center', lineHeight: 1.3,
-                  }}>
-                    {s.label}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+          {TAGLINE}
+        </p>
+      </div>
 
+      {/* ── Bottom: CTA ── */}
+      <div className="px-5 pb-12 pt-2 flex flex-col gap-3 max-w-sm mx-auto w-full relative z-10">
         {/* CTAs */}
         <div
           style={{
-            opacity: phase >= 1 ? 1 : 0,
-            transform: phase >= 1 ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.55s ease 1.0s, transform 0.55s ease 1.0s',
+            opacity: ready ? 1 : 0,
+            transform: ready ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.55s ease 0.2s, transform 0.55s ease 0.2s',
             display: 'flex',
             flexDirection: 'column',
             gap: 12,

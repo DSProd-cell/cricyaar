@@ -176,7 +176,7 @@ export default function SendMoney() {
               <div>
                 <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Name *</label>
                 <input
-                  className="otp-input w-full h-auto px-3 py-3 rounded-xl text-sm"
+                  className="cm-input"
                   placeholder="e.g. Rohit Sharma"
                   value={recipientName}
                   onChange={e => setRecipientName(e.target.value)}
@@ -185,7 +185,7 @@ export default function SendMoney() {
               <div>
                 <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Phone number *</label>
                 <input
-                  className="otp-input w-full h-auto px-3 py-3 rounded-xl text-sm"
+                  className="cm-input"
                   placeholder="10-digit mobile number"
                   type="tel"
                   inputMode="numeric"
@@ -196,7 +196,7 @@ export default function SendMoney() {
               <div>
                 <label className="text-xs font-semibold text-navy-500 mb-1.5 block">UPI ID</label>
                 <input
-                  className="otp-input w-full h-auto px-3 py-3 rounded-xl text-sm"
+                  className="cm-input"
                   placeholder="name@okhdfcbank"
                   value={recipientUpi}
                   onChange={e => setRecipientUpi(e.target.value)}
@@ -217,7 +217,7 @@ export default function SendMoney() {
               <div>
                 <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Amount (₹) *</label>
                 <input
-                  className="otp-input w-full h-auto px-3 py-3 rounded-xl text-2xl font-black text-center"
+                  className="cm-input text-2xl font-black text-center"
                   placeholder="0"
                   type="number"
                   inputMode="numeric"
@@ -263,7 +263,7 @@ export default function SendMoney() {
               <div>
                 <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Note (optional)</label>
                 <input
-                  className="otp-input w-full h-auto px-3 py-3 rounded-xl text-sm"
+                  className="cm-input"
                   placeholder="e.g. Semi-final match fee"
                   value={note}
                   onChange={e => setNote(e.target.value)}
