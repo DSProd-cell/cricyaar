@@ -3,13 +3,43 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --cy-bg: #f8fafc;
+  --cy-surface: #ffffff;
+  --cy-text: #0f172a;
+  --cy-muted: #64748b;
+  --cy-border: #e2e8f0;
+  --cy-nav-bg: rgba(255,255,255,0.82);
+  --cy-nav-border: rgba(255,255,255,0.65);
+  --cy-nav-shadow: 0 6px 32px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.90);
+  --cy-icon-inactive: rgba(120,120,128,0.10);
+  --cy-icon-border: rgba(255,255,255,0.5);
+  --cy-icon-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
+  --cy-label-inactive: #94a3b8;
+}
+
+:root[data-theme="dark"] {
+  --cy-bg: #020b14;
+  --cy-surface: #0d1b2a;
+  --cy-text: #f1f5f9;
+  --cy-muted: #94a3b8;
+  --cy-border: rgba(255,255,255,0.08);
+  --cy-nav-bg: rgba(12,12,14,0.88);
+  --cy-nav-border: rgba(255,255,255,0.10);
+  --cy-nav-shadow: 0 6px 32px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  --cy-icon-inactive: rgba(255,255,255,0.06);
+  --cy-icon-border: rgba(255,255,255,0.12);
+  --cy-icon-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3);
+  --cy-label-inactive: rgba(255,255,255,0.4);
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    background: #f8fafc;
-    color: #0f172a;
+    background: var(--cy-bg, #f8fafc);
+    color: var(--cy-text, #0f172a);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -57,7 +87,7 @@
     .main-area { padding-bottom: 0; }
   }
 
-  /* ── Bottom Nav — iOS Liquid Glass ── */
+  /* ── Bottom Nav — Crystal Glass ── */
   .bottom-nav {
     position: fixed;
     left: 10px; right: 10px;
@@ -68,16 +98,13 @@
     justify-content: space-around;
     padding: 6px 4px;
     border-radius: 22px;
-    height: 62px;
-    /* Liquid glass */
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-    box-shadow:
-      0 6px 32px rgba(0, 0, 0, 0.10),
-      0 1px 2px rgba(0, 0, 0, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.90);
+    height: 64px;
+    background: var(--cy-nav-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--cy-nav-border);
+    box-shadow: var(--cy-nav-shadow);
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
   }
   .bottom-nav-item {
     flex: 1;

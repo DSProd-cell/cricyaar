@@ -1,4 +1,3 @@
 #!/bin/bash
-export PATH="/Users/ayushpuhan/.local/node24/bin:$PATH"
-cd "$(dirname "$0")"
-exec npm run dev
+cd /Users/debasish/cricmate-v0
+exec /Users/debasish/.local/node20/bin/node node_modules/.bin/vite --port 3092 --host
