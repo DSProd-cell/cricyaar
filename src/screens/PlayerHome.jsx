@@ -6,7 +6,7 @@ import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
   Activity, MapPin, Trophy, Eye, BarChart2, Building2, Circle,
-  ChevronRight, Lock, Users, Send, Crown
+  ChevronRight, Lock, Users, Send, Crown, Wallet, IndianRupee
 } from 'lucide-react'
 
 function ActiveBlock({ icon: Icon, color, bg, title, sub, badge, onClick }) {
@@ -184,6 +184,31 @@ export default function PlayerHome() {
             }
             onClick={() => navigate('/open-tournaments')}
           />
+        </div>
+
+        {/* Pay / Request row */}
+        <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider mb-3">Payments</h3>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <button
+            onClick={() => navigate('/send-money', { state: { purpose: 'match_fee' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
+              <Send size={20} style={{ color: '#ca8a04' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Pay Someone</p>
+            <p className="text-navy-500 text-[11px] leading-tight mt-0.5">Match fee, umpire, ground</p>
+          </button>
+          <button
+            onClick={() => navigate('/receive-money')}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
+              <Wallet size={20} style={{ color: '#16a34a' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Request Payment</p>
+            <p className="text-navy-500 text-[11px] leading-tight mt-0.5">Share your UPI via WhatsApp</p>
+          </button>
         </div>
 
         {/* Locked blocks */}

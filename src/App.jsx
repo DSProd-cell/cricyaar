@@ -69,6 +69,8 @@ import AadhaarVerification from './screens/AadhaarVerification'
 import InviteEarn          from './screens/InviteEarn'
 import IplTeamPicker       from './screens/IplTeamPicker'
 import GroundOwnerDashboard from './screens/GroundOwnerDashboard'
+import SendMoney    from './screens/SendMoney'
+import ReceiveMoney from './screens/ReceiveMoney'
 
 function AuthGuard({ children }) {
   const { user } = useStore()
@@ -322,6 +324,8 @@ export default function App() {
           <Route path="/aadhaar-verify"      element={<AuthGuard><AadhaarVerification /></AuthGuard>} />
           <Route path="/invite"              element={<AuthGuard><InviteEarn /></AuthGuard>} />
           <Route path="/ground-owner"        element={<AuthGuard><GroundOwnerDashboard /></AuthGuard>} />
+          <Route path="/send-money"          element={<AuthGuard><SendMoney /></AuthGuard>} />
+          <Route path="/receive-money"       element={<AuthGuard><ReceiveMoney /></AuthGuard>} />
 
           {/* IPL Team Picker */}
           <Route path="/ipl-pick" element={<IplTeamPicker />} />

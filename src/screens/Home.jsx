@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, PLAYERS, TEAMS, TOURNAMENTS, UMPIRE_PROFILE, teamById, playerById } from '../data/mock'
-import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, LayoutGrid, Star, Crown, Plus, X, BookOpen, Swords, GraduationCap, Gift, RefreshCw, LogIn } from 'lucide-react'
+import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, LayoutGrid, Star, Crown, Plus, X, BookOpen, Swords, GraduationCap, Gift, RefreshCw, LogIn, Send, Wallet } from 'lucide-react'
 import TopBar from '../components/TopBar'
 import RoleLockedModal from '../components/RoleLockedModal'
 import FanHome from './FanHome'
@@ -117,6 +117,8 @@ function CricYaarFAB({ role, isPro }) {
 
   const actions = [
     { icon: RefreshCw, label: 'Change Role', path: '/role-select', roles: ['player','captain','organiser','umpire','fan','admin'] },
+    { icon: Send,   label: 'Send Money',    path: '/send-money',    roles: ['player','captain','organiser','umpire','admin'] },
+    { icon: Wallet, label: 'Receive Money', path: '/receive-money', roles: ['player','captain','organiser','umpire','admin'] },
     { icon: Swords, label: 'Find Opponent', path: '/opponent-finder', roles: ['captain','organiser','admin'], pro: true },
     { icon: LogIn, label: 'Join a Team', path: '/teams', roles: ['player','captain','organiser','admin'], pro: true },
     { icon: GraduationCap, label: 'Join a Tournament', path: '/open-tournaments', roles: ['player','captain','organiser','umpire','admin'], pro: true },

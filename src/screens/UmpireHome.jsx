@@ -16,7 +16,7 @@ import {
   CheckCircle, Circle, AlertCircle, ChevronRight, ChevronLeft, Shield,
   Activity, Trophy, Users, ChevronDown, ChevronUp, X,
   Navigation, Home, Bell, BadgeCheck, XCircle, Loader,
-  ArrowRight, Lock, FileText, Settings, Check
+  ArrowRight, Lock, FileText, Settings, Check, Wallet, IndianRupee
 } from 'lucide-react'
 
 // ── Format helpers ────────────────────────────────────────────────────────────
@@ -1729,6 +1729,33 @@ export default function UmpireHome() {
             addToast={addToast}
           />
         )}
+
+        {/* Payments quick-access — always visible */}
+        <div className="mt-5 space-y-3">
+          <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider">Payments</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => navigate('/receive-money', { state: { purpose: 'umpire_fee' } })}
+              className="home-block text-left relative active:scale-[0.97] transition-transform"
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
+                <Wallet size={18} style={{ color: '#16a34a' }} />
+              </div>
+              <p className="font-bold text-navy-900 text-sm">Request Fee</p>
+              <p className="text-navy-500 text-[11px] mt-0.5">Share UPI via WhatsApp</p>
+            </button>
+            <button
+              onClick={() => navigate('/send-money', { state: { purpose: 'umpire_fee' } })}
+              className="home-block text-left relative active:scale-[0.97] transition-transform"
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
+                <Send size={18} style={{ color: '#ca8a04' }} />
+              </div>
+              <p className="font-bold text-navy-900 text-sm">Pay an Umpire</p>
+              <p className="text-navy-500 text-[11px] mt-0.5">After confirming via call</p>
+            </button>
+          </div>
+        </div>
 
       </main>
     </div>

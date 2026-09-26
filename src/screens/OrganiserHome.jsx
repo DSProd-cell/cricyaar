@@ -7,7 +7,7 @@ import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
   BarChart2, Trophy, MapPin, Activity, Eye, Building2,
   Circle, ChevronRight, Lock, Users, Send, Crown, Check,
-  Zap, X, UserPlus
+  Zap, X, UserPlus, Wallet, IndianRupee
 } from 'lucide-react'
 
 // ── Add Teams to Tournament sheet (Pro-gated) ─────────────────────────────
@@ -375,6 +375,31 @@ export default function OrganiserHome() {
           </button>
         </div>
 
+        {/* Payments section */}
+        <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider mb-3 mt-2">Payments</h3>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <button
+            onClick={() => navigate('/receive-money', { state: { purpose: 'match_fee' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
+              <Wallet size={20} style={{ color: '#16a34a' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Collect Fees</p>
+            <p className="text-navy-500 text-[11px] mt-0.5">Entry / match fees via UPI</p>
+          </button>
+          <button
+            onClick={() => navigate('/send-money', { state: { purpose: 'prize' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
+              <Send size={20} style={{ color: '#ca8a04' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Pay Prize / Fee</p>
+            <p className="text-navy-500 text-[11px] mt-0.5">Prize money, umpire, ground</p>
+          </button>
+        </div>
+
         {/* Locked blocks */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-3">
@@ -388,7 +413,7 @@ export default function OrganiserHome() {
               onTap={() => setLocked(true)} />
             <LockedBlock icon={Users} title="Player Stats" sub="Player feature"
               onTap={() => setLocked(true)} />
-            <LockedBlock icon={Send} title="Umpire Earnings" sub="Umpire feature"
+            <LockedBlock icon={IndianRupee} title="Umpire Earnings" sub="Umpire feature"
               onTap={() => setLocked(true)} />
           </div>
         </div>
