@@ -509,6 +509,22 @@ export default function PlayerProfile() {
             {/* Favourite IPL Team */}
             <IplTeamProfileRow roleColor={roleColor} onPress={() => setShowTeamPicker(true)} />
 
+            {/* Fetch Past Record */}
+            <button
+              onClick={() => navigate('/fetch-past-record')}
+              className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+              style={{ borderBottom: `1px solid ${roleColor.border}` }}
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(124,58,237,0.1)' }}>
+                <span style={{ fontSize: 17 }}>🏏</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy-900 text-sm">Fetch Past Record</p>
+                <p className="text-navy-400 text-xs mt-0.5">Link your old matches & career history</p>
+              </div>
+              <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
+            </button>
+
             {/* App Settings */}
             <button
               onClick={() => navigate('/settings')}

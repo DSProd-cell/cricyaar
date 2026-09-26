@@ -69,8 +69,10 @@ import AadhaarVerification from './screens/AadhaarVerification'
 import InviteEarn          from './screens/InviteEarn'
 import IplTeamPicker       from './screens/IplTeamPicker'
 import GroundOwnerDashboard from './screens/GroundOwnerDashboard'
-import SendMoney    from './screens/SendMoney'
-import ReceiveMoney from './screens/ReceiveMoney'
+import SendMoney       from './screens/SendMoney'
+import ReceiveMoney    from './screens/ReceiveMoney'
+import FetchPastRecord from './screens/FetchPastRecord'
+import YareinWelcome   from './screens/YareinWelcome'
 
 function AuthGuard({ children }) {
   const { user } = useStore()
@@ -328,7 +330,9 @@ export default function App() {
           <Route path="/receive-money"       element={<AuthGuard><ReceiveMoney /></AuthGuard>} />
 
           {/* IPL Team Picker */}
-          <Route path="/ipl-pick" element={<IplTeamPicker />} />
+          <Route path="/ipl-pick"          element={<IplTeamPicker />} />
+          <Route path="/fetch-past-record" element={<AuthGuard><FetchPastRecord /></AuthGuard>} />
+          <Route path="/yarein-welcome"    element={<AuthGuard><YareinWelcome /></AuthGuard>} />
 
           {/* Legacy redirect */}
           <Route path="/usp" element={<Navigate to="/welcome" replace />} />
