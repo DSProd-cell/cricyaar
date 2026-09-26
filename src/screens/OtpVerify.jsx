@@ -134,6 +134,8 @@ export default function OtpVerify() {
         upiId: profile?.upi_id || null,
       })
       localStorage.setItem('whats_new_seen_version', 'v3')
+      // Reset referral popup so it fires after every login/signup
+      sessionStorage.removeItem('cy_invite_popup_shown')
       if (isNewUser) {
         navigate('/profile-match')
       } else if (proIntent) {
