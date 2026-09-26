@@ -260,19 +260,23 @@ export default function PlayerProfile() {
 
       {/* ── Hero Card ───────────────────────────────────────────────────── */}
       <div className="bg-[var(--cy-surface)] relative">
-        {/* Gradient Banner */}
+        {/* Dark Banner */}
         <div
           className="relative h-[110px]"
-          style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` }}
+          style={{ background: 'linear-gradient(135deg, #0d0b1e 0%, #1a1035 60%, #0f172a 100%)' }}
         >
-          {/* Subtle dot texture */}
+          {/* Subtle grid texture */}
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.13) 1px, transparent 1px)',
-              backgroundSize: '18px 18px',
+              backgroundImage: [
+                'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,255,255,0.03) 20px)',
+                'repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255,255,255,0.03) 20px)',
+              ].join(', '),
             }}
           />
+          {/* Purple glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 130%, rgba(124,58,237,0.18) 0%, transparent 70%)' }} />
           {/* Edit button top-right */}
           {isOwnProfile && (
             <button
@@ -316,20 +320,43 @@ export default function PlayerProfile() {
             )}
           </div>
 
-          {/* Name / username / role tag */}
+          {/* Name / username / role tags */}
           <div className="mt-3">
             <h1 className="font-extrabold text-navy-900 text-xl leading-tight">{player.name}</h1>
             {player.username && <p className="text-navy-400 text-sm mt-0.5">@{player.username}</p>}
 
-            <div
-              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-              style={{ background: roleColor.light, color: roleColor.primary, border: `1.5px solid ${roleColor.border}` }}
-            >
-              <span>{roleColor.emoji}</span>
-              <span>{roleColor.label}</span>
-              <span className="w-1.5 h-1.5 rounded-full ml-0.5 bg-current opacity-70" />
-              <span className="opacity-80">Active</span>
-            </div>
+            {/* All roles — active/most-used first */}
+            {(() => {
+              const activeR = isOwnProfile
+                ? (localStorage.getItem('cy_active_role') || role)
+                : (player.roles?.[0] || 'player')
+              const allRoles = isOwnProfile
+                ? Array.from(new Set([activeR, ...(user?.roles || [role])].filter(r => r !== 'fan')))
+                : Array.from(new Set(player.roles?.filter(r => r !== 'fan') || [activeR]))
+              return (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {allRoles.map((r, idx) => {
+                    const rc = getRoleColor(r)
+                    const isActive = r === activeR
+                    return (
+                      <div
+                        key={r}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                        style={{
+                          background: isActive ? rc.primary : rc.light,
+                          color: isActive ? '#fff' : rc.primary,
+                          border: `1.5px solid ${isActive ? rc.primary : rc.border}`,
+                        }}
+                      >
+                        <span style={{ fontSize: 10 }}>{rc.emoji}</span>
+                        <span>{rc.label}</span>
+                        {isActive && <span className="ml-0.5 opacity-80 text-[9px] font-semibold">· Active</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
 
             {(player.city || (user?.phone && isOwnProfile)) && (
               <p className="text-navy-400 text-xs mt-1.5 flex items-center gap-1">
