@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react'
 
-function playFanfare(primary) {
+// Per-team sound signatures — notes (Hz), waveform, spacing (s), plus optional bass drop
+const TEAM_SOUNDS = {
+  mi:   { notes:[293.66,369.99,440.00,587.33,880.00], type:'square',   gap:0.10, boom:{ start:55, end:30, vol:0.6 } },  // MI: powerful low bass
+  csk:  { notes:[329.63,415.30,523.25,659.25,783.99], type:'sine',     gap:0.14, boom:{ start:65, end:45, vol:0.4 } },  // CSK: warm melodic horn
+  rcb:  { notes:[220.00,277.18,329.63,440.00,659.25], type:'sawtooth', gap:0.09, boom:{ start:70, end:40, vol:0.5 } },  // RCB: distorted rock
+  kkr:  { notes:[196.00,246.94,329.63,392.00,523.25], type:'square',   gap:0.11, boom:{ start:45, end:25, vol:0.7 } },  // KKR: dark thundering bass
+  dc:   { notes:[349.23,440.00,523.25,698.46,880.00], type:'triangle', gap:0.08, boom:{ start:80, end:55, vol:0.3 } },  // DC: bright punchy
+  rr:   { notes:[392.00,493.88,587.33,740.00,987.77], type:'sine',     gap:0.12, boom:{ start:90, end:60, vol:0.3 } },  // RR: high playful
+  srh:  { notes:[261.63,311.13,369.99,493.88,740.00], type:'sawtooth', gap:0.09, boom:{ start:75, end:50, vol:0.45} },  // SRH: fast aggressive
+  pbks: { notes:[293.66,369.99,440.00,523.25,659.25], type:'triangle', gap:0.10, boom:{ start:85, end:60, vol:0.35} },  // PBKS: energetic bhangra feel
+  lsg:  { notes:[311.13,391.99,466.16,622.25,830.61], type:'sine',     gap:0.13, boom:{ start:70, end:48, vol:0.4 } },  // LSG: regal classical
+  gt:   { notes:[329.63,415.30,523.25,622.25,830.61], type:'square',   gap:0.11, boom:{ start:68, end:44, vol:0.45} },  // GT: bold rising
+}
+const DEFAULT_SOUND = { notes:[261.63,329.63,392.00,523.25,659.25], type:'square', gap:0.13, boom:{ start:80, end:40, vol:0.5 } }
+
+function playFanfare(teamId) {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)()
-    const notes = [261.63, 329.63, 392.00, 523.25, 659.25]
-    notes.forEach((freq, i) => {
+    const sig = TEAM_SOUNDS[teamId] || DEFAULT_SOUND
+    sig.notes.forEach((freq, i) => {
       const osc  = ctx.createOscillator()
       const gain = ctx.createGain()
       const dist = ctx.createWaveShaper()
@@ -13,22 +28,24 @@ function playFanfare(primary) {
       dist.curve = curve
       osc.connect(dist); dist.connect(gain); gain.connect(ctx.destination)
       osc.frequency.value = freq
-      osc.type = i < 4 ? 'square' : 'sawtooth'
-      const t = ctx.currentTime + i * 0.13
+      osc.type = sig.type
+      const t = ctx.currentTime + i * sig.gap
       gain.gain.setValueAtTime(0, t)
       gain.gain.linearRampToValueAtTime(0.18, t + 0.04)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4)
-      osc.start(t); osc.stop(t + 0.45)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.42)
+      osc.start(t); osc.stop(t + 0.48)
     })
-    // boom on beat 2
+    // Bass boom drop — team-specific
+    const b = sig.boom
     const boom = ctx.createOscillator()
     const bGain = ctx.createGain()
     boom.connect(bGain); bGain.connect(ctx.destination)
-    boom.frequency.setValueAtTime(80, ctx.currentTime + 0.52)
-    boom.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.72)
-    bGain.gain.setValueAtTime(0.5, ctx.currentTime + 0.52)
-    bGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.72)
-    boom.start(ctx.currentTime + 0.52); boom.stop(ctx.currentTime + 0.75)
+    const bTime = ctx.currentTime + sig.notes.length * sig.gap + 0.05
+    boom.frequency.setValueAtTime(b.start, bTime)
+    boom.frequency.exponentialRampToValueAtTime(b.end, bTime + 0.25)
+    bGain.gain.setValueAtTime(b.vol, bTime)
+    bGain.gain.exponentialRampToValueAtTime(0.001, bTime + 0.35)
+    boom.start(bTime); boom.stop(bTime + 0.38)
   } catch (_) {}
 }
 
@@ -65,7 +82,7 @@ export default function IplCelebrationOverlay({ team, onDone }) {
   const [phase, setPhase] = useState(0) // 0=enter, 1=tagline, 2=ready
 
   useEffect(() => {
-    playFanfare(team.primary)
+    playFanfare(team.id)
     const t1 = setTimeout(() => setPhase(1), 500)
     const t2 = setTimeout(() => setPhase(2), 1800)
     return () => { clearTimeout(t1); clearTimeout(t2) }

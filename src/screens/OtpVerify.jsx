@@ -7,7 +7,7 @@ import PageHeader from '../components/PageHeader'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
-  const { pendingPhone, setUser, addToast, otpMode, proIntent, user, pendingSignup } = useStore()
+  const { pendingPhone, setUser, addToast, otpMode, proIntent, user, pendingSignup, iplTeam } = useStore()
   const [digits, setDigits]     = useState(['','','','','',''])
   const [error, setError]       = useState('')
   const [attempts, setAttempts] = useState(0)
@@ -144,7 +144,12 @@ export default function OtpVerify() {
         navigate('/pro-payment')
       } else {
         addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
-        navigate('/')
+        // Show IPL team picker if user hasn't chosen a team yet (optional, skippable)
+        if (!iplTeam) {
+          navigate('/ipl-pick', { state: { returnTo: '/' } })
+        } else {
+          navigate('/')
+        }
       }
 
       // Every free login lands here — offer Pro (pay ₹1/month, or get it free

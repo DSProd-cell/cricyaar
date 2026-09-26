@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
-// Called by the sign-out handler to force the splash to show again — see the
-// showSplash store field for why this can't be a local/module-level flag.
+// Called by the sign-out handler to force the splash to show again.
 export function resetSplash() { useStore.getState().setShowSplash(true) }
 
 const TAGLINES = [
@@ -174,7 +173,7 @@ export default function SplashOverlay() {
           style={{
             width: 84, height: 84,
             borderRadius: 22,
-            background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+            background: 'var(--cy-primary, #7C3AED)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginBottom: 16,
             animation: show(0) ? 'splashPulse 3s ease-in-out infinite' : 'none',
@@ -299,7 +298,7 @@ export default function SplashOverlay() {
               onClick={() => dismissTo('/')}
               style={{
                 width: '100%', padding: '16px', borderRadius: 16,
-                background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+                background: 'var(--cy-primary, #7C3AED)',
                 color: '#fff', fontSize: 16, fontWeight: 700,
                 border: 'none', cursor: 'pointer',
                 boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
@@ -313,7 +312,7 @@ export default function SplashOverlay() {
                 onClick={() => dismissTo('/login?mode=signup')}
                 style={{
                   width: '100%', padding: '16px', borderRadius: 16,
-                  background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+                  background: 'var(--cy-primary, #7C3AED)',
                   color: '#fff', fontSize: 16, fontWeight: 700,
                   border: 'none', cursor: 'pointer',
                   boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
@@ -326,8 +325,8 @@ export default function SplashOverlay() {
                 style={{
                   width: '100%', padding: '16px', borderRadius: 16,
                   background: 'transparent',
-                  color: '#C4B5FD', fontSize: 16, fontWeight: 700,
-                  border: '2px solid color-mix(in srgb, #C4B5FD 50%, transparent)',
+                  color: 'var(--cy-secondary,#C4B5FD)', fontSize: 16, fontWeight: 700,
+                  border: '2px solid var(--cy-secondary-50, rgba(196,181,253,0.5))',
                   cursor: 'pointer',
                 }}
               >

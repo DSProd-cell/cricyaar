@@ -11,10 +11,8 @@ export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
   const [selected, setSelected] = useState(null)
   const [celebrating, setCelebrating] = useState(false)
 
-  // When reached mid-onboarding (Celebration screen), falling through to
-  // city-select/role-select is correct. When reached from Profile to just
-  // change an existing team, the caller passes returnTo: 'back' via route
-  // state so this doesn't drag an existing user back through onboarding.
+  // When reached mid-onboarding, fall through to city-select/role-select.
+  // When reached from Profile or login, the caller passes returnTo via state.
   const returnTo = location.state?.returnTo
 
   const finish = () => {
