@@ -1,51 +1,190 @@
 import { useEffect, useState } from 'react'
 
-// Per-team sound signatures — notes (Hz), waveform, spacing (s), plus optional bass drop
-const TEAM_SOUNDS = {
-  mi:   { notes:[293.66,369.99,440.00,587.33,880.00], type:'square',   gap:0.10, boom:{ start:55, end:30, vol:0.6 } },  // MI: powerful low bass
-  csk:  { notes:[329.63,415.30,523.25,659.25,783.99], type:'sine',     gap:0.14, boom:{ start:65, end:45, vol:0.4 } },  // CSK: warm melodic horn
-  rcb:  { notes:[220.00,277.18,329.63,440.00,659.25], type:'sawtooth', gap:0.09, boom:{ start:70, end:40, vol:0.5 } },  // RCB: distorted rock
-  kkr:  { notes:[196.00,246.94,329.63,392.00,523.25], type:'square',   gap:0.11, boom:{ start:45, end:25, vol:0.7 } },  // KKR: dark thundering bass
-  dc:   { notes:[349.23,440.00,523.25,698.46,880.00], type:'triangle', gap:0.08, boom:{ start:80, end:55, vol:0.3 } },  // DC: bright punchy
-  rr:   { notes:[392.00,493.88,587.33,740.00,987.77], type:'sine',     gap:0.12, boom:{ start:90, end:60, vol:0.3 } },  // RR: high playful
-  srh:  { notes:[261.63,311.13,369.99,493.88,740.00], type:'sawtooth', gap:0.09, boom:{ start:75, end:50, vol:0.45} },  // SRH: fast aggressive
-  pbks: { notes:[293.66,369.99,440.00,523.25,659.25], type:'triangle', gap:0.10, boom:{ start:85, end:60, vol:0.35} },  // PBKS: energetic bhangra feel
-  lsg:  { notes:[311.13,391.99,466.16,622.25,830.61], type:'sine',     gap:0.13, boom:{ start:70, end:48, vol:0.4 } },  // LSG: regal classical
-  gt:   { notes:[329.63,415.30,523.25,622.25,830.61], type:'square',   gap:0.11, boom:{ start:68, end:44, vol:0.45} },  // GT: bold rising
+// ─── Team Sound Engine ─────────────────────────────────────────────────────
+// Each team gets a completely unique sonic identity built from the Web Audio API.
+
+function makeDistortion(ctx, amount = 20) {
+  const ws = ctx.createWaveShaper()
+  const n = 256, curve = new Float32Array(n)
+  for (let i = 0; i < n; i++) {
+    const x = (i * 2) / n - 1
+    curve[i] = ((Math.PI + amount) * x) / (Math.PI + amount * Math.abs(x))
+  }
+  ws.curve = curve
+  return ws
 }
-const DEFAULT_SOUND = { notes:[261.63,329.63,392.00,523.25,659.25], type:'square', gap:0.13, boom:{ start:80, end:40, vol:0.5 } }
+
+function makeReverb(ctx, duration = 0.6) {
+  const len = ctx.sampleRate * duration
+  const buf = ctx.createBuffer(2, len, ctx.sampleRate)
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c)
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5)
+  }
+  const conv = ctx.createConvolver()
+  conv.buffer = buf
+  return conv
+}
+
+function tone(ctx, dest, freq, type, startT, dur, vol = 0.22, attack = 0.04) {
+  const osc = ctx.createOscillator()
+  const g   = ctx.createGain()
+  osc.connect(g); g.connect(dest)
+  osc.frequency.value = freq
+  osc.type = type
+  g.gain.setValueAtTime(0, startT)
+  g.gain.linearRampToValueAtTime(vol, startT + attack)
+  g.gain.exponentialRampToValueAtTime(0.001, startT + dur)
+  osc.start(startT); osc.stop(startT + dur + 0.05)
+}
 
 function playFanfare(teamId) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)()
-    const sig = TEAM_SOUNDS[teamId] || DEFAULT_SOUND
-    sig.notes.forEach((freq, i) => {
-      const osc  = ctx.createOscillator()
-      const gain = ctx.createGain()
-      const dist = ctx.createWaveShaper()
-      const curve = new Float32Array(256)
-      for (let j = 0; j < 256; j++) { const x = (j * 2) / 256 - 1; curve[j] = (3 + 20) * x * 20 * (Math.PI / 180) / (Math.PI + 20 * Math.abs(x)) }
-      dist.curve = curve
-      osc.connect(dist); dist.connect(gain); gain.connect(ctx.destination)
-      osc.frequency.value = freq
-      osc.type = sig.type
-      const t = ctx.currentTime + i * sig.gap
-      gain.gain.setValueAtTime(0, t)
-      gain.gain.linearRampToValueAtTime(0.18, t + 0.04)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.42)
-      osc.start(t); osc.stop(t + 0.48)
-    })
-    // Bass boom drop — team-specific
-    const b = sig.boom
-    const boom = ctx.createOscillator()
-    const bGain = ctx.createGain()
-    boom.connect(bGain); bGain.connect(ctx.destination)
-    const bTime = ctx.currentTime + sig.notes.length * sig.gap + 0.05
-    boom.frequency.setValueAtTime(b.start, bTime)
-    boom.frequency.exponentialRampToValueAtTime(b.end, bTime + 0.25)
-    bGain.gain.setValueAtTime(b.vol, bTime)
-    bGain.gain.exponentialRampToValueAtTime(0.001, bTime + 0.35)
-    boom.start(bTime); boom.stop(bTime + 0.38)
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)()
+    const now  = ctx.currentTime
+    const rev  = makeReverb(ctx, 0.8)
+    const dist = makeDistortion(ctx, 18)
+    const master = ctx.createGain()
+    master.gain.value = 0.9
+    rev.connect(master); dist.connect(master); master.connect(ctx.destination)
+
+    if (teamId === 'mi') {
+      // Mumbai Indians — Deep ocean bass wave + thunderous power chords + "Duniya Hila Denge" triumphant blast
+      for (let i = 0; i < 3; i++) {
+        tone(ctx, dist, 55 - i * 5, 'sine', now + i * 0.12, 0.55, 0.7)          // sub bass hits
+      }
+      ;[293.66, 440.00, 587.33, 880.00].forEach((f, i) => {
+        tone(ctx, dist, f, 'square', now + 0.38 + i * 0.10, 0.55, 0.22)
+      })
+      // Ocean wave sweep
+      const sweep = ctx.createOscillator(); const sG = ctx.createGain()
+      sweep.connect(sG); sG.connect(master)
+      sweep.type = 'sine'
+      sweep.frequency.setValueAtTime(120, now + 0.8); sweep.frequency.linearRampToValueAtTime(40, now + 1.8)
+      sG.gain.setValueAtTime(0.5, now + 0.8); sG.gain.exponentialRampToValueAtTime(0.001, now + 1.9)
+      sweep.start(now + 0.8); sweep.stop(now + 2.0)
+
+    } else if (teamId === 'csk') {
+      // CSK — Iconic Whistle Podu! — shrill referee whistle trill + brass horn fanfare
+      const wFreqs = [2637, 2637, 2093, 2637, 2637, 3136, 2637]
+      wFreqs.forEach((f, i) => {
+        const lfo = ctx.createOscillator(); const lfoG = ctx.createGain()
+        const whistle = ctx.createOscillator(); const wG = ctx.createGain()
+        lfo.frequency.value = 8; lfo.type = 'sine'
+        lfoG.gain.value = 60
+        lfo.connect(lfoG); lfoG.connect(whistle.frequency)
+        whistle.connect(wG); wG.connect(master)
+        whistle.type = 'sine'; whistle.frequency.value = f
+        const t = now + i * 0.13
+        wG.gain.setValueAtTime(0, t); wG.gain.linearRampToValueAtTime(0.28, t + 0.02)
+        wG.gain.exponentialRampToValueAtTime(0.001, t + 0.11)
+        lfo.start(t); lfo.stop(t + 0.13)
+        whistle.start(t); whistle.stop(t + 0.13)
+      })
+      // Brass fanfare after whistle
+      ;[261.63, 329.63, 392.00, 523.25, 659.25].forEach((f, i) => {
+        tone(ctx, rev, f, 'sawtooth', now + 0.95 + i * 0.11, 0.6, 0.18)
+      })
+
+    } else if (teamId === 'rcb') {
+      // RCB — Distorted rock power chord crash + crowd roar rise
+      const chordFreqs = [[110, 138.59, 164.81], [220, 277.18, 329.63]]
+      chordFreqs.forEach((chord, ci) => {
+        chord.forEach(f => tone(ctx, dist, f, 'sawtooth', now + ci * 0.35, 0.8, 0.25))
+      })
+      // Noise burst = crowd roar
+      const bufLen = ctx.sampleRate * 0.8
+      const noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate)
+      const nd = noiseBuf.getChannelData(0)
+      for (let i = 0; i < bufLen; i++) nd[i] = (Math.random() * 2 - 1) * Math.pow(i / bufLen, 0.3) * Math.pow(1 - i / bufLen, 0.5)
+      const noiseS = ctx.createBufferSource(); const nG = ctx.createGain()
+      const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 800
+      noiseS.buffer = noiseBuf; noiseS.connect(lpf); lpf.connect(nG); nG.connect(master)
+      nG.gain.value = 0.6
+      noiseS.start(now + 0.75)
+
+    } else if (teamId === 'kkr') {
+      // KKR — War drums: Korbo Lorbo Jeetbo thunder — deep taiko drums + dark bass horn
+      const drumTimes = [0, 0.22, 0.44, 0.55, 0.66, 0.88]
+      drumTimes.forEach(t => {
+        const d = ctx.createOscillator(); const dG = ctx.createGain()
+        d.connect(dG); dG.connect(dist)
+        d.type = 'sine'; d.frequency.setValueAtTime(120, now + t); d.frequency.exponentialRampToValueAtTime(40, now + t + 0.18)
+        dG.gain.setValueAtTime(0.9, now + t); dG.gain.exponentialRampToValueAtTime(0.001, now + t + 0.22)
+        d.start(now + t); d.stop(now + t + 0.25)
+      })
+      // Dark bass horn
+      ;[98, 123.47, 146.83, 196.00].forEach((f, i) => {
+        tone(ctx, rev, f, 'square', now + 1.0 + i * 0.13, 0.7, 0.3)
+      })
+
+    } else if (teamId === 'dc') {
+      // DC — Sharp Delhi capital bugle call — bright ascending trumpet fanfare
+      ;[523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, i) => {
+        tone(ctx, rev, f, 'sawtooth', now + i * 0.09, 0.5, 0.2, 0.02)
+      })
+      // Punchy drum accent
+      for (let i = 0; i < 3; i++) {
+        tone(ctx, dist, 80 - i * 8, 'sine', now + 0.5 + i * 0.15, 0.18, 0.5)
+      }
+
+    } else if (teamId === 'rr') {
+      // RR — Halla Bol — royal Rajasthani folk instrument feel + festive fanfare
+      const folkNotes = [392, 440, 493.88, 587.33, 493.88, 659.25, 587.33, 783.99]
+      folkNotes.forEach((f, i) => {
+        tone(ctx, rev, f, 'triangle', now + i * 0.10, 0.45, 0.2)
+        tone(ctx, rev, f * 2, 'sine', now + i * 0.10, 0.35, 0.08)   // octave shimmer
+      })
+
+    } else if (teamId === 'srh') {
+      // SRH — Rise Up Orange Army — fast climbing sunrise crescendo
+      const riseFreqs = [220, 261.63, 329.63, 392, 493.88, 587.33, 739.99, 987.77]
+      riseFreqs.forEach((f, i) => {
+        tone(ctx, rev, f, 'sawtooth', now + i * 0.075, 0.45 + i * 0.02, 0.14 + i * 0.015)
+      })
+      tone(ctx, dist, 65, 'sine', now + 0.65, 0.5, 0.7)   // orange boom
+
+    } else if (teamId === 'pbks') {
+      // PBKS — Sher Di Dhaad — bhangra dhol pattern: ta-ta-ta-DHUM
+      const dholPattern = [[0, 160, 0.12], [0.14, 180, 0.10], [0.26, 200, 0.10], [0.36, 90, 0.30],
+                           [0.68, 160, 0.12], [0.82, 180, 0.10], [0.94, 200, 0.10], [1.04, 90, 0.30]]
+      dholPattern.forEach(([t, f, dur]) => {
+        const d = ctx.createOscillator(); const dG = ctx.createGain()
+        d.connect(dG); dG.connect(dist)
+        d.type = 'triangle'; d.frequency.setValueAtTime(f, now + t); d.frequency.exponentialRampToValueAtTime(f * 0.5, now + t + dur)
+        dG.gain.setValueAtTime(0.6, now + t); dG.gain.exponentialRampToValueAtTime(0.001, now + t + dur)
+        d.start(now + t); d.stop(now + t + dur + 0.05)
+      })
+      // Pungi (folk flute) melody on top
+      ;[659.25, 783.99, 987.77, 783.99].forEach((f, i) => {
+        tone(ctx, rev, f, 'triangle', now + 0.4 + i * 0.14, 0.35, 0.15)
+      })
+
+    } else if (teamId === 'lsg') {
+      // LSG — Nawabi Lucknow — stately clarion call, regal ascending arpeggio
+      ;[261.63, 329.63, 392.00, 523.25, 659.25, 783.99].forEach((f, i) => {
+        tone(ctx, rev, f, 'sine', now + i * 0.13, 0.65, 0.2 + i * 0.01)
+        if (i > 1) tone(ctx, rev, f * 1.5, 'triangle', now + i * 0.13 + 0.06, 0.3, 0.1)
+      })
+      tone(ctx, dist, 60, 'sine', now + 0.9, 0.45, 0.55)   // nawabi bass
+
+    } else if (teamId === 'gt') {
+      // GT — Aava Do Titans — clash of titans: anvil-style power + triumphant rise
+      for (let i = 0; i < 4; i++) {
+        tone(ctx, dist, 55 + i * 8, 'square', now + i * 0.08, 0.35, 0.55 - i * 0.05)
+      }
+      ;[392, 493.88, 587.33, 739.99, 987.77].forEach((f, i) => {
+        tone(ctx, rev, f, 'sawtooth', now + 0.45 + i * 0.09, 0.55, 0.2)
+      })
+      tone(ctx, dist, 70, 'sine', now + 1.0, 0.35, 0.65)
+
+    } else {
+      // Default — generic cricket fanfare
+      ;[261.63, 329.63, 392.00, 523.25, 659.25].forEach((f, i) => {
+        tone(ctx, rev, f, 'square', now + i * 0.12, 0.55, 0.2)
+      })
+      tone(ctx, dist, 80, 'sine', now + 0.7, 0.35, 0.6)
+    }
   } catch (_) {}
 }
 

@@ -19,10 +19,13 @@ export default function InviteOnOpenSheet() {
   useEffect(() => {
     if (!user) return
     if (SKIP_PATHS.some(p => pathname.startsWith(p))) return
-    const shown = sessionStorage.getItem('cy_invite_popup_shown')
-    if (shown) return
-    sessionStorage.setItem('cy_invite_popup_shown', '1')
-    const t = setTimeout(() => { setOpen(true); requestAnimationFrame(() => setVisible(true)) }, 2500)
+    if (sessionStorage.getItem('cy_invite_popup_shown')) return
+    const t = setTimeout(() => {
+      if (sessionStorage.getItem('cy_invite_popup_shown')) return
+      sessionStorage.setItem('cy_invite_popup_shown', '1')
+      setOpen(true)
+      requestAnimationFrame(() => setVisible(true))
+    }, 2500)
     return () => clearTimeout(t)
   }, [user?.id]) // eslint-disable-line
 
