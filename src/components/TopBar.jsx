@@ -69,14 +69,11 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
             {title && showBack ? (
               <p className="font-bold text-navy-900 text-sm truncate leading-tight">{title}</p>
             ) : (
-              <>
-                <p className="font-extrabold text-navy-900 text-sm leading-none">CricYaar</p>
-                {isRoot && (
-                  <p className="text-brand-500 text-[8px] font-bold tracking-[0.15em] uppercase leading-none mt-[3px]">
-                    Your Game. Your Record. For Real.
-                  </p>
-                )}
-              </>
+              isRoot && (
+                <p className="text-brand-500 text-[8px] font-bold tracking-[0.15em] uppercase leading-none">
+                  Your Game. Your Record.
+                </p>
+              )
             )}
           </div>
         </button>
@@ -84,23 +81,15 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
 
       {/* RIGHT: PRO + Refer + Bell */}
       <div className="flex items-center gap-0.5 flex-shrink-0">
-        {isPro && (
-          <span
-            className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold text-white tracking-wide select-none mr-1"
-            style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', boxShadow: '0 1px 4px rgba(245,158,11,0.35)' }}
-          >
-            👑 PRO
-          </span>
-        )}
         <button
           onClick={() => navigate('/invite')}
           className="flex items-center gap-1.5 h-8 rounded-full flex-shrink-0 active:scale-95 transition-all"
           style={{
             padding: '0 12px',
-            background: 'linear-gradient(135deg,#16a34a,#15803d)',
-            boxShadow: '0 2px 10px rgba(22,163,74,0.4)',
+            background: 'linear-gradient(135deg,#7C3AED,#5B21B6)',
+            boxShadow: '0 2px 10px rgba(124,58,237,0.4)',
           }}
-          aria-label="Refer & Earn"
+          aria-label="Refer &amp; Earn"
         >
           <Gift size={13} strokeWidth={2.5} color="#fff" />
           <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.01em' }}>Refer &amp; Earn</span>

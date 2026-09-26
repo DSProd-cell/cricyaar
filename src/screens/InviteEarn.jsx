@@ -15,24 +15,24 @@ function currentLevel(n) {
 
 const LEVELS = [
   {
-    level: 1, friendsNeeded: 1, earn: '₹1',
+    level: 1, friendsNeeded: 1, earn: 'Get 1 month Pro',
     bg: 'linear-gradient(150deg,#7C3AED 0%,#4C1D95 100%)',
-    activeLabel: 'refer 1 friend and earn ₹1',
+    activeLabel: 'refer 1 friend — Get 1 month Pro',
     activeSub: '1 month Pro free for both of you',
     reached: FRIEND_COUNT >= 1,
   },
   {
-    level: 2, friendsNeeded: 3, earn: '₹2',
+    level: 2, friendsNeeded: 3, earn: 'Get 2 months Pro',
     bg: 'linear-gradient(150deg,#2563EB 0%,#1E3A8A 100%)',
     reached: FRIEND_COUNT >= 3,
   },
   {
-    level: 3, friendsNeeded: 7, earn: '₹3',
+    level: 3, friendsNeeded: 7, earn: 'Get 3 months Pro',
     bg: 'linear-gradient(150deg,#059669 0%,#064E3B 100%)',
     reached: FRIEND_COUNT >= 7,
   },
   {
-    level: 4, friendsNeeded: 15, earn: '₹4',
+    level: 4, friendsNeeded: 15, earn: 'Get 4 months Pro',
     bg: 'linear-gradient(150deg,#9333EA 0%,#581C87 100%)',
     reached: FRIEND_COUNT >= 15,
   },
@@ -102,7 +102,7 @@ function MoneyStack() {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          {i === 0 && <span style={{ color: '#fff', fontSize: 16, fontWeight: 900 }}>₹1</span>}
+          {i === 0 && <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, textAlign: 'center', lineHeight: 1.2 }}>1 mo{'\n'}Pro</span>}
         </div>
       ))}
     </div>
@@ -347,7 +347,7 @@ export default function InviteEarn() {
 
         {/* CY Logo + Tagline */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 13, background: 'linear-gradient(135deg,#22c55e,#16a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px #000, 0 0 18px rgba(34,197,94,0.5)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: 13, background: 'linear-gradient(135deg,#7C3AED,#5B21B6)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px #000, 0 0 18px rgba(124,58,237,0.5)' }}>
             <span style={{ color: '#fff', fontWeight: 900, fontSize: 19, letterSpacing: '-0.04em' }}>CY</span>
           </div>
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>

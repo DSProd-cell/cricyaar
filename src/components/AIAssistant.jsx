@@ -437,7 +437,7 @@ export default function AIAssistant() {
       {/* ── Chat sheet ── */}
       {open && (
         <div
-          className="fixed inset-0 z-[58] flex flex-col justify-end"
+          className="fixed inset-0 z-[65] flex flex-col justify-end"
           onClick={() => setOpen(false)}
         >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
