@@ -5,8 +5,20 @@ import { useStore } from '../store/useStore'
 // Resets when the JS module is re-evaluated (fresh page load / app reopen)
 let _shown = false
 
-// Called by logout handler to force splash on next navigation
-export function resetSplash() { _shown = false }
+// Module-level refs to the live React setters — wired up inside the component
+let _setVisible  = null
+let _setFading   = null
+let _setPhase    = null
+let _setProgress = null
+
+// Called by logout handler — resets flag AND forces the component to re-show
+export function resetSplash() {
+  _shown = false
+  if (_setFading)   _setFading(false)
+  if (_setPhase)    _setPhase(0)
+  if (_setProgress) _setProgress(0)
+  if (_setVisible)  _setVisible(true)
+}
 
 const TAGLINES = [
   "India's First Fraud-Free Cricket Platform",
@@ -45,6 +57,15 @@ export default function SplashOverlay() {
   const [phase, setPhase]     = useState(0)
   const [progress, setProgress] = useState(0)
   const rafRef = useRef(null)
+
+  // Register setters so resetSplash() can reach live React state
+  useEffect(() => {
+    _setVisible  = setVisible
+    _setFading   = setFading
+    _setPhase    = setPhase
+    _setProgress = setProgress
+    return () => { _setVisible = _setFading = _setPhase = _setProgress = null }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const dismissTo = (path) => {
     setFading(true)
@@ -176,7 +197,7 @@ export default function SplashOverlay() {
           style={{
             width: 84, height: 84,
             borderRadius: 22,
-            background: 'linear-gradient(135deg, var(--cy-primary,#7C3AED) 0%, var(--cy-bg-mid,#5B21B6) 100%)',
+            background: 'var(--cy-primary, #7C3AED)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginBottom: 16,
             animation: show(0) ? 'splashPulse 3s ease-in-out infinite' : 'none',
@@ -301,7 +322,7 @@ export default function SplashOverlay() {
               onClick={() => dismissTo('/')}
               style={{
                 width: '100%', padding: '16px', borderRadius: 16,
-                background: 'linear-gradient(135deg, var(--cy-primary,#7C3AED), var(--cy-bg-mid,#5B21B6))',
+                background: 'var(--cy-primary, #7C3AED)',
                 color: '#fff', fontSize: 16, fontWeight: 700,
                 border: 'none', cursor: 'pointer',
                 boxShadow: '0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))',
@@ -315,7 +336,7 @@ export default function SplashOverlay() {
                 onClick={() => dismissTo('/login?mode=signup')}
                 style={{
                   width: '100%', padding: '16px', borderRadius: 16,
-                  background: 'linear-gradient(135deg, var(--cy-primary,#7C3AED), var(--cy-bg-mid,#5B21B6))',
+                  background: 'var(--cy-primary, #7C3AED)',
                   color: '#fff', fontSize: 16, fontWeight: 700,
                   border: 'none', cursor: 'pointer',
                   boxShadow: '0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))',
@@ -329,7 +350,7 @@ export default function SplashOverlay() {
                   width: '100%', padding: '16px', borderRadius: 16,
                   background: 'transparent',
                   color: 'var(--cy-secondary,#C4B5FD)', fontSize: 16, fontWeight: 700,
-                  border: '2px solid color-mix(in srgb, var(--cy-secondary,#C4B5FD) 50%, transparent)',
+                  border: '2px solid var(--cy-secondary-50, rgba(196,181,253,0.5))',
                   cursor: 'pointer',
                 }}
               >

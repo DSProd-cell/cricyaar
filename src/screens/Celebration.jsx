@@ -94,7 +94,7 @@ export default function Celebration() {
         {/* CTA */}
         <button
           onClick={() => navigate('/ipl-pick')}
-          style={{ width:'100%', padding:'16px', background:'linear-gradient(135deg,var(--cy-primary,#7C3AED),var(--cy-bg-mid,#5B21B6))', color:'#fff', fontWeight:900, borderRadius:16, fontSize:15, border:'none', cursor:'pointer', boxShadow:'0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))', marginBottom:12, transition:'transform 0.1s', }}
+          style={{ width:'100%', padding:'16px', background:'var(--cy-primary,#7C3AED)', color:'#fff', fontWeight:900, borderRadius:16, fontSize:15, border:'none', cursor:'pointer', boxShadow:'0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))', marginBottom:12, transition:'transform 0.1s', }}
           onMouseDown={e=>e.currentTarget.style.transform='scale(0.98)'}
           onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
         >

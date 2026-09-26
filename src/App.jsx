@@ -155,6 +155,7 @@ function WhatsNewGate({ children }) {
         if (storeUser) {
           useStore.setState({ user: null, isAuthenticated: false })
         }
+        resetSplash()
       }
     })
     return () => authSub.unsubscribe()

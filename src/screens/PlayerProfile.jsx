@@ -7,6 +7,7 @@ import { uploadAvatar } from '../lib/uploads'
 import TopBar from '../components/TopBar'
 import { getRoleColor, CAN_COLLECT, NEEDS_AADHAAR } from '../lib/roleColors'
 import { resetSplash } from '../components/SplashOverlay'
+import IplTeamPicker from './IplTeamPicker'
 import ShareAchievement from '../components/ShareAchievement'
 import {
   BarChart2, Activity, Users, Trophy, X, MapPin, Check, ChevronRight, Camera,
@@ -130,8 +131,7 @@ function roleStats(role, player) {
 }
 
 // ─── Logout confirm modal ────────────────────────────────────────────────────
-function IplTeamProfileRow({ roleColor }) {
-  const navigate = useNavigate()
+function IplTeamProfileRow({ roleColor, onPress }) {
   const { iplTeam } = useStore()
   const [teamData, setTeamData] = useState(null)
   useEffect(() => {
@@ -143,7 +143,7 @@ function IplTeamProfileRow({ roleColor }) {
   }, [iplTeam])
   return (
     <button
-      onClick={() => navigate('/ipl-pick')}
+      onClick={onPress}
       className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
       style={{ borderBottom: `1px solid ${roleColor.border}` }}
     >
@@ -202,6 +202,7 @@ export default function PlayerProfile() {
   const [tab, setTab]             = useState('Overview')
   const [showEdit, setShowEdit]   = useState(false)
   const [showSignOut, setShowSignOut] = useState(false)
+  const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
   const photoRef = useRef(null)
 
@@ -506,7 +507,7 @@ export default function PlayerProfile() {
             </button>
 
             {/* Favourite IPL Team */}
-            <IplTeamProfileRow roleColor={roleColor} />
+            <IplTeamProfileRow roleColor={roleColor} onPress={() => setShowTeamPicker(true)} />
 
             {/* App Settings */}
             <button
@@ -752,6 +753,13 @@ export default function PlayerProfile() {
           onCancel={() => setShowSignOut(false)}
           onConfirm={handleSignOut}
         />
+      )}
+
+      {/* IPL Team Picker — full-screen overlay, no navigation */}
+      {showTeamPicker && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 8500, overflowY: 'auto' }}>
+          <IplTeamPicker onDone={() => setShowTeamPicker(false)} />
+        </div>
       )}
     </div>
   )
