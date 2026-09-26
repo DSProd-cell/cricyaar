@@ -20,7 +20,6 @@ import InviteOnOpenSheet from './components/InviteOnOpenSheet'
 import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
-import LandingPage    from './screens/LandingPage'
 import Welcome        from './screens/Welcome'
 import ProfileMatch   from './screens/ProfileMatch'
 import CitySelect     from './screens/CitySelect'
@@ -71,7 +70,7 @@ import GroundOwnerDashboard from './screens/GroundOwnerDashboard'
 
 function AuthGuard({ children }) {
   const { user } = useStore()
-  if (!user) return <Navigate to="/landing" replace />
+  if (!user) return <Navigate to="/welcome" replace />
   return children
 }
 
@@ -121,9 +120,7 @@ function WhatsNewGate({ children }) {
     // cy_last_active check above is the only auto-logout gate.
     supabase.auth.getSession().then(({ data: { session } }) => {
       const storeUser = useStore.getState().user
-      // Don't restore session if the user just signed out — prevents redirect loop
-      const fromSignout = window.location.search.includes('from=signout')
-      if (session && !storeUser && !fromSignout) {
+      if (session && !storeUser) {
         // Have a valid Supabase session but no Zustand user — restore it
         supabase.from('profiles').select('*').eq('id', session.user.id).single()
           .then(({ data: profile }) => {
@@ -232,7 +229,7 @@ function GlobalShareSheet() {
   )
 }
 
-const PRE_LOGIN_PATHS = ['/landing', '/welcome', '/login', '/otp', '/setup', '/profile-match', '/celebration', '/city-select', '/role-select', '/player-match', '/role-onboard', '/player-setup']
+const PRE_LOGIN_PATHS = ['/welcome', '/login', '/otp', '/setup', '/profile-match', '/celebration', '/city-select', '/role-select', '/player-match', '/role-onboard', '/player-setup']
 
 function FloatingSignOut() {
   const navigate  = useNavigate()
@@ -241,7 +238,7 @@ function FloatingSignOut() {
   if (!user || PRE_LOGIN_PATHS.includes(pathname)) return null
   const handleSignOut = () => {
     logout()
-    navigate('/landing?from=signout')
+    navigate('/welcome')
     addToast('Signed out successfully', 'info')
   }
   return (
@@ -269,7 +266,7 @@ function AppShell({ children }) {
 
   const noShell = [
     '/welcome','/login','/otp','/setup','/role-warning','/role-select',
-    '/whats-new','/landing','/pro-payment','/celebration','/player-match',
+    '/whats-new','/pro-payment','/celebration','/player-match',
     '/role-onboard','/player-setup','/city-select','/profile-match',
   ].includes(pathname)
     || pathname.startsWith('/score')
@@ -302,7 +299,7 @@ export default function App() {
       <AppShell>
         <Routes>
           {/* Landing + auth */}
-          <Route path="/landing"       element={<LandingPage />} />
+          <Route path="/landing"       element={<Navigate to="/welcome" replace />} />
           <Route path="/welcome"       element={<Welcome />} />
           <Route path="/login"         element={<Login />} />
           <Route path="/otp"           element={<OtpVerify />} />
@@ -355,7 +352,7 @@ export default function App() {
           <Route path="/ground-owner"        element={<AuthGuard><GroundOwnerDashboard /></AuthGuard>} />
 
           {/* Legacy redirect */}
-          <Route path="/usp" element={<Navigate to="/landing" replace />} />
+          <Route path="/usp" element={<Navigate to="/welcome" replace />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
