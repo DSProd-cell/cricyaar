@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore'
 import { MATCHES, PLAYERS, TEAMS, TOURNAMENTS, teamById, playerById } from '../data/mock'
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
+import RoleStrip from '../components/RoleStrip'
 import {
   Activity, MapPin, Trophy, Eye, BarChart2, Building2, Circle,
   ChevronRight, Lock, Users, Send, Crown, Wallet, IndianRupee
@@ -69,10 +70,9 @@ function RoleChangePopup({ onClose }) {
   )
 }
 
-export default function PlayerHome() {
+export default function PlayerHome({ activeRole, setActiveRole }) {
   const navigate  = useNavigate()
   const { user }  = useStore()
-  const [locked, setLocked]           = useState(null)
   const [scoreMatch, setScoreMatch]   = useState(null)
 
   const player     = PLAYERS.find(p => p.id === user?.id) || PLAYERS[0]
@@ -93,19 +93,16 @@ export default function PlayerHome() {
       <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full pb-44">
 
         {/* Greeting */}
-        <div className="mb-5 animate-fade-in">
+        <div className="mb-4 animate-fade-in">
           <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
             Hey, {user?.name?.split(' ')[0] || 'Player'} 👋
           </h2>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: '#dbeafe', color: '#2563eb' }}>
-              🏏 Player
-            </span>
-            {myTeams.length > 0 && (
-              <span className="text-navy-500 text-xs">{myTeams.length} team{myTeams.length > 1 ? 's' : ''}</span>
-            )}
-          </div>
         </div>
+
+        {/* Role strip */}
+        {activeRole && setActiveRole && (
+          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
+        )}
 
         {/* Hero — live banner (read-only scorecard) */}
         {liveMatch && (
@@ -211,27 +208,8 @@ export default function PlayerHome() {
           </button>
         </div>
 
-        {/* Locked blocks */}
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Lock size={11} className="text-slate-400" />
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Other Role Features</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <LockedBlock icon={Eye} title="Umpiring" sub="Umpire feature"
-              onTap={() => setLocked(true)} />
-            <LockedBlock icon={Building2} title="My Ground" sub="Ground Owner feature"
-              onTap={() => setLocked(true)} />
-            <LockedBlock icon={BarChart2} title="Manage Tournaments" sub="Organiser feature"
-              onTap={() => setLocked(true)} />
-            <LockedBlock icon={Send} title="Ground Requests" sub="Organiser feature"
-              onTap={() => setLocked(true)} />
-          </div>
-        </div>
-
       </main>
 
-      {locked && <RoleChangePopup onClose={() => setLocked(null)} />}
       {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
     </div>
   )

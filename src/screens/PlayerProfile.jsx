@@ -11,7 +11,7 @@ import IplTeamPicker from './IplTeamPicker'
 import ShareAchievement from '../components/ShareAchievement'
 import {
   BarChart2, Activity, Users, Trophy, X, MapPin, Check, ChevronRight, Camera,
-  Edit, LogOut, RefreshCw, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
+  Edit, LogOut, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
   Swords, ClipboardList, Scale, Megaphone, Building2, Star,
 } from 'lucide-react'
 import { useState, useMemo, useRef, useEffect } from 'react'
@@ -185,7 +185,7 @@ function LogoutModal({ onCancel, onConfirm }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function PlayerProfile() {
-  const { user, setUser, logout, addToast, setOtpMode, setProIntent } = useStore()
+  const { user, setUser, logout, addToast } = useStore()
   const navigate   = useNavigate()
   const { playerId } = useParams()
 
@@ -229,15 +229,6 @@ export default function PlayerProfile() {
     if (error) { addToast(error.message || 'Failed to save profile.', 'error'); return }
     setUser({ ...user, name: edits.name, city: edits.city, bio: edits.bio })
     addToast('Profile updated!', 'success')
-  }
-
-  const handleChangeRole = () => {
-    if (!user?.phone) {
-      setOtpMode('role-switch'); setProIntent(false)
-      navigate('/login?mode=signup')
-    } else {
-      navigate('/role-select')
-    }
   }
 
   const handleSignOut = () => {
@@ -472,22 +463,6 @@ export default function PlayerProfile() {
                 ? <span className="text-xs font-bold px-2 py-0.5 rounded-full text-amber-700 bg-amber-50 flex-shrink-0">Active</span>
                 : <span className="text-xs font-bold px-2.5 py-1 rounded-full text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}>Upgrade</span>
               }
-            </button>
-
-            {/* Change Role */}
-            <button
-              onClick={handleChangeRole}
-              className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
-              style={{ borderBottom: `1px solid ${roleColor.border}` }}
-            >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
-                <RefreshCw size={17} style={{ color: roleColor.primary }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-navy-900 text-sm">Change Role</p>
-                <p className="text-navy-400 text-xs mt-0.5">Current: {roleColor.label}</p>
-              </div>
-              <span className="text-[10px] text-navy-400 flex-shrink-0">OTP required</span>
             </button>
 
             {/* Invite & Earn */}

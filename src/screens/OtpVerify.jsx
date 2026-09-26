@@ -109,8 +109,8 @@ export default function OtpVerify() {
           upiId: profile?.upi_id || null,
         })
       }
-      addToast('Account created! Now choose your role.', 'success')
-      navigate('/role-select')
+      addToast('Account created! Welcome to CricYaar.', 'success')
+      navigate('/')
     } else {
       const isNewUser = !profile?.onboarded
       const savedRole = localStorage.getItem('cricyaar_last_role')

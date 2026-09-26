@@ -8,6 +8,7 @@ import { toGroundRow, fetchMyGrounds } from '../lib/groundsApi'
 import { uploadGroundPhoto } from '../lib/uploads'
 import { getCurrentCoords } from '../lib/geolocation'
 import TopBar from '../components/TopBar'
+import RoleStrip from '../components/RoleStrip'
 import {
   MapPin, BarChart2, Send, ChevronRight, CheckCircle, Clock,
   Building2, Star, Trophy, Calendar, IndianRupee, Users,
@@ -526,7 +527,7 @@ function DemandCard({ item, onSend }) {
 }
 
 // ── Main component ───────────────────────────────────────────────────────────
-export default function GroundOwnerHome() {
+export default function GroundOwnerHome({ activeRole, setActiveRole }) {
   const navigate = useNavigate()
   const { user, addToast } = useStore()
 
@@ -569,16 +570,12 @@ export default function GroundOwnerHome() {
           <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
             Hey, {user?.name?.split(' ')[0] || 'Ground Owner'} 👋
           </h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background:'#cffafe', color:'#0891b2' }}>
-              📍 Ground Owner
-            </span>
-            {isVerified
-              ? <span className="flex items-center gap-1 text-xs text-teal-600 font-semibold"><CheckCircle size={11} />Verified</span>
-              : <span className="flex items-center gap-1 text-xs text-amber-600 font-semibold"><Clock size={11} />Verification pending</span>
-            }
-          </div>
         </div>
+
+        {/* Role strip */}
+        {activeRole && setActiveRole && (
+          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
+        )}
 
         {/* Verification banner (only if not verified) */}
         {!isVerified && (

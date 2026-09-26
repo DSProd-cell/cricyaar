@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, PLAYERS, TEAMS, TOURNAMENTS, UMPIRE_PROFILE, teamById, playerById } from '../data/mock'
-import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, LayoutGrid, Star, Crown, Plus, X, BookOpen, Swords, GraduationCap, Gift, RefreshCw, LogIn, Send, Wallet } from 'lucide-react'
+import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, LayoutGrid, Star, Crown, Plus, X, BookOpen, Swords, GraduationCap, Gift, LogIn, Send, Wallet } from 'lucide-react'
 import TopBar from '../components/TopBar'
 import RoleLockedModal from '../components/RoleLockedModal'
 import FanHome from './FanHome'
@@ -116,7 +116,6 @@ function CricYaarFAB({ role, isPro }) {
   const isCapOrOrg = ['captain','organiser','admin'].includes(role)
 
   const actions = [
-    { icon: RefreshCw, label: 'Change Role', path: '/role-select', roles: ['player','captain','organiser','umpire','fan','admin'] },
     { icon: Send,   label: 'Send Money',    path: '/send-money',    roles: ['player','captain','organiser','umpire','admin'] },
     { icon: Wallet, label: 'Receive Money', path: '/receive-money', roles: ['player','captain','organiser','umpire','admin'] },
     { icon: Swords, label: 'Find Opponent', path: '/opponent-finder', roles: ['captain','organiser','admin'], pro: true },
@@ -165,12 +164,20 @@ export default function Home() {
   const { user } = useStore()
   const role = user?.role || 'fan'
 
+  const [activeRole, setActiveRole] = useState(() => {
+    return localStorage.getItem('cy_active_role') || (role !== 'fan' ? role : 'player')
+  })
+  const handleSetActiveRole = (r) => {
+    setActiveRole(r)
+    localStorage.setItem('cy_active_role', r)
+  }
+
   // Route to role-specific home screens
   if (role === 'fan')          return <FanHome />
-  if (role === 'umpire')       return <UmpireHome />
-  if (role === 'ground_owner') return <GroundOwnerHome />
-  if (role === 'player')       return <PlayerHome />
-  if (role === 'organiser')    return <OrganiserHome />
+  if (activeRole === 'umpire')       return <UmpireHome activeRole={activeRole} setActiveRole={handleSetActiveRole} />
+  if (activeRole === 'ground_owner') return <GroundOwnerHome activeRole={activeRole} setActiveRole={handleSetActiveRole} />
+  if (activeRole === 'organiser')    return <OrganiserHome activeRole={activeRole} setActiveRole={handleSetActiveRole} />
+  return <PlayerHome activeRole={activeRole} setActiveRole={handleSetActiveRole} />
 
   const player     = PLAYERS.find(p => p.id === user?.id) || PLAYERS[0]
   const myTeams    = TEAMS.filter(t => t.squad.includes(player?.id))

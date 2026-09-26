@@ -25,14 +25,15 @@ export default function CitySelect() {
   const handleContinue = async () => {
     if (!selected || saving) return
     setSaving(true)
-    setUser({ ...user, city: selected })
+    const defaultRole = user?.role && user.role !== 'fan' ? user.role : 'player'
+    setUser({ ...user, city: selected, role: defaultRole })
     try {
       const { supabase } = await import('../lib/supabase')
       if (user?.id) {
-        await supabase.from('profiles').update({ city: selected }).eq('id', user.id)
+        await supabase.from('profiles').update({ city: selected, role: defaultRole, onboarded: true }).eq('id', user.id)
       }
     } catch {}
-    navigate('/role-select')
+    navigate('/')
   }
 
   return (
@@ -105,7 +106,7 @@ export default function CitySelect() {
             {saving ? 'Saving…' : 'Continue →'}
           </button>
           <button
-            onClick={() => navigate('/role-select')}
+            onClick={() => navigate('/')}
             className="w-full py-3 text-slate-400 font-medium text-sm"
           >
             Skip for now

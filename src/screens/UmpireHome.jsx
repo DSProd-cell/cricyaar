@@ -9,6 +9,7 @@ import {
 import { fetchApprovedGrounds } from '../lib/groundsApi'
 import UmpireMatchSession from './UmpireMatchSession'
 import TopBar from '../components/TopBar'
+import RoleStrip from '../components/RoleStrip'
 import ProPaywallSheet from '../components/ProPaywallSheet'
 import MatchScoreSheet from '../components/MatchScoreSheet'
 import {
@@ -1645,7 +1646,7 @@ function MyRequests({ umpireRequests, umpireTournamentRequests, addToast }) {
 // ══════════════════════════════════════════════════════════════════════════════
 // Main Component
 // ══════════════════════════════════════════════════════════════════════════════
-export default function UmpireHome() {
+export default function UmpireHome({ activeRole, setActiveRole }) {
   const navigate = useNavigate()
   const { user, addToast,
           umpireRequests, addUmpireRequest, withdrawUmpireRequest,
@@ -1676,14 +1677,12 @@ export default function UmpireHome() {
           <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
             Hey, {user?.name?.split(' ')[0] || 'Umpire'} 👋
           </h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background:'#fef3c7', color:'#d97706' }}>
-              ⚖️ Umpire
-            </span>
-            <span className="text-navy-400 text-xs">·</span>
-            <span className="text-navy-500 text-xs">⭐ {UMPIRE_PROFILE.rating} · {UMPIRE_PROFILE.matchesUmpired} matches umpired</span>
-          </div>
         </div>
+
+        {/* Role strip */}
+        {activeRole && setActiveRole && (
+          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
+        )}
 
         {/* Tab bar — scrollable on small screens */}
         <div className="flex gap-1 bg-slate-200 p-1 rounded-2xl mb-4 animate-fade-in overflow-x-auto no-scrollbar">

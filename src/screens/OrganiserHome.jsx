@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore'
 import { MATCHES, TEAMS, TOURNAMENTS, teamById } from '../data/mock'
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
+import RoleStrip from '../components/RoleStrip'
 import {
   BarChart2, Trophy, MapPin, Activity, Eye, Building2,
   Circle, ChevronRight, Lock, Users, Send, Crown, Check,
@@ -232,7 +233,7 @@ function RoleChangePopup({ onClose }) {
   )
 }
 
-export default function OrganiserHome() {
+export default function OrganiserHome({ activeRole, setActiveRole }) {
   const navigate = useNavigate()
   const { user } = useStore()
   const [locked, setLocked]           = useState(null)
@@ -255,18 +256,16 @@ export default function OrganiserHome() {
       <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full pb-44">
 
         {/* Greeting */}
-        <div className="mb-5 animate-fade-in">
+        <div className="mb-4 animate-fade-in">
           <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
             Hey, {user?.name?.split(' ')[0] || 'Organiser'} 👋
           </h2>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: '#dcfce7', color: '#16a34a' }}>
-              🏆 Organiser
-            </span>
-            <span className="text-navy-400 text-xs">·</span>
-            <span className="text-navy-500 text-xs">{TOURNAMENTS.length} tournaments · {MATCHES.length} matches</span>
-          </div>
         </div>
+
+        {/* Role strip */}
+        {activeRole && setActiveRole && (
+          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
+        )}
 
         {/* Hero — stats bar */}
         <div
