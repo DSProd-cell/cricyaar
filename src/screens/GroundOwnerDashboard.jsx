@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { saveMyUpiId, fetchBookingsToConfirm, confirmBookingPayment } from '../lib/groundsApi'
+import { buildUpiLink, isValidUpiId } from '../lib/upi'
+import UpiPayment from '../lib/upiPayment'
 import TopBar from '../components/TopBar'
 import {
   Shield, MapPin, Camera, Banknote, Check, Upload,
@@ -130,55 +133,145 @@ const INITIAL_DUE_PAYMENTS = [
   { id: 'dp3', renter: 'Delhi Daredevils',  phone: '+919845612378', amount: 1600, slot: 'Sun, 1 Jun · 07:00–09:00',  remindersSent: 0 },
 ]
 
-// Builds a standard UPI deep link (the same `upi://pay` intent used by
-// GPay/PhonePe/Paytm "Pay" buttons across the web). Opening this URL on a
-// phone hands off to whichever UPI apps are installed — no bank account
-// number or IFSC is ever involved.
-function buildUpiLink({ payeeVpa, payeeName, amount, note }) {
-  const params = new URLSearchParams({
-    pa: payeeVpa,            // payee VPA (the ground owner's UPI ID)
-    pn: payeeName,           // payee name
-    am: String(amount),      // amount
-    cu: 'INR',
-    tn: note,                // transaction note
-  })
-  return `upi://pay?${params.toString()}`
+// ── Bookings to confirm — real bookings where the renter has claimed a UPI
+// payment and the owner needs to check their own UPI app and confirm ──────
+function BookingsToConfirm({ user, addToast }) {
+  const [bookings, setBookings] = useState(null) // null = loading
+  const [confirmingId, setConfirmingId] = useState(null)
+
+  useEffect(() => {
+    if (!user?.id) return
+    fetchBookingsToConfirm(user.id)
+      .then(setBookings)
+      .catch(err => { console.error('Failed to load bookings to confirm', err); setBookings([]) })
+  }, [user?.id])
+
+  const handleConfirm = async (booking) => {
+    setConfirmingId(booking.id)
+    try {
+      await confirmBookingPayment(booking.id)
+      setBookings(b => b.filter(x => x.id !== booking.id))
+      addToast('Payment confirmed', 'success')
+    } catch (err) {
+      addToast(err.message || 'Failed to confirm payment', 'error')
+    } finally {
+      setConfirmingId(null)
+    }
+  }
+
+  if (bookings === null) return null // don't flash an empty state while loading
+  if (bookings.length === 0) return null // nothing awaiting confirmation — no need to take up space
+
+  return (
+    <SectionCard title="Bookings to Confirm" icon={<Check size={15} className="text-green-600" />} badge={`${bookings.length} new`}>
+      <div className="space-y-3">
+        {bookings.map(b => (
+          <div key={b.id} className="border border-slate-100 rounded-xl p-3">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="min-w-0">
+                <p className="font-bold text-navy-900 text-sm truncate">{b.renterName}</p>
+                <p className="text-navy-400 text-xs mt-0.5">{b.slot || b.groundName}</p>
+                <p className="text-navy-300 text-[10px] mt-0.5">Ref: {b.bookingRef}</p>
+              </div>
+              <p className="font-extrabold text-green-600 text-sm flex-shrink-0">₹{Number(b.amount).toLocaleString('en-IN')}</p>
+            </div>
+            <p className="text-navy-500 text-xs mb-2">Renter says they've paid via UPI — check your UPI app or bank statement, then confirm.</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleConfirm(b)}
+                disabled={confirmingId === b.id}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-600 text-white text-xs font-bold disabled:opacity-60"
+              >
+                <Check size={13} />
+                {confirmingId === b.id ? 'Confirming…' : 'Payment Received'}
+              </button>
+              {b.renterPhone && (
+                <button
+                  onClick={() => window.location.href = `tel:${b.renterPhone}`}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold"
+                >
+                  <Phone size={13} />
+                  Call
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  )
 }
 
-function PaymentCollection({ addToast, groundName }) {
+function PaymentCollection({ user, setUser, addToast, groundName }) {
   const [dues, setDues] = useState(INITIAL_DUE_PAYMENTS)
-  const [upiId, setUpiId] = useState('')
-  const [savedUpiId, setSavedUpiId] = useState('')
+  const [upiId, setUpiId] = useState(user?.upiId || '')
   const [savingUpi, setSavingUpi] = useState(false)
+  const [testingUpi, setTestingUpi] = useState(false)
+  const savedUpiId = user?.upiId || null
 
   const handleSaveUpi = async () => {
-    if (!/^[\w.\-]{2,}@[a-zA-Z]{2,}$/.test(upiId.trim())) {
+    if (!isValidUpiId(upiId)) {
       addToast('Enter a valid UPI ID, e.g. name@okhdfcbank', 'error'); return
     }
     setSavingUpi(true)
-    await new Promise(r => setTimeout(r, 600))
-    setSavedUpiId(upiId.trim())
-    setSavingUpi(false)
-    addToast('UPI ID saved — you can now collect payments directly', 'success')
+    try {
+      await saveMyUpiId(user.id, upiId.trim())
+      setUser({ ...user, upiId: upiId.trim() })
+      addToast('UPI ID saved — you can now collect payments directly', 'success')
+    } catch (err) {
+      addToast(err.message || 'Failed to save UPI ID', 'error')
+    } finally {
+      setSavingUpi(false)
+    }
   }
 
-  const handleCollectUpi = (due) => {
+  const handleCollectUpi = async (due) => {
     if (!savedUpiId) { addToast('Add and save your UPI ID above first', 'error'); return }
-    const link = buildUpiLink({
-      payeeVpa: savedUpiId,
-      payeeName: groundName || 'CricYaar Ground',
-      amount: due.amount,
-      note: `Ground booking - ${due.renter}`,
-    })
-    // This is a native URI scheme — on a phone it hands off straight to the
-    // installed UPI apps (GPay/PhonePe/Paytm/BHIM); on desktop, with none
-    // registered to handle it, the browser will simply do nothing visible.
-    window.location.href = link
+    try {
+      const result = await UpiPayment.pay({
+        vpa: savedUpiId,
+        payeeName: user?.name || groundName || 'CricYaar Ground',
+        amount: String(due.amount),
+        note: `Ground booking - ${due.renter}`,
+      })
+      if (result.status === 'SUCCESS') addToast('UPI app confirmed the payment went through', 'success')
+      else if (result.status === 'FAILURE') addToast('UPI app reported the payment failed', 'error')
+      // SUBMITTED/CANCELLED/UNKNOWN: no confirmed status either way — this
+      // is the manual dues list, so there's no booking row to mark paid
+      // automatically the way there is for real in-app bookings.
+    } catch (err) {
+      addToast(err.message || 'Could not open a UPI app', 'error')
+    }
+  }
+
+  // Lets a ground owner verify their own UPI ID actually works end-to-end —
+  // sends ₹1 to themselves via the same native plugin used for real
+  // payments, so a SUCCESS here means the detection path genuinely works on
+  // this device, not just that the link was well-formed.
+  const handleTestPayment = async () => {
+    if (!savedUpiId) { addToast('Save your UPI ID first', 'error'); return }
+    setTestingUpi(true)
+    try {
+      const result = await UpiPayment.pay({
+        vpa: savedUpiId,
+        payeeName: user?.name || 'CricYaar Test',
+        amount: '1',
+        note: 'CricYaar UPI test payment',
+      })
+      if (result.status === 'SUCCESS') addToast('✅ Test payment confirmed — detection is working!', 'success')
+      else if (result.status === 'FAILURE') addToast('UPI app reported the test payment failed', 'error')
+      else if (result.status === 'CANCELLED') addToast('Test payment cancelled', 'info')
+      else addToast(`No confirmed status from the UPI app (${result.status}). It may still have gone through — check your UPI app.`, 'info')
+    } catch (err) {
+      addToast(err.message || 'Could not open a UPI app', 'error')
+    } finally {
+      setTestingUpi(false)
+    }
   }
 
   const handleRemind = (due) => {
     const upiLine = savedUpiId
-      ? `\n\nPay directly via UPI: ${buildUpiLink({ payeeVpa: savedUpiId, payeeName: groundName || 'CricYaar Ground', amount: due.amount, note: `Ground booking - ${due.renter}` })}`
+      ? `\n\nPay directly via UPI: ${buildUpiLink({ payeeVpa: savedUpiId, payeeName: user?.name || groundName || 'CricYaar Ground', amount: due.amount, note: `Ground booking - ${due.renter}` })}`
       : ''
     const message = `Hi ${due.renter}, this is a reminder that ₹${due.amount.toLocaleString('en-IN')} is pending for your ground booking (${due.slot}).${upiLine}\n\n— CricYaar`
     const waNumber = due.phone.replace(/\D/g, '')
@@ -213,9 +306,27 @@ function PaymentCollection({ addToast, groundName }) {
             {savingUpi ? 'Saving…' : 'Save'}
           </button>
         </div>
-        {savedUpiId && <p className="text-green-600 text-xs mt-1.5 flex items-center gap-1"><Check size={11} />Collecting to {savedUpiId}</p>}
+        {savedUpiId && (
+          <>
+            <p className="text-green-600 text-xs mt-1.5 flex items-center gap-1"><Check size={11} />Collecting to {savedUpiId}</p>
+            <button
+              onClick={handleTestPayment}
+              disabled={testingUpi}
+              className="mt-2 w-full py-2 rounded-lg border border-slate-300 text-navy-700 text-xs font-semibold disabled:opacity-60"
+            >
+              {testingUpi ? 'Opening UPI app…' : 'Send ₹1 test payment to myself'}
+            </button>
+            <p className="text-navy-400 text-[10px] mt-1 leading-relaxed">
+              Verifies this device can detect a real payment — opens your UPI app for ₹1 to your own ID above. Only works on a real phone with a UPI app installed, not on this preview.
+            </p>
+          </>
+        )}
       </div>
 
+      {/* Manually-tracked dues — for bookings arranged outside the app
+          (cash/WhatsApp bookings, older bookings, etc). Real in-app bookings
+          appear above in "Bookings to Confirm" instead, the moment the
+          renter claims payment. */}
       {dues.length === 0 ? (
         <p className="text-navy-400 text-sm text-center py-4">All payments collected. Nothing pending 🎉</p>
       ) : (
@@ -262,7 +373,7 @@ function PaymentCollection({ addToast, groundName }) {
 }
 
 // ── Verified dashboard ──────────────────────────────────────────────────────
-function VerifiedDashboard({ user, addToast }) {
+function VerifiedDashboard({ user, setUser, addToast }) {
   const navigate = useNavigate()
   const { hash } = useLocation()
 
@@ -438,7 +549,8 @@ function VerifiedDashboard({ user, addToast }) {
       </SectionCard>
 
       {/* ── 4. Payment Collection ─────────────────────────────────────────── */}
-      <PaymentCollection addToast={addToast} groundName={groundName} />
+      <BookingsToConfirm user={user} addToast={addToast} />
+      <PaymentCollection user={user} setUser={setUser} addToast={addToast} groundName={groundName} />
 
       {/* ── 5. Bank Account Details ───────────────────────────────────────── */}
       <div id="bank-details" />
@@ -498,7 +610,7 @@ function VerifiedDashboard({ user, addToast }) {
 
 // ── Main export ─────────────────────────────────────────────────────────────
 export default function GroundOwnerDashboard() {
-  const { user, addToast } = useStore()
+  const { user, setUser, addToast } = useStore()
 
   return (
     <div className="min-h-dvh flex flex-col bg-slate-50">
@@ -512,7 +624,7 @@ export default function GroundOwnerDashboard() {
         <VerificationGate />
       ) : (
         /* Full dashboard — only shown after verification */
-        <VerifiedDashboard user={user} addToast={addToast} />
+        <VerifiedDashboard user={user} setUser={setUser} addToast={addToast} />
       )}
     </div>
   )

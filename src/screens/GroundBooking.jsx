@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, Calendar, Clock, CloudRain, Sun, Cloud, CheckCircle, Copy, MapPin, AlertCircle, Timer } from 'lucide-react'
+import { ChevronLeft, Calendar, Clock, CloudRain, Sun, Cloud, CheckCircle, Copy, MapPin, AlertCircle, Timer, IndianRupee, Phone, HelpCircle } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { fetchGroundById, createGroundBooking } from '../lib/groundsApi'
+import UpiPayment from '../lib/upiPayment'
 
 const SLOTS = [
   { id: 's1', start: '06:00', end: '08:00', price: 800, available: true },
@@ -53,6 +55,7 @@ function WeatherBanner({ prob }) {
 
 export default function GroundBooking() {
   const navigate = useNavigate()
+  const { id: groundId } = useParams()
   const { addGroundBooking, addToast, user } = useStore()
   const [step, setStep] = useState(1)
   const [selectedDay, setSelectedDay] = useState(null)
@@ -61,26 +64,97 @@ export default function GroundBooking() {
   const [players, setPlayers] = useState('11')
   const [overs, setOvers] = useState('20')
   const [note, setNote] = useState('')
-  const [payMethod, setPayMethod] = useState('razorpay')
   const [paying, setPaying] = useState(false)
+  const [awaitingUpiConfirm, setAwaitingUpiConfirm] = useState(false)
   const [timeLeft, setTimeLeft] = useState(598)
   const [bookingRef] = useState('CY-' + Math.random().toString(36).substring(2,10).toUpperCase())
-  const groundName = 'Bengaluru Turf Ground'
+  const [ground, setGround] = useState(null)
+  const [loadingGround, setLoadingGround] = useState(true)
   const groundCode = 'GND-CY-48X9'
   const rainProb = 15
 
+  // Booking (and paying someone) only makes sense against a specific
+  // ground — the generic "Book a Ground" shortcut used to land here with no
+  // :id at all and silently book a hardcoded fake ground. Send it through
+  // ground search instead so there's always a real owner to pay.
+  useEffect(() => {
+    if (!groundId) {
+      addToast('Pick a ground first', 'info')
+      navigate('/grounds', { replace: true })
+      return
+    }
+    setLoadingGround(true)
+    fetchGroundById(groundId)
+      .then(g => {
+        if (!g) { addToast('Ground not found', 'error'); navigate('/grounds', { replace: true }); return }
+        setGround(g)
+      })
+      .catch(err => addToast(err.message || 'Failed to load ground', 'error'))
+      .finally(() => setLoadingGround(false))
+  }, [groundId])
+
+  const groundName = ground?.name || '—'
+  const canPayViaUpi = !!ground?.ownerUpiId
+  const amount = selectedSlot?.price || 0
+
   const fmt = (d) => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
 
-  const handlePayment = async () => {
+  const finalizeBooking = async (paymentStatus) => {
     setPaying(true)
-    await new Promise(r => setTimeout(r, 1800))
-    addGroundBooking({
-      groundName, slot: selectedSlot, day: selectedDay?.date?.toDateString(),
-      ballType, players, overs, note, bookingRef, status: 'confirmed'
-    })
-    setStep(4)
-    setPaying(false)
+    try {
+      await createGroundBooking({
+        groundId, renterId: user.id, bookingDate: selectedDay?.date?.toISOString().slice(0, 10),
+        slotStart: selectedSlot?.start, slotEnd: selectedSlot?.end, ballType, players, overs,
+        note, amount, bookingRef, paymentStatus,
+      })
+      addGroundBooking({
+        groundName, slot: selectedSlot, day: selectedDay?.date?.toDateString(),
+        ballType, players, overs, note, bookingRef, status: 'confirmed'
+      })
+      setStep(4)
+    } catch (err) {
+      addToast(err.message || 'Failed to save booking — try again', 'error')
+    } finally {
+      setPaying(false)
+      setAwaitingUpiConfirm(false)
+    }
   }
+
+  // Launches the UPI app via the native plugin (Android: startActivityForResult,
+  // so we get the UPI app's own reported status back) instead of a blind
+  // `window.location.href` redirect. Only an explicit SUCCESS is trusted
+  // automatically — not every UPI app implements the response callback, and
+  // on web there's no native channel at all, so anything else still falls
+  // back to asking the renter directly (same trust model as a shopkeeper
+  // taking UPI off their own phone).
+  const handlePayViaUpi = async () => {
+    setPaying(true)
+    try {
+      const result = await UpiPayment.pay({
+        vpa: ground.ownerUpiId,
+        payeeName: ground.ownerName || groundName,
+        amount: String(amount),
+        note: `${groundName} booking`,
+        refId: bookingRef,
+      })
+      if (result.status === 'SUCCESS') {
+        await finalizeBooking('claimed_paid')
+      } else if (result.status === 'FAILURE') {
+        addToast('Payment failed or was declined in the UPI app', 'error')
+        setPaying(false)
+      } else {
+        // SUBMITTED / CANCELLED / UNKNOWN — the UPI app didn't give us a
+        // clean yes/no, so fall back to the self-reported confirmation.
+        setPaying(false)
+        setAwaitingUpiConfirm(true)
+      }
+    } catch (err) {
+      setPaying(false)
+      addToast(err.message || 'Could not open a UPI app', 'error')
+    }
+  }
+
+  const handlePayAtVenue = () => finalizeBooking('pending')
 
   const isPro = user?.subscription === 'pro_active'
 
@@ -96,12 +170,22 @@ export default function GroundBooking() {
     </div>
   )
 
+  if (loadingGround) return (
+    <div className="min-h-dvh bg-navy-50 flex items-center justify-center">
+      <span className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+
   return (
     <div className="min-h-dvh bg-navy-50 flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-navy-200 sticky top-0 z-10">
         <div className="flex items-center gap-3 px-4 py-3">
-          <button onClick={() => step > 1 && step < 4 ? setStep(s => s-1) : navigate(-1)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-navy-100 text-navy-700">
+          <button onClick={() => {
+            if (awaitingUpiConfirm) setAwaitingUpiConfirm(false)
+            else if (step > 1 && step < 4) setStep(s => s - 1)
+            else navigate(-1)
+          }} className="w-9 h-9 flex items-center justify-center rounded-xl bg-navy-100 text-navy-700">
             <ChevronLeft size={20} />
           </button>
           <div>
@@ -268,30 +352,63 @@ export default function GroundBooking() {
                 </div>
               </div>
               <div className="space-y-2 text-sm mb-4">
-                <div className="flex justify-between text-navy-600"><span>Ground rent</span><span>₹{selectedSlot?.price?.toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between text-navy-600"><span>Platform fee (5%)</span><span>₹{Math.round(selectedSlot?.price * 0.05)}</span></div>
-                <div className="border-t border-navy-200 pt-2 flex justify-between font-black text-navy-900 text-base">
-                  <span>Total</span><span>₹{((selectedSlot?.price || 0) + Math.round((selectedSlot?.price || 0) * 0.05)).toLocaleString('en-IN')}</span>
+                <div className="flex justify-between font-black text-navy-900 text-base">
+                  <span>Total</span><span>₹{amount.toLocaleString('en-IN')}</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                {['razorpay','upi'].map(m => (
-                  <button key={m} onClick={() => setPayMethod(m)}
-                    className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all ${payMethod === m ? 'border-brand-500 bg-brand-50' : 'border-navy-200 bg-white'}`}>
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${payMethod === m ? 'border-brand-500' : 'border-navy-300'}`}>
-                      {payMethod === m && <div className="w-2 h-2 rounded-full bg-brand-500" />}
-                    </div>
-                    <span className="font-semibold text-sm text-navy-900">
-                      {m === 'razorpay' ? 'Pay with Razorpay' : 'Pay with UPI'}
-                    </span>
-                    <span className="ml-auto text-xs text-navy-400">{m === 'razorpay' ? 'Card / Net Banking / Wallet' : 'GPay / PhonePe / Paytm'}</span>
-                  </button>
-                ))}
-              </div>
+
+              {awaitingUpiConfirm ? (
+                /* No payment gateway is involved in a raw UPI deep link, so
+                   there's no callback telling us the payment landed — same
+                   trust model as a shopkeeper taking UPI off their own
+                   phone. We just ask. */
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                  <p className="font-semibold text-navy-900 text-sm mb-1">Did you complete the payment?</p>
+                  <p className="text-navy-500 text-xs mb-3">We opened your UPI app for ₹{amount.toLocaleString('en-IN')} to {ground.ownerName || groundName}.</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => setAwaitingUpiConfirm(false)} className="flex-1 py-2.5 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-white">
+                      Not yet
+                    </button>
+                    <button onClick={() => finalizeBooking('claimed_paid')} disabled={paying}
+                      className="flex-1 py-2.5 rounded-xl bg-green-600 text-white font-semibold text-sm disabled:opacity-60 flex items-center justify-center gap-2">
+                      {paying ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <CheckCircle size={15} />}
+                      Yes, I've paid
+                    </button>
+                  </div>
+                </div>
+              ) : canPayViaUpi ? (
+                <button onClick={handlePayViaUpi} disabled={paying}
+                  className="w-full flex items-center justify-center gap-2 py-4 rounded-xl text-white font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-70"
+                  style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}>
+                  {paying ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <IndianRupee size={16} />}
+                  {paying ? 'Opening UPI app…' : `Pay ₹${amount.toLocaleString('en-IN')} via UPI`}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                    <HelpCircle size={15} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-amber-800 text-xs leading-relaxed">
+                      This ground hasn't set up UPI payments yet. Call the owner to arrange payment, or continue and pay at the venue.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {ground?.ownerPhone && (
+                      <button onClick={() => window.location.href = `tel:${ground.ownerPhone}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-white">
+                        <Phone size={14} />Call Owner
+                      </button>
+                    )}
+                    <button onClick={handlePayAtVenue} disabled={paying}
+                      className="flex-1 py-3 rounded-xl bg-brand-500 text-white font-semibold text-sm disabled:opacity-60">
+                      {paying ? 'Booking…' : 'Continue — Pay at Venue'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             <WeatherBanner prob={rainProb} />
             <div className="card p-4 text-xs text-navy-500 leading-relaxed">
-              By paying, you agree to CricYaar's cancellation policy. Razorpay Route: 95% of the amount goes directly to the ground owner's bank account.
+              By booking, you agree to CricYaar's cancellation policy. Payment goes directly to the ground owner — CricYaar doesn't hold or process the money.
             </div>
           </div>
         )}
@@ -324,7 +441,7 @@ export default function GroundBooking() {
                 <div className="flex justify-between"><span className="text-navy-500">Ground</span><span className="font-semibold">{groundName}</span></div>
                 <div className="flex justify-between"><span className="text-navy-500">Date</span><span className="font-semibold">{selectedDay && fmt(selectedDay.date)}</span></div>
                 <div className="flex justify-between"><span className="text-navy-500">Time</span><span className="font-semibold">{selectedSlot?.start} – {selectedSlot?.end}</span></div>
-                <div className="flex justify-between"><span className="text-navy-500">Amount Paid</span><span className="font-black text-green-600">₹{((selectedSlot?.price || 0) + Math.round((selectedSlot?.price || 0) * 0.05)).toLocaleString('en-IN')}</span></div>
+                <div className="flex justify-between"><span className="text-navy-500">Amount</span><span className="font-black text-green-600">₹{amount.toLocaleString('en-IN')}</span></div>
               </div>
             </div>
             <WeatherBanner prob={rainProb} />
@@ -340,25 +457,19 @@ export default function GroundBooking() {
         )}
       </div>
 
-      {/* Footer */}
-      {step < 4 && (
+      {/* Footer — step 3 has its own action buttons (Pay via UPI / pay at
+          venue / confirm payment), so there's nothing generic to show here. */}
+      {step < 3 && (
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg bg-white border-t border-navy-200 p-4 z-20">
           <button
             onClick={() => {
               if (step === 1) { if (selectedDay && selectedSlot) setStep(2) }
               else if (step === 2) setStep(3)
-              else if (step === 3) handlePayment()
             }}
-            disabled={
-              (step === 1 && (!selectedDay || !selectedSlot)) ||
-              paying
-            }
+            disabled={step === 1 && (!selectedDay || !selectedSlot)}
             className="btn-primary w-full flex items-center justify-center gap-2"
           >
-            {paying ? (
-              <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing Payment…</>
-            ) : step === 3 ? `Pay ₹${((selectedSlot?.price || 0) + Math.round((selectedSlot?.price || 0) * 0.05)).toLocaleString('en-IN')} via ${payMethod === 'razorpay' ? 'Razorpay' : 'UPI'}` :
-            step === 1 ? 'Continue to Details' : 'Proceed to Payment'}
+            {step === 1 ? 'Continue to Details' : 'Proceed to Payment'}
           </button>
         </div>
       )}

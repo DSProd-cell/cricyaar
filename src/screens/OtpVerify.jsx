@@ -105,6 +105,7 @@ export default function OtpVerify() {
           city: profile?.city || '', role: profile?.role || 'fan', roles: profile?.roles || ['fan'],
           isNew: !profile?.onboarded, avatar: profile?.avatar_url || null,
           lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
+          upiId: profile?.upi_id || null,
         })
       }
       addToast('Account created! Now choose your role.', 'success')
@@ -119,6 +120,7 @@ export default function OtpVerify() {
         city: profile?.city || '', role: restoredRole, roles: profile?.roles || [restoredRole],
         isNew: isNewUser, avatar: profile?.avatar_url || null,
         lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
+        upiId: profile?.upi_id || null,
       })
       // Mark What's New as seen so returning users skip it
       localStorage.setItem('whats_new_seen_version', 'v3')
