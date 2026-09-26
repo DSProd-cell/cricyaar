@@ -236,7 +236,6 @@ function RoleChangePopup({ onClose }) {
 export default function OrganiserHome({ activeRole, setActiveRole }) {
   const navigate = useNavigate()
   const { user } = useStore()
-  const [locked, setLocked]           = useState(null)
   const [showAddTeams, setShowAddTeams] = useState(false)
   const [scoreMatch, setScoreMatch]   = useState(null)
 
@@ -384,7 +383,7 @@ export default function OrganiserHome({ activeRole, setActiveRole }) {
             <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
               <Wallet size={20} style={{ color: '#16a34a' }} />
             </div>
-            <p className="font-bold text-navy-900 text-sm">Collect Fees</p>
+            <p className="font-bold text-navy-900 text-sm">Receive Amount</p>
             <p className="text-navy-500 text-[11px] mt-0.5">Entry / match fees via UPI</p>
           </button>
           <button
@@ -394,32 +393,14 @@ export default function OrganiserHome({ activeRole, setActiveRole }) {
             <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
               <Send size={20} style={{ color: '#ca8a04' }} />
             </div>
-            <p className="font-bold text-navy-900 text-sm">Pay Prize / Fee</p>
+            <p className="font-bold text-navy-900 text-sm">Send Amount</p>
             <p className="text-navy-500 text-[11px] mt-0.5">Prize money, umpire, ground</p>
           </button>
         </div>
 
-        {/* Locked blocks */}
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-3">
-            <Lock size={11} className="text-slate-400" />
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Other Role Features</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <LockedBlock icon={Eye} title="Umpiring" sub="Umpire feature"
-              onTap={() => setLocked(true)} />
-            <LockedBlock icon={Building2} title="My Ground" sub="Ground Owner feature"
-              onTap={() => setLocked(true)} />
-            <LockedBlock icon={Users} title="Player Stats" sub="Player feature"
-              onTap={() => setLocked(true)} />
-            <LockedBlock icon={IndianRupee} title="Umpire Earnings" sub="Umpire feature"
-              onTap={() => setLocked(true)} />
-          </div>
-        </div>
 
       </main>
 
-      {locked && <RoleChangePopup onClose={() => setLocked(null)} />}
       {scoreMatch && <MatchScoreSheet match={scoreMatch} onClose={() => setScoreMatch(null)} />}
       {showAddTeams && (
         <AddTeamsSheet

@@ -1785,7 +1785,7 @@ export default function UmpireHome({ activeRole, setActiveRole }) {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
               <Wallet size={18} style={{ color: '#16a34a' }} />
             </div>
-            <p className="font-bold text-navy-900 text-sm">Request Fee</p>
+            <p className="font-bold text-navy-900 text-sm">Receive Amount</p>
             <p className="text-navy-500 text-[11px] mt-0.5">Share UPI via WhatsApp</p>
           </button>
           <button
@@ -1795,7 +1795,7 @@ export default function UmpireHome({ activeRole, setActiveRole }) {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
               <Send size={18} style={{ color: '#ca8a04' }} />
             </div>
-            <p className="font-bold text-navy-900 text-sm">Pay an Umpire</p>
+            <p className="font-bold text-navy-900 text-sm">Send Amount</p>
             <p className="text-navy-500 text-[11px] mt-0.5">After confirming via call</p>
           </button>
         </div>

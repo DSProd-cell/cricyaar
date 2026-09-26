@@ -12,7 +12,7 @@ import RoleStrip from '../components/RoleStrip'
 import {
   MapPin, BarChart2, Send, ChevronRight, CheckCircle, Clock,
   Building2, Star, Trophy, Calendar, IndianRupee, Users,
-  TrendingUp, Zap, Phone, ArrowRight, Lock, Shield,
+  TrendingUp, Zap, Phone, ArrowRight, Lock, Shield, Wallet,
   Activity, Eye, Layers, X, Check, Camera, ImagePlus, LocateFixed
 } from 'lucide-react'
 
@@ -531,7 +531,6 @@ export default function GroundOwnerHome({ activeRole, setActiveRole }) {
   const navigate = useNavigate()
   const { user, addToast } = useStore()
 
-  const [activeTab, setActiveTab] = useState('grounds') // 'grounds' | 'stats' | 'demand'
   const [sentOffers, setSentOffers] = useState([])
   const [showAddGround, setShowAddGround] = useState(false)
   const [grounds, setGrounds] = useState([])
@@ -596,143 +595,109 @@ export default function GroundOwnerHome({ activeRole, setActiveRole }) {
           </button>
         )}
 
-        {/* Tab bar */}
-        <div className="flex gap-1 bg-slate-200 p-1 rounded-2xl mb-4 animate-fade-in">
-          {[
-            { key:'grounds', label:'My Grounds', icon: Building2 },
-            { key:'stats',   label:'My Stats',   icon: BarChart2 },
-            { key:'demand',  label:'Send Request', icon: Send },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                activeTab === tab.key
-                  ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm'
-                  : 'text-navy-500 hover:text-navy-700'
-              }`}
-            >
-              <tab.icon size={12} />
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden">{tab.key === 'demand' ? 'Requests' : tab.label.split(' ')[1] || tab.label}</span>
-            </button>
-          ))}
+        {/* Blue stats box */}
+        <div
+          className="w-full mb-5 rounded-2xl p-4 animate-slide-up"
+          style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)' }}
+        >
+          <p className="text-blue-100 text-xs font-bold uppercase tracking-wide mb-3">My Ground Stats</p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Grounds', val: groundsLoading ? '…' : grounds.length },
+              { label: 'Verified', val: isVerified ? '✓' : '—' },
+              { label: 'Demand Req.', val: GROUND_DEMAND_LIST.length },
+            ].map(s => (
+              <div key={s.label} className="bg-white/15 rounded-xl px-2 py-2.5 text-center">
+                <p className="text-white font-extrabold text-2xl tabular-nums">{s.val}</p>
+                <p className="text-blue-100 text-[9px] font-medium">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* ── MY GROUNDS TAB ── */}
-        {activeTab === 'grounds' && (
-          <div className="space-y-3 animate-slide-up">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-xs font-bold text-navy-500 uppercase tracking-wider">
-                {groundsLoading ? 'Loading…' : `${grounds.length} Ground${grounds.length !== 1 ? 's' : ''} Listed`}
-              </p>
-              <button
-                onClick={() => setShowAddGround(true)}
-                className="text-xs font-semibold text-cyan-600 flex items-center gap-1"
-              >
-                + Add Ground
-              </button>
+        {/* 2×2 dashboard grid */}
+        <div className="grid grid-cols-2 gap-3 mb-5 animate-slide-up">
+          <button
+            onClick={() => setShowAddGround(true)}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(59,130,246,0.12)' }}>
+              <Building2 size={20} style={{ color: '#3b82f6' }} />
             </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">My Grounds</p>
+            <span className="inline-flex mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#3b82f6' }}>
+              {groundsLoading ? '…' : grounds.length} Listed
+            </span>
+            <ChevronRight size={13} className="absolute top-3.5 right-3 text-navy-300" />
+          </button>
 
-            {!groundsLoading && grounds.length === 0 && (
-              <div className="text-center py-10 bg-[var(--cy-surface)] rounded-2xl shadow-card">
-                <Building2 size={28} className="mx-auto text-navy-300 mb-2" />
-                <p className="font-semibold text-navy-600 text-sm">No grounds listed yet</p>
-                <p className="text-navy-400 text-xs mt-1">Tap "+ Add Ground" to list your first one.</p>
-              </div>
-            )}
-
-            {grounds.map(g => (
-              <GroundCard
-                key={g.id}
-                ground={g}
-                onPress={() => navigate(`/grounds/${g.id}`)}
-              />
-            ))}
-
-            {/* Upgrade ground listing CTA */}
-            <button
-              onClick={() => setShowAddGround(true)}
-              className="w-full rounded-2xl border-2 border-dashed border-cyan-300 bg-cyan-50 px-4 py-4 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
-            >
-              <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center flex-shrink-0">
-                <Building2 size={18} className="text-cyan-600" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-cyan-900 text-sm">Add Another Ground</p>
-                <p className="text-cyan-600 text-xs mt-0.5">Photos, pricing, slot availability</p>
-              </div>
-              <ChevronRight size={14} className="text-cyan-400" />
-            </button>
-          </div>
-        )}
-
-        {/* ── MY STATS TAB ── */}
-        {activeTab === 'stats' && (
-          <div className="animate-slide-up">
-            <MyStats grounds={grounds} />
-
-            {/* Trend comparison */}
-            <div className="mt-3 bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
-              <p className="font-bold text-navy-900 text-sm mb-3 flex items-center gap-2">
-                <TrendingUp size={14} className="text-brand-500" />
-                Month-on-Month Trend
-              </p>
-              {grounds.map(g => {
-                const diff = g.thisMonth.bookings - g.lastMonth.bookings
-                const up   = diff >= 0
-                return (
-                  <div key={g.id} className="flex items-center gap-3 mb-3 last:mb-0">
-                    <div className="w-8 h-8 rounded-xl bg-cyan-50 flex items-center justify-center flex-shrink-0">
-                      <Building2 size={14} className="text-cyan-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-navy-900 text-xs truncate">{g.name}</p>
-                      <p className="text-navy-400 text-[10px]">{g.thisMonth.bookings} bookings this month</p>
-                    </div>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                      up ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'
-                    }`}>
-                      {up ? '▲' : '▼'} {Math.abs(diff)}
-                    </span>
-                  </div>
-                )
-              })}
+          <button
+            onClick={() => navigate('/ground-stats')}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(59,130,246,0.12)' }}>
+              <BarChart2 size={20} style={{ color: '#3b82f6' }} />
             </div>
-          </div>
-        )}
+            <p className="font-bold text-navy-900 text-sm leading-tight">Ground Stats</p>
+            <span className="inline-flex mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#3b82f6' }}>
+              Bookings & Trends
+            </span>
+            <ChevronRight size={13} className="absolute top-3.5 right-3 text-navy-300" />
+          </button>
 
-        {/* ── SEND REQUEST / GROUND DEMAND TAB ── */}
-        {activeTab === 'demand' && (
-          <div className="animate-slide-up">
-            {/* Info banner */}
-            <div className="flex items-start gap-2.5 bg-cyan-50 border border-cyan-200 rounded-2xl px-4 py-3 mb-4">
-              <Zap size={14} className="text-cyan-600 flex-shrink-0 mt-0.5" />
-              <p className="text-cyan-800 text-xs leading-relaxed">
-                Tournaments and teams below are <strong>actively looking for a ground</strong> in your city. Send them an offer to fill your empty slots and earn more!
-              </p>
+          <button
+            onClick={() => navigate('/ground-demand')}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(59,130,246,0.12)' }}>
+              <Send size={20} style={{ color: '#3b82f6' }} />
             </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">Demand List</p>
+            <span className="inline-flex mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#3b82f6' }}>
+              {GROUND_DEMAND_LIST.length} Requests
+            </span>
+            <ChevronRight size={13} className="absolute top-3.5 right-3 text-navy-300" />
+          </button>
 
-            {/* Filter pills */}
-            <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
-              {['All', 'Tournaments', 'Matches'].map(f => (
-                <span key={f} className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 bg-[var(--cy-surface)] text-navy-600 cursor-pointer hover:border-cyan-400 hover:text-cyan-700 transition-colors">
-                  {f}
-                </span>
-              ))}
+          <button
+            onClick={() => navigate('/grounds')}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(59,130,246,0.12)' }}>
+              <MapPin size={20} style={{ color: '#3b82f6' }} />
             </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">Find Grounds</p>
+            <span className="inline-flex mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#3b82f6' }}>
+              Browse All
+            </span>
+            <ChevronRight size={13} className="absolute top-3.5 right-3 text-navy-300" />
+          </button>
+        </div>
 
-            <div className="space-y-3">
-              {GROUND_DEMAND_LIST.map(item => (
-                <DemandCard
-                  key={item.id}
-                  item={item}
-                  onSend={handleSendOffer}
-                />
-              ))}
+        {/* Payments section */}
+        <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider mb-3 mt-2">Payments</h3>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <button
+            onClick={() => navigate('/receive-money', { state: { purpose: 'ground_fee' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(59,130,246,0.12)' }}>
+              <Wallet size={20} style={{ color: '#3b82f6' }} />
             </div>
-          </div>
-        )}
+            <p className="font-bold text-navy-900 text-sm">Receive Amount</p>
+            <p className="text-navy-500 text-[11px] mt-0.5">Collect booking fees via UPI</p>
+          </button>
+          <button
+            onClick={() => navigate('/send-money', { state: { purpose: 'ground_payment' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
+              <Send size={20} style={{ color: '#ca8a04' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Send Amount</p>
+            <p className="text-navy-500 text-[11px] mt-0.5">Pay prize money or fees</p>
+          </button>
+        </div>
 
       </main>
 

@@ -193,7 +193,7 @@ export default function PlayerHome({ activeRole, setActiveRole }) {
             <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
               <Send size={20} style={{ color: '#ca8a04' }} />
             </div>
-            <p className="font-bold text-navy-900 text-sm">Pay Someone</p>
+            <p className="font-bold text-navy-900 text-sm">Send Amount</p>
             <p className="text-navy-500 text-[11px] leading-tight mt-0.5">Match fee, umpire, ground</p>
           </button>
           <button
@@ -203,7 +203,7 @@ export default function PlayerHome({ activeRole, setActiveRole }) {
             <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
               <Wallet size={20} style={{ color: '#16a34a' }} />
             </div>
-            <p className="font-bold text-navy-900 text-sm">Request Payment</p>
+            <p className="font-bold text-navy-900 text-sm">Receive Amount</p>
             <p className="text-navy-500 text-[11px] leading-tight mt-0.5">Share your UPI via WhatsApp</p>
           </button>
         </div>
