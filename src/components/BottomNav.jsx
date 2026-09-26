@@ -47,27 +47,15 @@ export default function BottomNav() {
         const active     = pathname === path || (path !== '/' && pathname.startsWith(path))
         const badgeCount = badge === 'inbox' ? organiserInboxUnread : 0
 
-        // Crystal icon bubble styles
-        const activeGradient = isDark
-          ? `linear-gradient(160deg, ${roleColor.primary}30 0%, ${roleColor.primary}10 100%)`
-          : `linear-gradient(160deg, ${roleColor.primary}28 0%, ${roleColor.primary}0f 100%)`
-        const inactiveGradient = isDark
-          ? 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%)'
-          : 'linear-gradient(160deg, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.50) 100%)'
+        // Crystal icon bubble styles — nav is always dark (CRED style)
+        const activeGradient = `linear-gradient(160deg, ${roleColor.primary}38 0%, ${roleColor.primary}14 100%)`
+        const inactiveGradient = 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)'
 
-        const activeShadow = isDark
-          ? `inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.25), 0 4px 12px ${roleColor.primary}35`
-          : `inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(0,0,0,0.06), 0 3px 10px ${roleColor.primary}28`
-        const inactiveShadow = isDark
-          ? 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.25)'
-          : 'inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(0,0,0,0.04)'
+        const activeShadow = `inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.28), 0 4px 14px ${roleColor.primary}40`
+        const inactiveShadow = 'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.25)'
 
-        const activeBorder = isDark
-          ? `1px solid ${roleColor.primary}35`
-          : `1px solid ${roleColor.primary}28`
-        const inactiveBorder = isDark
-          ? '1px solid rgba(255,255,255,0.10)'
-          : '1px solid rgba(200,210,230,0.60)'
+        const activeBorder = `1px solid ${roleColor.primary}40`
+        const inactiveBorder = '1px solid rgba(255,255,255,0.12)'
 
         return (
           <button
@@ -91,7 +79,7 @@ export default function BottomNav() {
               <Icon
                 size={18}
                 strokeWidth={active ? 2.5 : 1.8}
-                style={{ color: active ? roleColor.primary : isDark ? 'rgba(255,255,255,0.45)' : '#94a3b8' }}
+                style={{ color: active ? roleColor.primary : 'rgba(255,255,255,0.55)' }}
               />
               {badgeCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold border border-white">
@@ -108,7 +96,7 @@ export default function BottomNav() {
               style={{
                 fontSize: 9,
                 fontWeight: active ? 700 : 500,
-                color: active ? roleColor.primary : isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8',
+                color: active ? roleColor.primary : 'rgba(255,255,255,0.45)',
                 letterSpacing: '0.03em',
               }}
             >

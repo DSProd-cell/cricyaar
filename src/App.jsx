@@ -296,6 +296,8 @@ export default function App() {
     <BrowserRouter>
       <Toast />
       <SplashOverlay />
+      <div className="mobile-border-left" aria-hidden="true" />
+      <div className="mobile-border-right" aria-hidden="true" />
       <WhatsNewGate>
       <AppShell>
         <Routes>

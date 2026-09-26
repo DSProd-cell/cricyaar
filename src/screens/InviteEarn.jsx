@@ -345,9 +345,14 @@ export default function InviteEarn() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M5 12l7-7M5 12l7 7"/></svg>
         </button>
 
-        {/* Avatar circle */}
-        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#6B3FA0,#4A1F7A)', border: '2.5px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px #000' }}>
-          <span style={{ color: '#fff', fontWeight: 800, fontSize: 16 }}>{initials}</span>
+        {/* CY Logo + Tagline */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 13, background: 'linear-gradient(135deg,#22c55e,#16a34a)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px #000, 0 0 18px rgba(34,197,94,0.5)' }}>
+            <span style={{ color: '#fff', fontWeight: 900, fontSize: 19, letterSpacing: '-0.04em' }}>CY</span>
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap', margin: 0 }}>
+            Your Game. Your Record.
+          </p>
         </div>
 
         {/* Info button */}

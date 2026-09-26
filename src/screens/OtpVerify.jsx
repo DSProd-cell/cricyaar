@@ -136,6 +136,9 @@ export default function OtpVerify() {
       localStorage.setItem('whats_new_seen_version', 'v3')
       if (isNewUser) {
         navigate('/profile-match')
+      } else if (!profile?.city && !proIntent) {
+        // Existing user who skipped city selection during onboarding
+        navigate('/city-select')
       } else if (proIntent) {
         addToast('Phone verified! Complete your Pro setup.', 'success')
         navigate('/pro-payment')
