@@ -133,7 +133,7 @@ function WhatsNewGate({ children }) {
       if (event === 'TOKEN_REFRESHED') {
         localStorage.setItem('cy_last_active', String(Date.now()))
       }
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' && useStore.getState().user) {
         useStore.getState().logout()
       }
     })

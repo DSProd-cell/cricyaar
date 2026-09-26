@@ -46,6 +46,14 @@ export default function USPScreen() {
     if (user) navigate('/', { replace: true })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Show the landing page briefly, then move on to login/signup on its own —
+  // cancelled if the user taps anything here first (unmounts before it fires).
+  useEffect(() => {
+    if (user) return
+    const t = setTimeout(() => navigate('/login'), 3000)
+    return () => clearTimeout(t)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const go = (pro) => {
     setProIntent(!!pro)
     navigate('/login?mode=signup')

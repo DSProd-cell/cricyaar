@@ -15,6 +15,14 @@ export const useStore = create(
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
       setPendingSignup: (data) => set({ pendingSignup: data }),
       logout: () => {
+        // Guard against re-entrancy: supabase.auth.signOut() fires a
+        // SIGNED_OUT event even when there's nothing to sign out of, and
+        // App.jsx's onAuthStateChange listener calls this same logout() in
+        // response to that event. Without this check, an explicit logout
+        // triggers signOut() → SIGNED_OUT → logout() → signOut() → SIGNED_OUT
+        // → ... forever, pegging the JS event loop (this actually happened —
+        // the app went fully unresponsive after logout).
+        if (!get().user) return
         supabase.auth.signOut()
         set({
           user: null, isAuthenticated: false, pendingPhone: null, otpMode: 'login',
