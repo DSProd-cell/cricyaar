@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
-import { ArrowLeft, Trophy, Swords, CheckCircle2, Search, Loader2 } from 'lucide-react'
+import { ArrowLeft, Trophy, Swords, CheckCircle2, Search, Loader2, ChevronLeft } from 'lucide-react'
 
 // Stat pill component
 function Stat({ label, value, color = 'text-navy-700' }) {
@@ -120,7 +120,6 @@ export default function PlayerMatch() {
     if (!selected) return
     setImporting(true)
 
-    // Merge legacy data into their profile
     const updates = {
       legacy_player_id: selected.id,
       name: selected.name || user?.name,
@@ -128,7 +127,6 @@ export default function PlayerMatch() {
     }
     await supabase.from('profiles').update(updates).eq('id', user?.id)
 
-    // Also write the stats to player_stats if table exists
     await supabase.from('player_stats').upsert({
       user_id: user?.id,
       matches: selected.matches_played || 0,
@@ -136,19 +134,16 @@ export default function PlayerMatch() {
       wickets: selected.wickets_taken || 0,
       batting_avg: selected.batting_avg || 0,
       bowling_avg: selected.bowling_avg || 0,
-    }, { onConflict: 'user_id' }).then(() => {}) // silent fail — table may not exist yet
+    }, { onConflict: 'user_id' }).then(() => {})
 
-    setUser({
-      ...user,
-      name: selected.name || user?.name,
-      city: selected.city || user?.city,
-    })
-
+    setUser({ ...user, name: selected.name || user?.name, city: selected.city || user?.city })
     setImporting(false)
-    navigate('/setup', { state: { fromImport: true, importedName: selected.name } })
+
+    // Auto-assign role from legacy data if available, else let user pick
+    navigate('/role-onboard', { state: { preSelectedRole: selected.role || null } })
   }
 
-  const handleSkip = () => navigate('/setup')
+  const handleSkip = () => navigate('/role-onboard')
 
   return (
     <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
@@ -158,6 +153,10 @@ export default function PlayerMatch() {
           <button onClick={() => navigate('/celebration')} className="text-navy-500 hover:text-navy-900 transition-colors">
             <ArrowLeft size={20} />
           </button>
+          {/* CY Logo */}
+          <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center shadow-sm shadow-brand-500/30">
+            <span className="text-white font-black text-xs">CY</span>
+          </div>
           <div>
             <h1 className="font-bold text-navy-900 text-lg leading-tight">Is This You?</h1>
             <p className="text-navy-500 text-xs">

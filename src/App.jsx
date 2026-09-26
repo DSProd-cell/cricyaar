@@ -22,6 +22,7 @@ import OtpVerify      from './screens/OtpVerify'
 import ProfileSetup   from './screens/ProfileSetup'
 import Celebration    from './screens/Celebration'
 import PlayerMatch    from './screens/PlayerMatch'
+import RoleOnboard    from './screens/RoleOnboard'
 import ProPayment     from './screens/ProPayment'
 
 // Screens — main app
@@ -174,6 +175,7 @@ export default function App() {
           <Route path="/setup"         element={<ProfileSetup />} />
           <Route path="/celebration"   element={<Celebration />} />
           <Route path="/player-match"  element={<PlayerMatch />} />
+          <Route path="/role-onboard"  element={<RoleOnboard />} />
           <Route path="/pro-payment" element={<AuthGuard><ProPayment /></AuthGuard>} />
 
           {/* Main app */}
