@@ -378,40 +378,75 @@ export default function PlayerProfile() {
         </div>
       </div>
 
-      {/* ── Share Achievement ────────────────────────────────────────────── */}
-      <div className="mx-4 mt-3 flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: roleColor.primary }}>
-          Share Performance
-        </p>
-        <ShareAchievement
-          title={`${roleColor.label} Performance · ${player.name}`}
-          stats={quickStats.map(s => ({ label: s.label, value: String(s.val) }))}
-        />
-      </div>
-
-      {/* ── Financial Actions ────────────────────────────────────────────── */}
+      {/* ── Payment Summary ──────────────────────────────────────────────── */}
       {isOwnProfile && (
-        <div className="mx-4 mt-3 flex gap-2">
-          {canCollect && (
+        <div className="mx-4 mt-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: roleColor.primary }}>
+            Payment Summary
+          </p>
+          <div className="bg-[var(--cy-surface)] rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}` }}>
             <button
-              onClick={() => navigate('/earnings')}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.97]"
-              style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})`, boxShadow: `0 4px 12px ${roleColor.primary}33` }}
+              onClick={() => navigate('/receive-money')}
+              className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+              style={{ borderBottom: `1px solid ${roleColor.border}` }}
             >
-              <Wallet size={16} />
-              Collect Money
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,197,94,0.12)' }}>
+                <Wallet size={17} className="text-green-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy-900 text-sm">Payments Received</p>
+                <p className="text-navy-400 text-xs mt-0.5">View all incoming payments</p>
+              </div>
+              <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
             </button>
-          )}
-          <button
-            onClick={() => navigate('/send-money')}
-            className={`${canCollect ? 'flex-1' : 'w-full'} flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] hover:opacity-90`}
-            style={{ background: roleColor.light, color: roleColor.primary, border: `1.5px solid ${roleColor.border}` }}
-          >
-            <ArrowUpRight size={16} />
-            Send Money
-          </button>
+            <button
+              onClick={() => navigate('/send-money')}
+              className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(234,179,8,0.12)' }}>
+                <ArrowUpRight size={17} className="text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy-900 text-sm">Payments Made</p>
+                <p className="text-navy-400 text-xs mt-0.5">View all outgoing payments</p>
+              </div>
+              <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
+            </button>
+          </div>
         </div>
       )}
+
+      {/* ── Others ───────────────────────────────────────────────────────── */}
+      <div className="mx-4 mt-4 mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: roleColor.primary }}>
+          Others
+        </p>
+        <div className="bg-[var(--cy-surface)] rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}` }}>
+          <ShareAchievement
+            title={`${roleColor.label} Performance · ${player.name}`}
+            stats={quickStats.map(s => ({ label: s.label, value: String(s.val) }))}
+            asListItem
+            label="Share Achievement"
+            sublabel="Celebrate your milestones with friends"
+            borderColor={roleColor.border}
+            primaryColor={roleColor.primary}
+            lightBg={roleColor.light}
+          />
+          <button
+            onClick={() => navigate('/share-performance')}
+            className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+              <BarChart2 size={17} style={{ color: roleColor.primary }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-navy-900 text-sm">Share Performance</p>
+              <p className="text-navy-400 text-xs mt-0.5">Post your stats card to social media</p>
+            </div>
+            <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
+          </button>
+        </div>
+      </div>
 
       {/* ── Account Management ───────────────────────────────────────────── */}
       {isOwnProfile && (

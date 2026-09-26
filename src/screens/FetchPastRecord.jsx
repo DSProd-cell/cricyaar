@@ -171,7 +171,7 @@ export default function FetchPastRecord() {
         padding: '16px 16px 0',
       }}>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           style={{
             width: 36, height: 36, borderRadius: '50%',
             background: 'rgba(255,255,255,0.08)',
@@ -181,14 +181,23 @@ export default function FetchPastRecord() {
         >
           <ArrowLeft size={17} color="#fff" />
         </button>
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 style={{ color: '#fff', fontSize: 18, fontWeight: 800, lineHeight: 1.2 }}>
-            Fetch Past Record
+            Fetch Past Records
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 2 }}>
-            Find your cricket history
+            Find your cricket history on CricYaar
           </p>
         </div>
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            color: 'rgba(167,139,250,0.7)', fontSize: 12, fontWeight: 600,
+            background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px',
+          }}
+        >
+          Skip
+        </button>
       </div>
 
       <div style={{ padding: '20px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>

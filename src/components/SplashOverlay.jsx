@@ -61,13 +61,14 @@ export default function SplashOverlay() {
 
   useEffect(() => {
     if (!showSplash) return
+    if (user) { dismissTo('/'); return }
     setReady(false)
     setShowStats(false)
     setProgress(0)
     const t1 = setTimeout(() => setReady(true), 500)
     const t2 = setTimeout(() => setShowStats(true), 2000)
     return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [showSplash])
+  }, [showSplash, user]) // eslint-disable-line
 
   if (!showSplash) return null
 
@@ -262,20 +263,7 @@ export default function SplashOverlay() {
             gap: 12,
           }}
         >
-          {user ? (
-            <button
-              onClick={() => dismissTo('/')}
-              style={{
-                width: '100%', padding: '16px', borderRadius: 16,
-                background: '#7C3AED',
-                color: '#fff', fontSize: 16, fontWeight: 700,
-                border: 'none', cursor: 'pointer',
-                boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
-              }}
-            >
-              Continue to App →
-            </button>
-          ) : (
+          {!user && (
             <>
               <button
                 onClick={() => dismissTo('/login?mode=signup')}
@@ -287,7 +275,7 @@ export default function SplashOverlay() {
                   boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
                 }}
               >
-                Create Account
+                Sign Up — It's Free
               </button>
               <button
                 onClick={() => dismissTo('/login?mode=login')}
@@ -299,7 +287,7 @@ export default function SplashOverlay() {
                   cursor: 'pointer',
                 }}
               >
-                Log In
+                Log In to Your Account
               </button>
               <p style={{
                 textAlign: 'center', fontSize: 11,
@@ -317,3 +305,4 @@ export default function SplashOverlay() {
     </div>
   )
 }
+

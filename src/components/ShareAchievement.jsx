@@ -345,22 +345,45 @@ export function ShareAchievementSheet({ title, stats, matchName, tournamentName,
 }
 
 // ── Inline trigger + sheet (used from individual screens) ────────────────────
-export default function ShareAchievement({ title, stats, matchName, tournamentName }) {
+export default function ShareAchievement({
+  title, stats, matchName, tournamentName,
+  asListItem, label, sublabel, borderColor, primaryColor, lightBg,
+}) {
   const { user } = useStore()
   const [open, setOpen] = useState(false)
   const role = user?.role || 'fan'
   const roleColor = getRoleColor(role)
+  const pc = primaryColor || roleColor.primary
+  const lb = lightBg || roleColor.light
+  const bc = borderColor || roleColor.border
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-xs transition-all active:scale-95"
-        style={{ background: `${roleColor.primary}18`, color: roleColor.primary, border: `1px solid ${roleColor.primary}30` }}
-      >
-        <Share2 size={14} />
-        Share Achievement
-      </button>
+      {asListItem ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left active:scale-[0.99]"
+          style={{ borderBottom: `1px solid ${bc}` }}
+        >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: lb }}>
+            <Share2 size={17} style={{ color: pc }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-navy-900 text-sm">{label || 'Share Achievement'}</p>
+            {sublabel && <p className="text-navy-400 text-xs mt-0.5">{sublabel}</p>}
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: pc, opacity: 0.6, flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-xs transition-all active:scale-95"
+          style={{ background: `${roleColor.primary}18`, color: roleColor.primary, border: `1px solid ${roleColor.primary}30` }}
+        >
+          <Share2 size={14} />
+          Share Achievement
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-[70] flex flex-col justify-end" onClick={() => setOpen(false)}>
