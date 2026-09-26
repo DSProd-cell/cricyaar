@@ -340,3 +340,24 @@
   .pt-safe-top { padding-top: env(safe-area-inset-top, 12px); }
   .pb-safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
 }
+
+/* ── Splash screen animations ── */
+@keyframes splashFloat {
+  0%   { transform: translateY(0)      scale(1);   opacity: 0.5; }
+  50%  { opacity: 0.8; }
+  100% { transform: translateY(-110vh) scale(0.5); opacity: 0; }
+}
+@keyframes splashPulse {
+  0%, 100% { box-shadow: 0 0 60px rgba(34,197,94,0.40), 0 8px 32px rgba(0,0,0,0.50); }
+  50%       { box-shadow: 0 0 100px rgba(34,197,94,0.65), 0 8px 40px rgba(0,0,0,0.50); }
+}
+@keyframes splashSweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 0.6; }
+  100% { transform: translateX(220%)  skewX(-15deg); opacity: 0; }
+}
+@keyframes splashRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

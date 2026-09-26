@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { uploadAvatar } from '../lib/uploads'
 import TopBar from '../components/TopBar'
 import { getRoleColor, CAN_COLLECT, NEEDS_AADHAAR } from '../lib/roleColors'
+import { resetSplash } from '../components/SplashOverlay'
 import {
   BarChart2, Activity, Users, Trophy, X, MapPin, Check, ChevronRight, Camera,
   Edit, LogOut, RefreshCw, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
@@ -206,8 +207,8 @@ export default function PlayerProfile() {
   const handleLogout = () => {
     if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
     logout()
-    navigate('/login')
-    addToast('Logged out. Sign in to continue.', 'info')
+    resetSplash()                     // ensure splash re-shows on next load
+    window.location.href = '/'        // full reload → splash → /usp → login
   }
 
   const playerTeams  = TEAMS.filter(t => t.squad.includes(player.id))
