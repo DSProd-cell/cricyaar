@@ -44,7 +44,8 @@ export default function SplashOverlay() {
 
   const dismissTo = (path) => {
     setFading(true)
-    setTimeout(() => { setShowSplash(false); setFading(false); if (path) navigate(path) }, 600)
+    if (path) navigate(path)
+    setTimeout(() => { setShowSplash(false); setFading(false) }, 600)
   }
 
   // Stats counter
