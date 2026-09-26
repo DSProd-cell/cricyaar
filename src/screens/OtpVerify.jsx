@@ -228,6 +228,5 @@ export default function OtpVerify() {
       </div>
       </div>
     </div>
-    </div>
   )
 }
