@@ -111,7 +111,7 @@ function AddGroundSheet({ user, onClose, onSubmitted }) {
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up max-h-[90vh] flex flex-col"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-center pt-3 flex-shrink-0"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
@@ -287,7 +287,7 @@ function GroundCard({ ground, onPress }) {
   return (
     <button
       onClick={onPress}
-      className="w-full text-left bg-white rounded-2xl shadow-card overflow-hidden active:scale-[0.98] transition-transform"
+      className="w-full text-left bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden active:scale-[0.98] transition-transform"
     >
       {/* Top color bar */}
       <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg,#0891b2,#06b6d4)' }} />
@@ -383,7 +383,7 @@ function MyStats({ grounds }) {
   const avgRating     = grounds.length > 0 ? (grounds.reduce((s, g) => s + g.rating, 0) / grounds.length).toFixed(1) : '—'
 
   return (
-    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+    <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
       {/* Header */}
       <div
         className="px-4 py-3 flex items-center gap-2"
@@ -448,7 +448,7 @@ function DemandCard({ item, onSend }) {
   const isTournament = item.type === 'tournament'
 
   return (
-    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+    <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
       {/* Type badge + title */}
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -611,7 +611,7 @@ export default function GroundOwnerHome() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeTab === tab.key
-                  ? 'bg-white text-navy-900 shadow-sm'
+                  ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm'
                   : 'text-navy-500 hover:text-navy-700'
               }`}
             >
@@ -638,7 +638,7 @@ export default function GroundOwnerHome() {
             </div>
 
             {!groundsLoading && grounds.length === 0 && (
-              <div className="text-center py-10 bg-white rounded-2xl shadow-card">
+              <div className="text-center py-10 bg-[var(--cy-surface)] rounded-2xl shadow-card">
                 <Building2 size={28} className="mx-auto text-navy-300 mb-2" />
                 <p className="font-semibold text-navy-600 text-sm">No grounds listed yet</p>
                 <p className="text-navy-400 text-xs mt-1">Tap "+ Add Ground" to list your first one.</p>
@@ -676,7 +676,7 @@ export default function GroundOwnerHome() {
             <MyStats grounds={grounds} />
 
             {/* Trend comparison */}
-            <div className="mt-3 bg-white rounded-2xl shadow-card p-4">
+            <div className="mt-3 bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
               <p className="font-bold text-navy-900 text-sm mb-3 flex items-center gap-2">
                 <TrendingUp size={14} className="text-brand-500" />
                 Month-on-Month Trend
@@ -719,7 +719,7 @@ export default function GroundOwnerHome() {
             {/* Filter pills */}
             <div className="flex gap-2 mb-3 overflow-x-auto pb-1 no-scrollbar">
               {['All', 'Tournaments', 'Matches'].map(f => (
-                <span key={f} className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 bg-white text-navy-600 cursor-pointer hover:border-cyan-400 hover:text-cyan-700 transition-colors">
+                <span key={f} className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 bg-[var(--cy-surface)] text-navy-600 cursor-pointer hover:border-cyan-400 hover:text-cyan-700 transition-colors">
                   {f}
                 </span>
               ))}

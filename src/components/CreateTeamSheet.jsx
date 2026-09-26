@@ -35,7 +35,7 @@ function PlayerRow({ player, onRemove, onChangeRole, isPro, isLocked }) {
         value={player.position}
         onChange={e => !isLocked && onChangeRole(player.id, e.target.value)}
         disabled={isLocked}
-        className={`text-[11px] font-semibold border rounded-lg px-1.5 py-1 outline-none bg-white ${POSITION_COLORS[player.position] || 'bg-slate-50 text-slate-600 border-slate-200'}`}
+        className={`text-[11px] font-semibold border rounded-lg px-1.5 py-1 outline-none bg-[var(--cy-surface)] ${POSITION_COLORS[player.position] || 'bg-slate-50 text-slate-600 border-slate-200'}`}
       >
         {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
       </select>
@@ -96,7 +96,7 @@ export default function CreateTeamSheet({ onClose }) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       <div
-        className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up"
         style={{ maxHeight: '92dvh' }}
         onClick={e => e.stopPropagation()}
       >
@@ -112,7 +112,7 @@ export default function CreateTeamSheet({ onClose }) {
             {!isPro && (
               <div className="flex items-center gap-1.5 mt-0.5">
                 <Crown size={11} className="text-amber-500 fill-amber-400" />
-                <span className="text-amber-600 text-xs font-bold">Pro feature — ₹99/month</span>
+                <span className="text-amber-600 text-xs font-bold">Pro feature — ₹1/month</span>
               </div>
             )}
           </div>
@@ -150,7 +150,7 @@ export default function CreateTeamSheet({ onClose }) {
                   style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff' }}
                 >
                   <Zap size={14} />
-                  Upgrade to Pro — ₹99/month
+                  Upgrade to Pro — ₹1/month
                 </button>
               </div>
             )}
@@ -281,7 +281,7 @@ export default function CreateTeamSheet({ onClose }) {
 
               {/* Add player picker */}
               {showAddPlayer && isPro && (
-                <div className="mt-2 bg-white border border-slate-200 rounded-2xl shadow-lg max-h-40 overflow-y-auto">
+                <div className="mt-2 bg-[var(--cy-surface)] border border-slate-200 rounded-2xl shadow-lg max-h-40 overflow-y-auto">
                   {availablePlayers.length === 0
                     ? <p className="text-center text-navy-400 text-sm py-4">All players added</p>
                     : availablePlayers.map(p => (
@@ -310,7 +310,7 @@ export default function CreateTeamSheet({ onClose }) {
         </div>
 
         {/* ── Sticky footer CTA ── */}
-        <div className="px-5 pb-8 pt-3 border-t border-slate-100 flex-shrink-0 bg-white">
+        <div className="px-5 pb-8 pt-3 border-t border-slate-100 flex-shrink-0 bg-[var(--cy-surface)]">
           {isPro ? (
             <button
               onClick={handleCreate}

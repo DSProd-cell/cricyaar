@@ -19,18 +19,34 @@ export default {
           800: '#4C1D95',
           900: '#3B0764',
         },
+        // navy/slate are redeclared against CSS custom properties (defined in
+        // index.css) so the whole app's text/border/surface colors invert for
+        // system dark mode without touching every screen individually — see
+        // the --cy-navy-*/--cy-slate-* tokens and their dark media query.
         navy: {
-          900: '#0f172a',
-          800: '#1e293b',
-          700: '#334155',
-          600: '#475569',
-          500: '#64748b',
-          400: '#94a3b8',
-          300: '#cbd5e1',
-          200: '#e2e8f0',
-          100: '#f1f5f9',
-          50:  '#f8fafc',
-        }
+          900: 'var(--cy-navy-900)',
+          800: 'var(--cy-navy-800)',
+          700: 'var(--cy-navy-700)',
+          600: 'var(--cy-navy-600)',
+          500: 'var(--cy-navy-500)',
+          400: 'var(--cy-navy-400)',
+          300: 'var(--cy-navy-300)',
+          200: 'var(--cy-navy-200)',
+          100: 'var(--cy-navy-100)',
+          50:  'var(--cy-navy-50)',
+        },
+        slate: {
+          50:  'var(--cy-slate-50)',
+          100: 'var(--cy-slate-100)',
+          200: 'var(--cy-slate-200)',
+          300: 'var(--cy-slate-300)',
+          400: 'var(--cy-slate-400)',
+          500: 'var(--cy-slate-500)',
+          600: 'var(--cy-slate-600)',
+          700: 'var(--cy-slate-700)',
+          800: 'var(--cy-slate-800)',
+          900: 'var(--cy-slate-900)',
+        },
       },
       animation: {
         'slide-up':   'slideUp 0.25s ease-out',

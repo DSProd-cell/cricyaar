@@ -81,7 +81,7 @@ export default function PlayerSetup() {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <PageHeader
         backTo="/role-onboard"
         showTagline
@@ -151,7 +151,7 @@ export default function PlayerSetup() {
 
           {/* Batsman sub-options */}
           {playingRole === 'batsman' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-4 space-y-3">
+            <div className="bg-[var(--cy-surface)] rounded-xl border border-slate-100 p-4 space-y-3">
               <p className="text-xs font-bold text-navy-500 uppercase tracking-wider">Batting hand</p>
               <div className="flex gap-2">
                 <Pill label="Right-hand" selected={battingHand === 'right'} onClick={() => setBattingHand('right')} />
@@ -162,7 +162,7 @@ export default function PlayerSetup() {
 
           {/* Bowler sub-options */}
           {playingRole === 'bowler' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-4 space-y-3">
+            <div className="bg-[var(--cy-surface)] rounded-xl border border-slate-100 p-4 space-y-3">
               <div>
                 <p className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-2">Bowling arm</p>
                 <div className="flex gap-2">
@@ -183,7 +183,7 @@ export default function PlayerSetup() {
 
           {/* Allrounder sub-options */}
           {playingRole === 'allrounder' && (
-            <div className="bg-white rounded-xl border border-slate-100 p-4 space-y-3">
+            <div className="bg-[var(--cy-surface)] rounded-xl border border-slate-100 p-4 space-y-3">
               <div>
                 <p className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-2">Allrounder type</p>
                 <div className="flex gap-2 flex-wrap">
@@ -211,7 +211,7 @@ export default function PlayerSetup() {
       </div>
 
       {/* ── Sticky footer: Consent + Save ───────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-4 pt-4 pb-safe">
+      <div className="fixed bottom-0 left-0 right-0 bg-[var(--cy-surface)] border-t border-slate-100 px-4 pt-4 pb-safe">
         {/* Consent */}
         <button
           onClick={() => setConsent(v => !v)}

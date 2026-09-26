@@ -33,7 +33,7 @@ function AddTeamsSheet({ onClose, isPro, onUpgrade }) {
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up"
         style={{ maxHeight: '88dvh' }}
         onClick={e => e.stopPropagation()}
       >
@@ -80,7 +80,7 @@ function AddTeamsSheet({ onClose, isPro, onUpgrade }) {
                 className="mt-3 w-full py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98]"
                 style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff' }}
               >
-                <Zap size={13} /> Upgrade to Pro — ₹99/month
+                <Zap size={13} /> Upgrade to Pro — ₹1/month
               </button>
             </div>
           )}
@@ -118,7 +118,7 @@ function AddTeamsSheet({ onClose, isPro, onUpgrade }) {
                     className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left ${
                       isSelected
                         ? 'border-brand-400 bg-brand-50'
-                        : 'border-slate-200 bg-white hover:border-slate-300'
+                        : 'border-slate-200 bg-[var(--cy-surface)] hover:border-slate-300'
                     } ${!isPro ? 'opacity-50' : ''}`}
                   >
                     <div
@@ -145,7 +145,7 @@ function AddTeamsSheet({ onClose, isPro, onUpgrade }) {
         </div>
 
         {/* Footer CTA */}
-        <div className="px-5 pb-8 pt-3 border-t border-slate-100 flex-shrink-0 bg-white">
+        <div className="px-5 pb-8 pt-3 border-t border-slate-100 flex-shrink-0 bg-[var(--cy-surface)]">
           {isPro ? (
             <button
               onClick={handleConfirm}
@@ -210,7 +210,7 @@ function RoleChangePopup({ onClose }) {
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
       <div
-        className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up"
         onClick={e => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />

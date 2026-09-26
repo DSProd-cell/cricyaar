@@ -146,10 +146,18 @@ export default function OtpVerify() {
         addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
         // Show IPL team picker if user hasn't chosen a team yet (optional, skippable)
         if (!iplTeam) {
-          navigate('/ipl-pick?from=login')
+          navigate('/ipl-pick', { state: { returnTo: '/' } })
         } else {
           navigate('/')
         }
+      }
+
+      // Every free login lands here — offer Pro (pay ₹1/month, or get it free
+      // via referral) without blocking access. Already-Pro users and anyone
+      // already headed to /pro-payment don't need the nudge.
+      const isPro = profile?.subscription === 'pro_active' || profile?.subscription === 'pro_cancelled'
+      if (!isPro && !proIntent) {
+        useStore.getState().setShowProSheet(true)
       }
     }
   }
@@ -163,12 +171,12 @@ export default function OtpVerify() {
   const lockMinutes = lockEnd ? Math.ceil((lockEnd - Date.now()) / 60000) : 0
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <PageHeader backTo="/login" showTagline />
 
       <div className="flex-1 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm animate-slide-up">
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-6">
           <h2 className="font-bold text-navy-900 text-xl mb-1">Enter OTP</h2>
           <p className="text-navy-500 text-sm mb-6">
             We sent a 6-digit code to <span className="font-semibold text-navy-900">{pendingPhone}</span>

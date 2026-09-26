@@ -31,7 +31,7 @@ export default function ProPaywallSheet({ featureName, featureDesc, onClose }) {
 
       {/* Sheet */}
       <div
-        className="relative bg-white rounded-t-3xl px-5 pt-4 pb-10 w-full max-w-lg mx-auto animate-slide-up"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl px-5 pt-4 pb-10 w-full max-w-lg mx-auto animate-slide-up"
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle */}
@@ -76,7 +76,7 @@ export default function ProPaywallSheet({ featureName, featureDesc, onClose }) {
 
         {/* Price */}
         <p className="text-center mb-4">
-          <span className="text-3xl font-extrabold text-navy-900">₹99</span>
+          <span className="text-3xl font-extrabold text-navy-900">₹1</span>
           <span className="text-navy-400 text-sm"> / month — cancel anytime</span>
         </p>
 
@@ -87,7 +87,7 @@ export default function ProPaywallSheet({ featureName, featureDesc, onClose }) {
           onClick={handleSubscribe}
         >
           <Crown size={17} className="fill-white text-white" />
-          Subscribe to Pro — ₹99/month
+          Subscribe to Pro — ₹1/month
         </button>
 
         <button

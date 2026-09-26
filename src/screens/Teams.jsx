@@ -86,7 +86,7 @@ function JoinTeamModal({ onClose, onJoin, teams }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
-      <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-navy-900 text-lg mb-1">Join a team</h3>
         <p className="text-navy-500 text-sm mb-4">Enter the 7-character team code (e.g. MUM-7X2)</p>
         <input className={`cm-input mb-1 uppercase tracking-widest font-bold ${error?'error':''}`} placeholder="MUM-7X2" value={code}
@@ -106,7 +106,7 @@ function RequestToJoinModal({ team, onClose, onSend }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
-      <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-navy-900 text-lg mb-1">Request to Join</h3>
         <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 mb-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0" style={{background:team.color}}>
@@ -143,7 +143,7 @@ function JoinRequestsSheet({ requests, onClose, onAccept, onDecline }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-t-3xl shadow-modal animate-slide-up max-h-[85dvh] overflow-y-auto">
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl shadow-modal animate-slide-up max-h-[85dvh] overflow-y-auto">
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3">
           <h2 className="font-bold text-navy-900 text-lg">Join Requests</h2>

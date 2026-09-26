@@ -52,7 +52,7 @@ export default function Settings() {
       <main className="flex-1 px-4 py-5 pb-24 max-w-2xl mx-auto w-full">
         <p className="text-xs font-semibold text-navy-400 uppercase tracking-wider mb-3 px-1">App preferences</p>
 
-        <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-50 overflow-hidden">
+        <div className="bg-[var(--cy-surface)] rounded-2xl border border-slate-100 divide-y divide-slate-50 overflow-hidden">
           {ROWS.map((row, i) => {
             const Icon = row.icon
             return (

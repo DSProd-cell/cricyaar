@@ -64,7 +64,7 @@ export function VerificationGate() {
         </button>
         <button
           onClick={() => navigate('/aadhaar-verify?from=ground_owner')}
-          className="w-full py-3 rounded-2xl border-2 border-slate-200 bg-white text-navy-700 font-semibold text-sm hover:border-cyan-300 transition-colors"
+          className="w-full py-3 rounded-2xl border-2 border-slate-200 bg-[var(--cy-surface)] text-navy-700 font-semibold text-sm hover:border-cyan-300 transition-colors"
         >
           Verify with Government ID
         </button>
@@ -82,7 +82,7 @@ const BADGE_COLORS = {
 
 function SectionCard({ title, icon, children, badge, badgeColor = 'green' }) {
   return (
-    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+    <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
         <span className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0">{icon}</span>
         <p className="font-bold text-navy-900 text-sm flex-1">{title}</p>
@@ -296,7 +296,7 @@ function PaymentCollection({ user, setUser, addToast, groundName }) {
             value={upiId}
             onChange={e => setUpiId(e.target.value)}
             placeholder="e.g. yourname@okhdfcbank"
-            className="flex-1 min-w-0 border border-slate-200 rounded-lg px-3 py-2 text-sm text-navy-900 bg-white focus:outline-none focus:border-brand-500 transition-colors"
+            className="flex-1 min-w-0 border border-slate-200 rounded-lg px-3 py-2 text-sm text-navy-900 bg-[var(--cy-surface)] focus:outline-none focus:border-brand-500 transition-colors"
           />
           <button
             onClick={handleSaveUpi}

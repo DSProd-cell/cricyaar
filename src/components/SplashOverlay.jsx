@@ -2,23 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
-// Resets when the JS module is re-evaluated (fresh page load / app reopen)
-let _shown = false
-
-// Module-level refs to the live React setters — wired up inside the component
-let _setVisible  = null
-let _setFading   = null
-let _setPhase    = null
-let _setProgress = null
-
-// Called by logout handler — resets flag AND forces the component to re-show
-export function resetSplash() {
-  _shown = false
-  if (_setFading)   _setFading(false)
-  if (_setPhase)    _setPhase(0)
-  if (_setProgress) _setProgress(0)
-  if (_setVisible)  _setVisible(true)
-}
+// Called by the sign-out handler to force the splash to show again.
+export function resetSplash() { useStore.getState().setShowSplash(true) }
 
 const TAGLINES = [
   "India's First Fraud-Free Cricket Platform",
@@ -50,26 +35,16 @@ const PARTICLES = [
 function easeOut(t) { return 1 - Math.pow(1 - t, 3) }
 
 export default function SplashOverlay() {
-  const { user } = useStore()
+  const { user, showSplash, setShowSplash } = useStore()
   const navigate  = useNavigate()
-  const [visible, setVisible] = useState(!_shown)
   const [fading, setFading]   = useState(false)
   const [phase, setPhase]     = useState(0)
   const [progress, setProgress] = useState(0)
   const rafRef = useRef(null)
 
-  // Register setters so resetSplash() can reach live React state
-  useEffect(() => {
-    _setVisible  = setVisible
-    _setFading   = setFading
-    _setPhase    = setPhase
-    _setProgress = setProgress
-    return () => { _setVisible = _setFading = _setPhase = _setProgress = null }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   const dismissTo = (path) => {
     setFading(true)
-    setTimeout(() => { setVisible(false); if (path) navigate(path) }, 600)
+    setTimeout(() => { setShowSplash(false); setFading(false); if (path) navigate(path) }, 600)
   }
 
   // Stats counter
@@ -87,17 +62,18 @@ export default function SplashOverlay() {
   }, [phase])
 
   useEffect(() => {
-    if (!visible) return
-    _shown = true
+    if (!showSplash) return
+    setPhase(0)
+    setProgress(0)
     const T = [
       setTimeout(() => setPhase(1), 600),
       setTimeout(() => setPhase(2), 2000),
       setTimeout(() => setPhase(3), 3100),
     ]
     return () => T.forEach(clearTimeout)
-  }, [visible]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [showSplash]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!visible) return null
+  if (!showSplash) return null
 
   const show = (minPhase) => phase >= minPhase
 
@@ -108,7 +84,7 @@ export default function SplashOverlay() {
         zIndex: 9999,
         opacity: fading ? 0 : 1,
         transition: 'opacity 0.65s ease',
-        background: 'var(--cy-gradient, linear-gradient(160deg, #0a0118 0%, #120520 55%, #07021a 100%))',
+        background: 'linear-gradient(160deg, #0a0118 0%, #120520 55%, #07021a 100%)',
       }}
     >
       {/* ── Background animations ─────────────────────────────── */}
@@ -121,7 +97,7 @@ export default function SplashOverlay() {
           top: '50%', left: '50%',
           marginTop: -250, marginLeft: -250,
           borderRadius: '50%',
-          background: 'conic-gradient(from 0deg, transparent 60%, var(--cy-glow,rgba(124,58,237,0.10)) 75%, transparent 90%)',
+          background: 'conic-gradient(from 0deg, transparent 60%, rgba(124,58,237,0.10) 75%, transparent 90%)',
           animation: 'splashRotate 12s linear infinite',
         }}
       />
@@ -325,7 +301,7 @@ export default function SplashOverlay() {
                 background: 'var(--cy-primary, #7C3AED)',
                 color: '#fff', fontSize: 16, fontWeight: 700,
                 border: 'none', cursor: 'pointer',
-                boxShadow: '0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))',
+                boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
               }}
             >
               Continue to App →
@@ -339,7 +315,7 @@ export default function SplashOverlay() {
                   background: 'var(--cy-primary, #7C3AED)',
                   color: '#fff', fontSize: 16, fontWeight: 700,
                   border: 'none', cursor: 'pointer',
-                  boxShadow: '0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))',
+                  boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
                 }}
               >
                 Create Account

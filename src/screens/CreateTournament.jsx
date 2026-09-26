@@ -46,7 +46,7 @@ function ChipGroup({ options, value, onChange, cols = 3 }) {
           className={`py-2.5 px-3 rounded-xl border-2 font-semibold text-sm transition-all touch-manipulation ${
             value === opt
               ? 'border-brand-400 bg-brand-50 text-brand-700'
-              : 'border-slate-200 bg-white text-navy-600 hover:border-slate-300'
+              : 'border-slate-200 bg-[var(--cy-surface)] text-navy-600 hover:border-slate-300'
           }`}
         >
           {opt}
@@ -59,7 +59,7 @@ function ChipGroup({ options, value, onChange, cols = 3 }) {
 // ── Step dot indicator ────────────────────────────────────────────────────────
 function StepBar({ current }) {
   return (
-    <div className="flex items-center gap-1 px-4 py-3 bg-white border-b border-slate-100">
+    <div className="flex items-center gap-1 px-4 py-3 bg-[var(--cy-surface)] border-b border-slate-100">
       {STEPS.map((s, i) => (
         <div key={s} className="flex items-center flex-1 last:flex-none">
           <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0 ${
@@ -216,7 +216,7 @@ export default function CreateTournament() {
   return (
     <div className="min-h-dvh flex flex-col bg-slate-50">
       {/* Top bar */}
-      <div className="bg-white flex items-center gap-3 px-4 h-14 border-b border-slate-100 sticky top-0 z-20">
+      <div className="bg-[var(--cy-surface)] flex items-center gap-3 px-4 h-14 border-b border-slate-100 sticky top-0 z-20">
         <button onClick={() => step === 0 ? navigate(-1) : prev()} className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors flex-shrink-0">
           <ChevronLeft size={20} className="text-navy-700" />
         </button>
@@ -444,7 +444,7 @@ export default function CreateTournament() {
       </main>
 
       {/* Bottom CTA */}
-      <div className="sticky bottom-0 bg-white border-t border-slate-100 px-4 py-4 safe-pb">
+      <div className="sticky bottom-0 bg-[var(--cy-surface)] border-t border-slate-100 px-4 py-4 safe-pb">
         {step < 4 ? (
           <button className="btn-primary w-full gap-2" onClick={next}>
             Continue

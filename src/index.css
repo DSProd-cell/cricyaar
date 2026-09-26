@@ -15,6 +15,8 @@
 
   --cy-bg: #f8fafc;
   --cy-surface: #ffffff;
+  --cy-input-bg: #f8fafc;
+  --cy-subtle: #f1f5f9;
   --cy-text: #0f172a;
   --cy-muted: #64748b;
   --cy-border: #e2e8f0;
@@ -25,21 +27,68 @@
   --cy-icon-border: rgba(255,255,255,0.5);
   --cy-icon-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
   --cy-label-inactive: #94a3b8;
+
+  /* navy/slate ramps — identical in light mode, inverted under dark (see
+     the prefers-color-scheme block below) so text-navy-900, bg-slate-100
+     etc. keep working everywhere without per-screen dark: variants. */
+  --cy-navy-900: #0f172a; --cy-navy-800: #1e293b; --cy-navy-700: #334155;
+  --cy-navy-600: #475569; --cy-navy-500: #64748b; --cy-navy-400: #94a3b8;
+  --cy-navy-300: #cbd5e1; --cy-navy-200: #e2e8f0; --cy-navy-100: #f1f5f9;
+  --cy-navy-50:  #f8fafc;
+  --cy-slate-900: #0f172a; --cy-slate-800: #1e293b; --cy-slate-700: #334155;
+  --cy-slate-600: #475569; --cy-slate-500: #64748b; --cy-slate-400: #94a3b8;
+  --cy-slate-300: #cbd5e1; --cy-slate-200: #e2e8f0; --cy-slate-100: #f1f5f9;
+  --cy-slate-50:  #f8fafc;
 }
 
-:root[data-theme="dark"] {
-  --cy-bg: #020b14;
-  --cy-surface: #0d1b2a;
-  --cy-text: #f1f5f9;
-  --cy-muted: #94a3b8;
-  --cy-border: rgba(255,255,255,0.08);
-  --cy-nav-bg: rgba(12,12,14,0.88);
-  --cy-nav-border: rgba(255,255,255,0.10);
-  --cy-nav-shadow: 0 6px 32px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-  --cy-icon-inactive: rgba(255,255,255,0.06);
-  --cy-icon-border: rgba(255,255,255,0.12);
-  --cy-icon-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3);
-  --cy-label-inactive: rgba(255,255,255,0.4);
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --cy-bg: #020b14;
+    --cy-surface: #0d1b2a;
+    --cy-input-bg: #0a1622;
+    --cy-subtle: #13253a;
+    --cy-text: #f1f5f9;
+    --cy-muted: #94a3b8;
+    --cy-border: rgba(255,255,255,0.08);
+    --cy-nav-bg: rgba(12,12,14,0.88);
+    --cy-nav-border: rgba(255,255,255,0.10);
+    --cy-nav-shadow: 0 6px 32px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    --cy-icon-inactive: rgba(255,255,255,0.06);
+    --cy-icon-border: rgba(255,255,255,0.12);
+    --cy-icon-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3);
+    --cy-label-inactive: rgba(255,255,255,0.4);
+
+    /* Inverted ramp: navy-900/slate-900 (was near-black ink) becomes the
+       brightest tone for headings on a dark surface; navy-50/slate-50 (was
+       a near-white background tint) becomes the darkest background tint. */
+    --cy-navy-900: #f1f5f9; --cy-navy-800: #e2e8f0; --cy-navy-700: #cbd5e1;
+    --cy-navy-600: #94a3b8; --cy-navy-500: #94a3b8; --cy-navy-400: #64748b;
+    --cy-navy-300: #475569; --cy-navy-200: #334155; --cy-navy-100: #1e293b;
+    --cy-navy-50:  #0f172a;
+    --cy-slate-900: #f1f5f9; --cy-slate-800: #e2e8f0; --cy-slate-700: #cbd5e1;
+    --cy-slate-600: #94a3b8; --cy-slate-500: #94a3b8; --cy-slate-400: #64748b;
+    --cy-slate-300: #475569; --cy-slate-200: #334155; --cy-slate-100: #1e293b;
+    --cy-slate-50:  #0f172a;
+  }
+}
+
+/* Some screens (live Scoring, the Pro checkout, the UMP match console) are
+   deliberately always-dark by design, independent of the viewer's system
+   theme — they use navy-900/bg-navy-800/etc. as literal fixed colors, not as
+   "ink that should invert." Applying this class to a screen's root re-pins
+   every --cy-* token to its original fixed value so that subtree is immune
+   to the dark-mode media query above. */
+.theme-pin-fixed {
+  --cy-bg: #f8fafc; --cy-surface: #ffffff; --cy-input-bg: #f8fafc; --cy-subtle: #f1f5f9;
+  --cy-text: #0f172a; --cy-muted: #64748b; --cy-border: #e2e8f0;
+  --cy-navy-900: #0f172a; --cy-navy-800: #1e293b; --cy-navy-700: #334155;
+  --cy-navy-600: #475569; --cy-navy-500: #64748b; --cy-navy-400: #94a3b8;
+  --cy-navy-300: #cbd5e1; --cy-navy-200: #e2e8f0; --cy-navy-100: #f1f5f9;
+  --cy-navy-50:  #f8fafc;
+  --cy-slate-900: #0f172a; --cy-slate-800: #1e293b; --cy-slate-700: #334155;
+  --cy-slate-600: #475569; --cy-slate-500: #64748b; --cy-slate-400: #94a3b8;
+  --cy-slate-300: #cbd5e1; --cy-slate-200: #e2e8f0; --cy-slate-100: #f1f5f9;
+  --cy-slate-50:  #f8fafc;
 }
 
 @layer base {
@@ -71,8 +120,8 @@
     display: none;
     width: 240px;
     flex-shrink: 0;
-    background: #fff;
-    border-right: 1px solid #e2e8f0;
+    background: var(--cy-surface);
+    border-right: 1px solid var(--cy-border);
     position: fixed;
     top: 0; left: 0; bottom: 0;
     z-index: 30;
@@ -189,7 +238,7 @@
     border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    color: #475569;
+    color: var(--cy-muted);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
     -webkit-tap-highlight-color: transparent;
@@ -200,8 +249,8 @@
 
   /* ── Cards ── */
   .card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--cy-surface);
+    border: 1px solid var(--cy-border);
     border-radius: 16px;
     padding: 16px;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -211,8 +260,8 @@
     box-shadow: 0 4px 12px 0 rgb(34 197 94 / 0.08);
   }
   .home-block {
-    background: #fff;
-    border: 1.5px solid #e2e8f0;
+    background: var(--cy-surface);
+    border: 1.5px solid var(--cy-border);
     border-radius: 20px;
     padding: 20px;
     cursor: pointer;
@@ -235,13 +284,13 @@
   /* ── Inputs ── */
   .cm-input {
     width: 100%;
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
+    background: var(--cy-input-bg);
+    border: 1.5px solid var(--cy-border);
     border-radius: 12px;
     padding: 12px 16px;
     font-size: 16px;
     font-weight: 400;
-    color: #0f172a;
+    color: var(--cy-text);
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
     -webkit-appearance: none;
@@ -249,21 +298,21 @@
   .cm-input:focus {
     border-color: #22c55e;
     box-shadow: 0 0 0 3px rgb(34 197 94 / 0.12);
-    background: #fff;
+    background: var(--cy-surface);
   }
   .cm-input.error {
     border-color: #dc2626;
     box-shadow: 0 0 0 3px rgb(220 38 38 / 0.08);
   }
-  .cm-input::placeholder { color: #94a3b8; }
+  .cm-input::placeholder { color: var(--cy-muted); }
   .cm-select {
     width: 100%;
-    background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 12px center / 16px;
-    border: 1.5px solid #e2e8f0;
+    background: var(--cy-input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 12px center / 16px;
+    border: 1.5px solid var(--cy-border);
     border-radius: 12px;
     padding: 12px 40px 12px 16px;
     font-size: 16px;
-    color: #0f172a;
+    color: var(--cy-text);
     outline: none;
     -webkit-appearance: none;
     transition: border-color 0.15s;
@@ -292,20 +341,20 @@
 
   .btn-secondary {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: #f1f5f9;
-    color: #334155;
+    background: var(--cy-subtle);
+    color: var(--cy-text);
     font-weight: 600;
     font-size: 15px;
     border-radius: 12px;
     padding: 14px 24px;
     cursor: pointer;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid var(--cy-border);
     transition: background 0.15s, border-color 0.15s, transform 0.1s;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     min-height: 48px;
   }
-  .btn-secondary:hover { background: #e2e8f0; border-color: #cbd5e1; }
+  .btn-secondary:hover { background: var(--cy-border); }
   .btn-secondary:active { transform: scale(0.97); }
 
   .btn-danger {
@@ -331,7 +380,7 @@
   .badge-amber  { background: #fef3c7; color: #92400e; }
   .badge-red    { background: #fee2e2; color: #b91c1c; }
   .badge-blue   { background: #dbeafe; color: #1d4ed8; }
-  .badge-navy   { background: #f1f5f9; color: #334155; }
+  .badge-navy   { background: var(--cy-subtle); color: var(--cy-text); }
   .badge-live   { background: #fee2e2; color: #dc2626; animation: pulse 1.5s infinite; }
 
   /* ── Score button (Scoring screen) ── */
@@ -351,8 +400,8 @@
     border: none;
   }
   .score-btn:active { transform: scale(0.94); }
-  .score-btn-dot   { background: #f1f5f9; color: #475569; }
-  .score-btn-run   { background: #fff; color: #0f172a; border: 1.5px solid #e2e8f0; }
+  .score-btn-dot   { background: var(--cy-subtle); color: var(--cy-muted); }
+  .score-btn-run   { background: var(--cy-surface); color: var(--cy-text); border: 1.5px solid var(--cy-border); }
   .score-btn-four  { background: #22c55e; color: #fff; }
   .score-btn-six   { background: #1e293b; color: #fff; border: 2px solid #94a3b8; }
   .score-btn-wicket { background: #dc2626; color: #fff; }
@@ -363,8 +412,8 @@
 
   /* ── Over ball dots ── */
   .over-ball { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-  .over-ball-dot  { background: #f1f5f9; color: #64748b; }
-  .over-ball-run  { background: #e2e8f0; color: #0f172a; }
+  .over-ball-dot  { background: var(--cy-subtle); color: var(--cy-muted); }
+  .over-ball-run  { background: var(--cy-border); color: var(--cy-text); }
   .over-ball-four { background: #22c55e; color: #fff; }
   .over-ball-six  { background: #0f172a; color: #fff; }
   .over-ball-w    { background: #dc2626; color: #fff; }
@@ -372,9 +421,9 @@
   .over-ball-nb   { background: #f97316; color: #fff; font-size: 10px; }
 
   /* ── Tab bar ── */
-  .tab-bar { display: flex; border-bottom: 1.5px solid #e2e8f0; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+  .tab-bar { display: flex; border-bottom: 1.5px solid var(--cy-border); overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
   .tab-bar::-webkit-scrollbar { display: none; }
-  .tab-item { flex: 0 0 auto; padding: 12px 14px; text-align: center; font-size: 14px; font-weight: 500; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+  .tab-item { flex: 0 0 auto; padding: 12px 14px; text-align: center; font-size: 14px; font-weight: 500; color: var(--cy-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
   .tab-item.active { color: #22c55e; border-bottom-color: #22c55e; font-weight: 600; }
 
   /* ── Toast ── */
@@ -387,27 +436,27 @@
   .facility-icon { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; }
 
   /* ── Skeleton shimmer ── */
-  .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+  .skeleton { background: linear-gradient(90deg, var(--cy-subtle) 25%, var(--cy-border) 50%, var(--cy-subtle) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
 
   /* ── Filter chip ── */
-  .filter-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1.5px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .filter-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; border: 1.5px solid var(--cy-border); background: var(--cy-surface); color: var(--cy-muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .filter-chip.active { background: #f0fdf4; border-color: #22c55e; color: #15803d; }
-  .filter-chip:hover:not(.active) { border-color: #cbd5e1; }
+  .filter-chip:hover:not(.active) { border-color: var(--cy-muted); }
 
   /* ── OTP input boxes ── */
-  .otp-input { flex: 1 1 0; min-width: 0; max-width: 48px; aspect-ratio: 6 / 7; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; font-size: clamp(16px, 6vw, 24px); font-weight: 700; color: #0f172a; background: #f8fafc; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
-  .otp-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgb(34 197 94 / 0.12); background: #fff; }
-  .otp-input.filled { border-color: #22c55e; background: #f0fdf4; }
+  .otp-input { flex: 1 1 0; min-width: 0; max-width: 48px; aspect-ratio: 6 / 7; border: 2px solid var(--cy-border); border-radius: 12px; text-align: center; font-size: clamp(16px, 6vw, 24px); font-weight: 700; color: var(--cy-text); background: var(--cy-input-bg); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+  .otp-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgb(34 197 94 / 0.12); background: var(--cy-surface); }
+  .otp-input.filled { border-color: #22c55e; background: var(--cy-surface); }
   .otp-input.error { border-color: #dc2626; }
 
   /* ── Role card (Profile Setup) ── */
-  .role-card { border: 2px solid #e2e8f0; border-radius: 14px; padding: 16px 12px; cursor: pointer; transition: all 0.15s; text-align: center; -webkit-tap-highlight-color: transparent; }
+  .role-card { border: 2px solid var(--cy-border); border-radius: 14px; padding: 16px 12px; cursor: pointer; transition: all 0.15s; text-align: center; -webkit-tap-highlight-color: transparent; }
   .role-card.selected { border-color: #22c55e; background: #f0fdf4; }
   .role-card:hover:not(.selected) { border-color: #86efac; }
   .role-card:active { transform: scale(0.97); }
 
   /* ── Stats tile ── */
-  .stat-tile { background: #f8fafc; border-radius: 12px; padding: 12px; text-align: center; }
+  .stat-tile { background: var(--cy-input-bg); border-radius: 12px; padding: 12px; text-align: center; }
 }
 
 @layer utilities {

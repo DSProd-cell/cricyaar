@@ -585,12 +585,10 @@ export default function InviteEarn() {
 
   const handleShare = () => {
     const msg = `🏏 Join CricYaar — India's fraud-free cricket app!\n\nUse my code *${code}* to get your first Pro month FREE:\n${referralLink}\n\n✅ Verified stats · Live scoring · Tournaments`
-    if (navigator.share) {
-      navigator.share({ title:'Join CricYaar', text:msg, url:referralLink })
-    } else {
-      navigator.clipboard?.writeText(referralLink)
-      addToast('Referral link copied!')
-    }
+    // Deep-link straight into WhatsApp rather than the generic Web Share API —
+    // navigator.share() opens a device-wide app picker (or silently no-ops in
+    // the WebView), neither of which "launches WhatsApp" as the button promises.
+    window.location.href = `whatsapp://send?text=${encodeURIComponent(msg)}`
   }
 
   const handleCopy = () => {

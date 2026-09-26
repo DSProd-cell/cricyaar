@@ -38,7 +38,7 @@ export default function EarningsDashboard() {
 
   return (
     <div className="min-h-dvh bg-navy-50 flex flex-col">
-      <div className="bg-white border-b border-navy-200 sticky top-0 z-10">
+      <div className="bg-[var(--cy-surface)] border-b border-navy-200 sticky top-0 z-10">
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-navy-100 text-navy-700">
             <ChevronLeft size={20} />
@@ -117,7 +117,7 @@ export default function EarningsDashboard() {
           <div className="flex gap-1 mb-3 overflow-x-auto pb-1 scrollbar-none">
             {[['all','All'],['completed','Completed'],['upcoming','Upcoming'],['cancelled','Cancelled'],['pending_payout','Pending']].map(([v,l]) => (
               <button key={v} onClick={() => setFilter(v)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === v ? 'bg-navy-900 border-navy-900 text-white' : 'bg-white border-navy-200 text-navy-600'}`}>
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === v ? 'bg-navy-900 border-navy-900 text-white' : 'bg-[var(--cy-surface)] border-navy-200 text-navy-600'}`}>
                 {l}
               </button>
             ))}

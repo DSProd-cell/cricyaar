@@ -20,7 +20,7 @@ function LiveScorecardReadOnly({ match, scoring, onUpgrade }) {
   const oversStr = `${Math.floor(overs)}.${legalBalls} / ${match.overs}`
 
   return (
-    <div className="min-h-dvh flex flex-col bg-navy-900">
+    <div className="min-h-dvh flex flex-col bg-navy-900 theme-pin-fixed">
       {/* Nav bar */}
       <div className="flex items-center h-14 px-4 bg-navy-800 border-b border-navy-700 flex-shrink-0">
         <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-navy-700 transition-colors">
@@ -44,7 +44,7 @@ function LiveScorecardReadOnly({ match, scoring, onUpgrade }) {
       </div>
 
       {/* Score header */}
-      <div className="px-4 py-5 bg-navy-900 border-b border-navy-700 text-center">
+      <div className="px-4 py-5 bg-navy-900 theme-pin-fixed border-b border-navy-700 text-center">
         <p className="text-brand-400 text-sm font-semibold mb-1">{battingTeam?.name} batting</p>
         <div className="flex items-end justify-center gap-3">
           <span className="text-white font-black text-5xl tabular-nums">{runs}/{wkts}</span>
@@ -137,7 +137,7 @@ function LiveScorecardReadOnly({ match, scoring, onUpgrade }) {
 function ScorecardPaywall({ navigate }) {
   const { setShowProSheet } = useStore()
   return (
-    <div className="min-h-dvh bg-navy-900 flex flex-col items-center justify-center px-6 text-center">
+    <div className="min-h-dvh bg-navy-900 theme-pin-fixed flex flex-col items-center justify-center px-6 text-center">
       <div className="w-20 h-20 bg-amber-500/20 rounded-3xl flex items-center justify-center mb-5 border border-amber-500/30">
         <Zap size={32} className="text-amber-400" />
       </div>
@@ -151,7 +151,7 @@ function ScorecardPaywall({ navigate }) {
           className="w-full py-3 rounded-xl bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
         >
           <Zap size={16} />
-          Upgrade to Pro — ₹99/month
+          Upgrade to Pro — ₹1/month
         </button>
         <button
           onClick={() => navigate(-1)}
@@ -183,7 +183,7 @@ function PreMatchSetup({ match, onStart }) {
   }`
 
   return (
-    <div className="h-dvh flex flex-col bg-navy-900">
+    <div className="h-dvh flex flex-col bg-navy-900 theme-pin-fixed">
       {/* Header */}
       <div className="px-4 pt-safe flex items-center h-14 gap-3 bg-navy-800 border-b border-navy-700">
         <div className="flex-1">
@@ -466,9 +466,9 @@ export default function Scoring() {
   const sp = playerById(striker?.id), nsp = playerById(nonStriker?.id), bp = playerById(currentBowler?.id)
 
   return (
-    <div className="h-dvh flex flex-col bg-navy-900 overflow-hidden select-none">
+    <div className="h-dvh flex flex-col bg-navy-900 theme-pin-fixed overflow-hidden select-none">
       {/* ZONE 1 — Match Header */}
-      <div className="flex-shrink-0 bg-navy-900 px-4 pt-safe flex items-center gap-3 h-14">
+      <div className="flex-shrink-0 bg-navy-900 theme-pin-fixed px-4 pt-safe flex items-center gap-3 h-14">
         <button onClick={() => navigate(-1)} className="text-navy-400 hover:text-white transition-colors flex-shrink-0">
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>

@@ -212,7 +212,7 @@ export default function MyTournaments() {
       <TopBar title="My Tournaments" showBack />
 
       {/* Primary tabs */}
-      <div className="bg-white border-b border-slate-100 sticky top-[57px] z-10 flex px-4">
+      <div className="bg-[var(--cy-surface)] border-b border-slate-100 sticky top-[57px] z-10 flex px-4">
         {TABS.map((label, idx) => (
           <button
             key={idx}
@@ -254,7 +254,7 @@ export default function MyTournaments() {
         {tab === 1 && (
           <>
             {/* Sub-filter tabs */}
-            <div className="bg-white border-b border-slate-100 sticky top-[105px] z-10 flex px-4 gap-1 overflow-x-auto no-scrollbar">
+            <div className="bg-[var(--cy-surface)] border-b border-slate-100 sticky top-[105px] z-10 flex px-4 gap-1 overflow-x-auto no-scrollbar">
               {['All', 'Live', 'Upcoming', 'Past'].map(label => (
                 <button
                   key={label}

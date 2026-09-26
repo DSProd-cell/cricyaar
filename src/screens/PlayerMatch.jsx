@@ -24,7 +24,7 @@ function PlayerCard({ player, onSelect, selected }) {
       className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
         selected
           ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
-          : 'border-slate-100 bg-white hover:border-brand-200 hover:shadow-sm'
+          : 'border-slate-100 bg-[var(--cy-surface)] hover:border-brand-200 hover:shadow-sm'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -169,7 +169,7 @@ export default function PlayerMatch() {
   const handleSkip = () => navigate('/role-onboard')
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-slate-100 px-4 pt-safe pb-3">
         <div className="flex items-center gap-3 pt-3 mb-3">
@@ -263,7 +263,7 @@ export default function PlayerMatch() {
 
       {/* Bottom action */}
       {!loading && players.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 pb-safe space-y-2">
+        <div className="fixed bottom-0 left-0 right-0 bg-[var(--cy-surface)] border-t border-slate-100 p-4 pb-safe space-y-2">
           {selected ? (
             <button
               onClick={handleImport}

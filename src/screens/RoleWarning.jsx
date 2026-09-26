@@ -27,13 +27,13 @@ export default function RoleWarning() {
   // Admin special case
   if (role === 'admin') {
     return (
-      <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
+      <div className="min-h-dvh flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-sm animate-slide-up">
           <button onClick={() => navigate('/settings')} className="flex items-center gap-2 text-navy-500 hover:text-navy-900 mb-6 transition-colors">
             <ArrowLeft size={18} />
             <span className="text-sm font-medium">Back to Settings</span>
           </button>
-          <div className="bg-white rounded-2xl shadow-card p-6 text-center">
+          <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-6 text-center">
             <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <AlertTriangle size={24} className="text-purple-600" />
             </div>
@@ -51,14 +51,14 @@ export default function RoleWarning() {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-dvh flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm animate-slide-up">
         <button onClick={() => navigate('/settings')} className="flex items-center gap-2 text-navy-500 hover:text-navy-900 mb-6 transition-colors">
           <ArrowLeft size={18} />
           <span className="text-sm font-medium">Back to Settings</span>
         </button>
 
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-6">
           {/* Icon */}
           <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
             <ArrowLeftRight size={28} className="text-amber-500" />

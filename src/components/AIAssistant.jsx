@@ -236,7 +236,7 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
   const canSubmit = name.trim() && phone.trim().length >= 10 && query.trim()
 
   return (
-    <div className="mt-2 rounded-2xl overflow-hidden border border-indigo-100 bg-white shadow-sm">
+    <div className="mt-2 rounded-2xl overflow-hidden border border-indigo-100 bg-[var(--cy-surface)] shadow-sm">
       <div className="bg-indigo-50 px-4 py-2 border-b border-indigo-100">
         <p className="text-indigo-700 font-bold text-xs uppercase tracking-wider">Support Ticket</p>
       </div>
@@ -251,7 +251,7 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
             value={name}
             onChange={e => setName(e.target.value)}
             placeholder="Your full name"
-            className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-indigo-400 placeholder-slate-400 text-navy-900 transition-colors"
+            className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-[var(--cy-surface)] outline-none focus:border-indigo-400 placeholder-slate-400 text-navy-900 transition-colors"
           />
         </div>
         {/* Phone */}
@@ -265,7 +265,7 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
             value={phone}
             onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
             placeholder="10-digit mobile number"
-            className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-indigo-400 placeholder-slate-400 text-navy-900 transition-colors"
+            className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-[var(--cy-surface)] outline-none focus:border-indigo-400 placeholder-slate-400 text-navy-900 transition-colors"
           />
         </div>
         {/* Query */}
@@ -278,7 +278,7 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
             value={query}
             onChange={e => setQuery(e.target.value.slice(0, 300))}
             placeholder="Describe your issue in detail…"
-            className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white outline-none focus:border-indigo-400 placeholder-slate-400 text-navy-900 resize-none transition-colors"
+            className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-[var(--cy-surface)] outline-none focus:border-indigo-400 placeholder-slate-400 text-navy-900 resize-none transition-colors"
           />
           <p className="text-right text-[10px] text-slate-400 mt-0.5">{query.length}/300</p>
         </div>
@@ -443,7 +443,7 @@ export default function AIAssistant() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
           <div
-            className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up flex flex-col"
+            className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up flex flex-col"
             style={{ maxHeight: '80dvh', minHeight: '55dvh' }}
             onClick={e => e.stopPropagation()}
           >
@@ -582,7 +582,7 @@ export default function AIAssistant() {
             )}
 
             {/* Input */}
-            <div className="px-4 pb-6 pt-2 border-t border-slate-100 flex-shrink-0 bg-white rounded-b-3xl">
+            <div className="px-4 pb-6 pt-2 border-t border-slate-100 flex-shrink-0 bg-[var(--cy-surface)] rounded-b-3xl">
               <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5">
                 <input
                   ref={inputRef}

@@ -15,7 +15,7 @@ function BookingModal({ ground, day, slot, onClose, onConfirm }) {
   if (confirmed) return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up px-5 pt-5 pb-10" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up px-5 pt-5 pb-10" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-1 mb-5"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex flex-col items-center text-center py-4">
           <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center mb-4">
@@ -41,7 +41,7 @@ function BookingModal({ ground, day, slot, onClose, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3">
           <div>
@@ -237,7 +237,7 @@ export default function GroundDetail() {
           {ground.photos?.length > 1 && (
             <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
               {ground.photos.map((_, i) => (
-                <button key={i} onClick={() => setPhotoIdx(i)} className={`w-1.5 h-1.5 rounded-full ${i===photoIdx?'bg-white':'bg-white/40'}`} />
+                <button key={i} onClick={() => setPhotoIdx(i)} className={`w-1.5 h-1.5 rounded-full ${i===photoIdx?'bg-[var(--cy-surface)]':'bg-white/40'}`} />
               ))}
             </div>
           )}
@@ -539,7 +539,7 @@ export default function GroundDetail() {
                   <Crown size={28} className="text-amber-500 fill-amber-400 mb-2" />
                   <p className="font-bold text-navy-900 text-sm mb-1">CricYaar Pro</p>
                   <p className="text-navy-500 text-xs mb-4 leading-relaxed max-w-xs">
-                    See owner details, slot availability, Google Maps directions, and full match history. ₹99/month.
+                    See owner details, slot availability, Google Maps directions, and full match history. ₹1/month.
                   </p>
                   <button onClick={() => navigate('/pro')} className="btn-primary px-6 py-2.5 text-sm">
                     Upgrade to Pro

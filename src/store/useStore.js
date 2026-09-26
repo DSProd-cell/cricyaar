@@ -192,6 +192,14 @@ export const useStore = create(
       // ── v3: Pro intent (session flag for USP → signup flow) ──────────────────
       proIntent: false,
       setProIntent: (val) => set({ proIntent: val }),
+
+      // ── SplashOverlay visibility ──────────────────────────────────────────────
+      // Real store state (not a module-level flag) so sign-out can force the
+      // splash to show again — SplashOverlay is mounted once at the App root
+      // and never remounts, so a plain module variable it read only at its
+      // initial useState() couldn't be un-dismissed after the first render.
+      showSplash: true,
+      setShowSplash: (val) => set({ showSplash: val }),
       showProSheet: false,
       setShowProSheet: (val) => set({ showProSheet: val }),
 

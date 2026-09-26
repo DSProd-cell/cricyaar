@@ -20,7 +20,7 @@ function CityPickerModal({ currentCity, onSelect, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
-      <div className="relative mt-auto bg-white rounded-t-3xl px-5 pt-4 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
+      <div className="relative mt-auto bg-[var(--cy-surface)] rounded-t-3xl px-5 pt-4 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4" />
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-navy-900 text-lg">Choose your city</h3>
@@ -185,7 +185,7 @@ function ScoreDetailSheet({ match, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative mt-auto bg-white rounded-t-3xl animate-slide-up max-h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
+      <div className="relative mt-auto bg-[var(--cy-surface)] rounded-t-3xl animate-slide-up max-h-[92vh] flex flex-col" onClick={e => e.stopPropagation()}>
 
         {/* Handle */}
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1 flex-shrink-0" />
@@ -402,7 +402,7 @@ function ProGatePopup({ tournament, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#fef3c7' }}>
           <Crown size={26} className="text-amber-500 fill-amber-400" />
@@ -476,7 +476,7 @@ export default function FanHome() {
     <div className="min-h-dvh bg-slate-50 flex flex-col">
 
       {/* Header */}
-      <header className="bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
+      <header className="bg-[var(--cy-surface)] border-b border-slate-100 px-4 py-3 flex items-center justify-between flex-shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center">
             <span className="text-white font-black text-sm">CY</span>
@@ -502,7 +502,7 @@ export default function FanHome() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-slate-100 sticky top-[57px] z-10 flex px-4 gap-4">
+      <div className="bg-[var(--cy-surface)] border-b border-slate-100 sticky top-[57px] z-10 flex px-4 gap-4">
         {[
           { id: 'matches',     label: '🔴 Live Matches' },
           { id: 'tournaments', label: '🏆 Tournaments'  },
@@ -709,7 +709,7 @@ export default function FanHome() {
       </main>
 
       {/* Bottom banner */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-4 z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-[var(--cy-surface)] border-t border-slate-200 px-4 py-4 z-10">
         <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-navy-700 font-semibold text-sm">Want to play, score, or organise?</p>
@@ -744,7 +744,7 @@ export default function FanHome() {
       {locked && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setLocked(false)}>
           <div className="absolute inset-0 bg-black/50" />
-          <div className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
             <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Lock size={22} className="text-navy-500" />

@@ -44,7 +44,7 @@ function EditProfileSheet({ player, onClose, onSave }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
           <h2 className="font-extrabold text-navy-900 text-lg">Edit Profile</h2>
@@ -168,7 +168,7 @@ function LogoutModal({ onCancel, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/50" />
-      <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in text-center" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in text-center" onClick={e => e.stopPropagation()}>
         <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
           <LogOut size={20} className="text-red-600" />
         </div>
@@ -268,7 +268,7 @@ export default function PlayerProfile() {
       <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack />
 
       {/* ── Hero Card ───────────────────────────────────────────────────── */}
-      <div className="bg-white relative">
+      <div className="bg-[var(--cy-surface)] relative">
         {/* Gradient Banner */}
         <div
           className="relative h-[110px]"
@@ -354,7 +354,7 @@ export default function PlayerProfile() {
             <div className="flex flex-wrap gap-2 mt-3">
               {playerTeams.map(t => (
                 <button key={t.id} onClick={() => navigate(`/teams/${t.id}`)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--cy-surface)] hover:opacity-80 transition-opacity"
                   style={{ border: `1px solid ${roleColor.border}`, color: roleColor.primary }}
                 >
                   <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
@@ -428,7 +428,7 @@ export default function PlayerProfile() {
           <p className="text-[10px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: roleColor.primary }}>
             Account
           </p>
-          <div className="bg-white rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}` }}>
+          <div className="bg-[var(--cy-surface)] rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}` }}>
 
             {/* Aadhaar — gated to organiser/umpire/ground_owner */}
             {needsAadhaar && (
@@ -539,7 +539,7 @@ export default function PlayerProfile() {
       {/* ── Stats Tabs (Player role only for own profile, or any role for others) ── */}
       {(role === 'player' || playerId) && (
         <>
-          <div className="tab-bar mt-4 bg-white border-t border-b border-slate-100">
+          <div className="tab-bar mt-4 bg-[var(--cy-surface)] border-t border-b border-slate-100">
             {PLAYER_TABS.map(t => (
               <button key={t} className={`tab-item flex-shrink-0 ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>{t}</button>
             ))}

@@ -70,7 +70,7 @@ export default function TeamProfile() {
       <TopBar title="Team Profile" showBack />
 
       {/* ── Team Header ── */}
-      <div className="bg-white border-b border-slate-100">
+      <div className="bg-[var(--cy-surface)] border-b border-slate-100">
         <div className="px-4 pt-5 pb-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-4 mb-4">
             {/* Team logo */}
@@ -222,7 +222,7 @@ export default function TeamProfile() {
                   className="px-5 py-2.5 rounded-xl font-bold text-sm text-white"
                   style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
                 >
-                  Upgrade to Pro — ₹99/mo
+                  Upgrade to Pro — ₹1/mo
                 </button>
               </div>
             )}

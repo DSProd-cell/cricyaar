@@ -1,25 +1,25 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { IPL_TEAMS } from '../lib/iplTeams'
 import IplCelebrationOverlay from '../components/IplCelebrationOverlay'
 
-// Resolve where to go after pick/skip based on the ?from param
-function resolveRoute(from, defaultRoute) {
-  if (from === 'profile') return '/profile'
-  if (from === 'login')   return '/'
-  return defaultRoute
-}
-
 export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
   const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const from = params.get('from')
+  const location = useLocation()
   const { setIplTeam } = useStore()
   const [selected, setSelected] = useState(null)
   const [celebrating, setCelebrating] = useState(false)
 
-  const dest = resolveRoute(from, skipRoute)
+  // When reached mid-onboarding, fall through to city-select/role-select.
+  // When reached from Profile or login, the caller passes returnTo via state.
+  const returnTo = location.state?.returnTo
+
+  const finish = () => {
+    if (onDone) onDone()
+    else if (returnTo === 'back') navigate(-1)
+    else navigate(returnTo || skipRoute)
+  }
 
   const handlePick = (team) => {
     setSelected(team)
@@ -29,14 +29,10 @@ export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
 
   const handleCelebrationDone = () => {
     setCelebrating(false)
-    if (onDone) onDone()
-    else navigate(dest)
+    finish()
   }
 
-  const handleSkip = () => {
-    if (onDone) onDone()
-    else navigate(dest)
-  }
+  const handleSkip = finish
 
   return (
     <div style={{
