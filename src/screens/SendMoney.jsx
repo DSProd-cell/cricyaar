@@ -1,13 +1,12 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   ChevronLeft, MessageCircle, Phone, CheckCircle,
-  IndianRupee, Send, AlertTriangle, Copy,
+  IndianRupee, Send, AlertTriangle, AlertCircle,
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import UpiPayment from '../lib/upiPayment'
 import { isValidUpiId } from '../lib/upi'
-import TopBar from '../components/TopBar'
 
 const PURPOSES = [
   { id: 'match_fee',   label: 'Match Fee',   emoji: '🏏' },
@@ -19,6 +18,50 @@ const PURPOSES = [
 ]
 
 const QUICK_AMOUNTS = [100, 200, 500, 1000, 2000]
+const MAX_AMOUNT = 100000
+
+// ── Validators ────────────────────────────────────────────────────────────────
+function validateName(v) {
+  if (!v.trim()) return 'Name is required'
+  if (v.trim().length < 2) return 'Name must be at least 2 characters'
+  if (!/^[a-zA-Z\s.'-]+$/.test(v.trim())) return 'Name should only contain letters'
+  return ''
+}
+
+function validatePhone(v) {
+  const digits = v.replace(/\D/g, '')
+  if (!digits) return 'Phone number is required'
+  if (digits.length !== 10) return 'Enter a valid 10-digit mobile number'
+  if (!/^[6-9]/.test(digits)) return 'Mobile number must start with 6, 7, 8 or 9'
+  return ''
+}
+
+function validateUpi(v) {
+  if (!v) return ''  // UPI is optional when phone is valid
+  if (!/^[\w.\-+]+@[a-zA-Z]{2,}$/.test(v.trim())) {
+    return 'Invalid UPI ID — try format: name@okhdfcbank'
+  }
+  return ''
+}
+
+function validateAmount(v) {
+  const n = parseFloat(v)
+  if (!v || isNaN(n)) return 'Amount is required'
+  if (n < 1) return 'Minimum amount is ₹1'
+  if (n > MAX_AMOUNT) return `Maximum amount is ₹${MAX_AMOUNT.toLocaleString('en-IN')}`
+  if (!/^\d+(\.\d{1,2})?$/.test(v)) return 'Enter a valid amount'
+  return ''
+}
+
+function FieldError({ msg }) {
+  if (!msg) return null
+  return (
+    <div className="flex items-center gap-1.5 mt-1.5">
+      <AlertCircle size={12} className="text-red-500 flex-shrink-0" />
+      <p className="text-red-500 text-xs">{msg}</p>
+    </div>
+  )
+}
 
 function StepDot({ active }) {
   return <div className={`w-2 h-2 rounded-full transition-colors ${active ? 'bg-brand-500' : 'bg-navy-200'}`} />
@@ -34,28 +77,54 @@ export default function SendMoney() {
   const [recipientName,  setRecipientName]  = useState(prefill.name  || '')
   const [recipientPhone, setRecipientPhone] = useState(prefill.phone || '')
   const [recipientUpi,   setRecipientUpi]   = useState(prefill.upiId || '')
-  const [amount,  setAmount]  = useState(prefill.amount  ? String(prefill.amount) : '')
+  const [amount,  setAmount]  = useState(prefill.amount ? String(prefill.amount) : '')
   const [purpose, setPurpose] = useState(prefill.purpose || 'match_fee')
   const [note,    setNote]    = useState('')
 
-  const [step,             setStep]             = useState(1)
-  const [contactDone,      setContactDone]      = useState(false)
-  const [hasContactedVia,  setHasContactedVia]  = useState(null)
-  const [paying,           setPaying]           = useState(false)
-  const [awaitingConfirm,  setAwaitingConfirm]  = useState(false)
+  // Track touched state for each field (show errors only after user has touched)
+  const [touched, setTouched] = useState({})
+  const touch = (field) => setTouched(t => ({ ...t, [field]: true }))
+
+  const [step,            setStep]            = useState(1)
+  const [contactDone,     setContactDone]     = useState(false)
+  const [hasContactedVia, setHasContactedVia] = useState(null)
+  const [paying,          setPaying]          = useState(false)
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false)
 
   const purposeObj = PURPOSES.find(p => p.id === purpose) || PURPOSES[0]
   const amt = parseFloat(amount) || 0
-  const phoneClean = recipientPhone.replace(/\D/g, '')
+  const phoneDigits = recipientPhone.replace(/\D/g, '')
+
+  // Live errors (only display when field is touched)
+  const nameErr  = validateName(recipientName)
+  const phoneErr = validatePhone(recipientPhone)
+  const upiErr   = validateUpi(recipientUpi)
+  const amtErr   = validateAmount(amount)
+
+  // Phone input: strip non-digits, limit to 10
+  const handlePhoneChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10)
+    setRecipientPhone(digits)
+  }
 
   const canProceed = (
+    !nameErr &&
+    !phoneErr &&
+    !upiErr &&
+    !amtErr &&
     recipientName.trim() &&
-    amt > 0 &&
-    (isValidUpiId(recipientUpi) || phoneClean.length >= 10)
+    phoneDigits.length === 10
   )
 
+  const handleContinue = () => {
+    // Touch all fields to show any errors
+    setTouched({ name: true, phone: true, upi: true, amount: true })
+    if (!canProceed) return
+    setStep(2)
+  }
+
   const openWhatsApp = () => {
-    const fullPhone = phoneClean.startsWith('91') ? phoneClean : '91' + phoneClean
+    const fullPhone = phoneDigits.startsWith('91') ? phoneDigits : '91' + phoneDigits
     const msg = encodeURIComponent(
       `Hi ${recipientName.split(' ')[0]}, I'm about to send you ₹${amt.toLocaleString('en-IN')} for ${purposeObj.label} via UPI.\n\nPlease confirm your UPI ID: ${recipientUpi || '(tell me your UPI ID)'}\n\nSent via CricYaar`
     )
@@ -65,7 +134,7 @@ export default function SendMoney() {
   }
 
   const openCall = () => {
-    window.location.href = `tel:${phoneClean}`
+    window.location.href = `tel:${phoneDigits}`
     setHasContactedVia('call')
     setTimeout(() => setContactDone(true), 1800)
   }
@@ -99,7 +168,7 @@ export default function SendMoney() {
     }
   }
 
-  // ── Success screen ────────────────────────────────────────────────────────
+  // ── Success screen ──────────────────────────────────────────────────────────
   if (step === 3) {
     return (
       <div className="min-h-dvh bg-[var(--cy-bg)] flex flex-col items-center justify-center px-5 gap-5">
@@ -114,22 +183,25 @@ export default function SendMoney() {
           <p className="text-navy-400 text-xs mt-1">{purposeObj.emoji} {purposeObj.label}</p>
         </div>
         <div className="w-full max-w-sm card p-4 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-navy-500">To</span>
-            <span className="font-semibold text-navy-900">{recipientName}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-navy-500">Amount</span>
-            <span className="font-bold text-navy-900">₹{amt.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-navy-500">UPI ID</span>
-            <span className="font-mono text-navy-700 text-xs">{recipientUpi}</span>
-          </div>
+          {[
+            { label: 'To', value: recipientName },
+            { label: 'Amount', value: `₹${amt.toLocaleString('en-IN')}`, bold: true },
+            { label: 'Phone', value: recipientPhone },
+            recipientUpi && { label: 'UPI ID', value: recipientUpi, mono: true },
+            { label: 'Purpose', value: `${purposeObj.emoji} ${purposeObj.label}` },
+            note && { label: 'Note', value: note },
+          ].filter(Boolean).map(r => (
+            <div key={r.label} className="flex justify-between text-sm">
+              <span className="text-navy-500">{r.label}</span>
+              <span className={`text-right max-w-[60%] ${r.mono ? 'font-mono text-xs' : ''} ${r.bold ? 'font-extrabold text-navy-900' : 'font-semibold text-navy-900'}`}>
+                {r.value}
+              </span>
+            </div>
+          ))}
         </div>
         <button onClick={() => navigate(-1)} className="btn-primary w-full max-w-sm">Done</button>
         <button
-          onClick={() => { setStep(1); setContactDone(false); setHasContactedVia(null); setAwaitingConfirm(false); setPaying(false) }}
+          onClick={() => { setStep(1); setContactDone(false); setHasContactedVia(null); setAwaitingConfirm(false); setPaying(false); setTouched({}) }}
           className="text-navy-500 text-sm"
         >
           Send another payment
@@ -173,38 +245,78 @@ export default function SendMoney() {
               <h2 className="font-bold text-navy-900 text-sm flex items-center gap-2">
                 <Send size={14} className="text-brand-500" /> Who are you paying?
               </h2>
+
+              {/* Name */}
               <div>
-                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Name *</label>
+                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
                 <input
-                  className="cm-input"
+                  className={`cm-input ${touched.name && nameErr ? 'border-red-400 focus:ring-red-300' : ''}`}
                   placeholder="e.g. Rohit Sharma"
                   value={recipientName}
                   onChange={e => setRecipientName(e.target.value)}
+                  onBlur={() => touch('name')}
+                  autoComplete="name"
                 />
+                {touched.name && <FieldError msg={nameErr} />}
               </div>
+
+              {/* Phone */}
               <div>
-                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Phone number *</label>
-                <input
-                  className="cm-input"
-                  placeholder="10-digit mobile number"
-                  type="tel"
-                  inputMode="numeric"
-                  value={recipientPhone}
-                  onChange={e => setRecipientPhone(e.target.value)}
-                />
+                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+                    <span className="text-navy-500 text-sm font-semibold">🇮🇳 +91</span>
+                    <div className="w-px h-4 bg-navy-200 ml-1" />
+                  </div>
+                  <input
+                    className={`cm-input pl-20 ${touched.phone && phoneErr ? 'border-red-400 focus:ring-red-300' : ''}`}
+                    placeholder="98765 43210"
+                    type="tel"
+                    inputMode="numeric"
+                    value={recipientPhone}
+                    onChange={handlePhoneChange}
+                    onBlur={() => touch('phone')}
+                    maxLength={10}
+                  />
+                  {phoneDigits.length === 10 && !phoneErr && (
+                    <CheckCircle size={15} className="text-green-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                  )}
+                </div>
+                {touched.phone && <FieldError msg={phoneErr} />}
+                {!touched.phone && (
+                  <p className="text-navy-400 text-[11px] mt-1">10-digit Indian mobile number (starts with 6–9)</p>
+                )}
               </div>
+
+              {/* UPI */}
               <div>
-                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">UPI ID</label>
+                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">
+                  UPI ID <span className="text-navy-400 font-normal">(optional but needed to pay)</span>
+                </label>
                 <input
-                  className="cm-input"
+                  className={`cm-input font-mono text-sm ${touched.upi && upiErr ? 'border-red-400 focus:ring-red-300' : recipientUpi && !upiErr ? 'border-green-400' : ''}`}
                   placeholder="name@okhdfcbank"
                   value={recipientUpi}
-                  onChange={e => setRecipientUpi(e.target.value)}
+                  onChange={e => setRecipientUpi(e.target.value.trim())}
+                  onBlur={() => touch('upi')}
                   autoCapitalize="none"
                   autoCorrect="off"
+                  autoComplete="off"
                 />
-                {recipientUpi && !isValidUpiId(recipientUpi) && (
-                  <p className="text-red-500 text-xs mt-1.5">Format: name@okhdfcbank</p>
+                {touched.upi && upiErr
+                  ? <FieldError msg={upiErr} />
+                  : recipientUpi && !upiErr && (
+                    <p className="text-green-600 text-xs mt-1 flex items-center gap-1">
+                      <CheckCircle size={11} /> Valid UPI ID
+                    </p>
+                  )
+                }
+                {!touched.upi && !recipientUpi && (
+                  <p className="text-navy-400 text-[11px] mt-1">Format: name@okhdfcbank · name@ybl · name@paytm</p>
                 )}
               </div>
             </div>
@@ -215,21 +327,33 @@ export default function SendMoney() {
                 <IndianRupee size={14} className="text-brand-500" /> Amount & purpose
               </h2>
               <div>
-                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Amount (₹) *</label>
-                <input
-                  className="cm-input text-2xl font-black text-center"
-                  placeholder="0"
-                  type="number"
-                  inputMode="numeric"
-                  value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                />
+                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">
+                  Amount (₹) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-500 font-bold text-lg">₹</span>
+                  <input
+                    className={`cm-input pl-8 text-2xl font-black text-center ${touched.amount && amtErr ? 'border-red-400 focus:ring-red-300' : ''}`}
+                    placeholder="0"
+                    type="number"
+                    inputMode="decimal"
+                    value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    onBlur={() => touch('amount')}
+                    min={1}
+                    max={MAX_AMOUNT}
+                  />
+                </div>
+                {touched.amount && <FieldError msg={amtErr} />}
+                {!touched.amount && (
+                  <p className="text-navy-400 text-[11px] mt-1">Min ₹1 · Max ₹{MAX_AMOUNT.toLocaleString('en-IN')}</p>
+                )}
                 {/* Quick amounts */}
                 <div className="flex gap-2 mt-2 overflow-x-auto pb-1 scrollbar-none">
                   {QUICK_AMOUNTS.map(q => (
                     <button
                       key={q}
-                      onClick={() => setAmount(String(q))}
+                      onClick={() => { setAmount(String(q)); touch('amount') }}
                       className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
                         amount === String(q)
                           ? 'bg-brand-500 border-brand-500 text-white'
@@ -261,13 +385,19 @@ export default function SendMoney() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">Note (optional)</label>
+                <label className="text-xs font-semibold text-navy-500 mb-1.5 block">
+                  Note <span className="text-navy-400 font-normal">(optional)</span>
+                </label>
                 <input
                   className="cm-input"
                   placeholder="e.g. Semi-final match fee"
                   value={note}
                   onChange={e => setNote(e.target.value)}
+                  maxLength={100}
                 />
+                {note && (
+                  <p className="text-navy-400 text-[10px] mt-1 text-right">{note.length}/100</p>
+                )}
               </div>
             </div>
 
@@ -280,8 +410,8 @@ export default function SendMoney() {
             </div>
 
             <button
-              onClick={() => setStep(2)}
-              disabled={!canProceed}
+              onClick={handleContinue}
+              disabled={!recipientName.trim() || phoneDigits.length < 10 || !amount}
               className="btn-primary w-full py-4 text-base font-bold disabled:opacity-40"
             >
               Continue →
@@ -303,7 +433,7 @@ export default function SendMoney() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-extrabold text-navy-900 truncate">{recipientName}</p>
-                  <p className="text-navy-500 text-xs">{recipientPhone}</p>
+                  <p className="text-navy-500 text-xs">+91 {recipientPhone}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-2xl font-black text-navy-900 tabular-nums">
@@ -312,10 +442,16 @@ export default function SendMoney() {
                   <p className="text-navy-500 text-xs">{purposeObj.emoji} {purposeObj.label}</p>
                 </div>
               </div>
-              {recipientUpi && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--cy-subtle)] border border-[var(--cy-border)]">
+              {recipientUpi ? (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-green-50 border border-green-200">
+                  <CheckCircle size={13} className="text-green-600 flex-shrink-0" />
                   <span className="text-navy-500 text-xs">UPI:</span>
                   <span className="text-navy-900 text-xs font-mono font-semibold flex-1 truncate">{recipientUpi}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+                  <AlertTriangle size={13} className="text-amber-600 flex-shrink-0" />
+                  <span className="text-amber-800 text-xs">No UPI ID — ask the recipient to share it before you pay</span>
                 </div>
               )}
             </div>
@@ -332,7 +468,6 @@ export default function SendMoney() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {/* WhatsApp */}
                 <button
                   onClick={openWhatsApp}
                   className={`flex flex-col items-center gap-2.5 py-5 rounded-2xl border-2 transition-all active:scale-[0.97] ${
@@ -352,7 +487,6 @@ export default function SendMoney() {
                   </div>
                 </button>
 
-                {/* Call */}
                 <button
                   onClick={openCall}
                   className={`flex flex-col items-center gap-2.5 py-5 rounded-2xl border-2 transition-all active:scale-[0.97] ${
@@ -416,9 +550,18 @@ export default function SendMoney() {
               </div>
             )}
 
+            {!recipientUpi && contactDone && (
+              <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-red-50 border border-red-200">
+                <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-red-700 text-xs leading-relaxed">
+                  You need a UPI ID to pay. Go back and add the recipient's UPI ID.
+                </p>
+              </div>
+            )}
+
             <button
               onClick={handlePay}
-              disabled={!contactDone || paying}
+              disabled={!contactDone || paying || !recipientUpi}
               className="btn-primary w-full py-4 text-base font-bold flex items-center justify-center gap-2 disabled:opacity-40"
             >
               {paying ? (

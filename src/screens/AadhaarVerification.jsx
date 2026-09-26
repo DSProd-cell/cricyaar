@@ -6,7 +6,8 @@ import { useStore } from '../store/useStore'
 export default function AadhaarVerification() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const fromGroundOwner = searchParams.get('from') === 'ground_owner'
+  const fromGroundOwner  = searchParams.get('from') === 'ground_owner'
+  const fromReceiveMoney = searchParams.get('from') === 'receive_money'
   const { addToast, user, setUser } = useStore()
   const [step, setStep] = useState(1)
   const [aadhaar, setAadhaar] = useState('')
@@ -48,12 +49,16 @@ export default function AadhaarVerification() {
     await new Promise(r => setTimeout(r, 1200))
     setLoading(false); setStep(4)
     if (fromGroundOwner) {
-      // Mark user as verified ground owner
-      setUser({ ...user, groundOwnerVerified: true })
+      setUser({ ...user, groundOwnerVerified: true, kycVerified: true })
       addToast('Identity verified! You can now list your ground.', 'success')
       setTimeout(() => navigate('/ground-owner'), 1500)
+    } else if (fromReceiveMoney) {
+      setUser({ ...user, kycVerified: true })
+      addToast('KYC verified! You can now receive payments.', 'success')
+      setTimeout(() => navigate('/receive-money'), 1200)
     } else {
-      addToast('Aadhaar verified! Your ground is under admin review.')
+      setUser({ ...user, kycVerified: true })
+      addToast('Aadhaar verified successfully!', 'success')
     }
   }
 
