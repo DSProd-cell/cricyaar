@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore'
 import { initials, ROLE_META } from '../data/mock'
 import TopBar from '../components/TopBar'
 import { LEGAL_URL } from '../lib/constants'
-import { User, Bell, Globe, Shield, Info, LogOut, ChevronRight, Camera, Phone, RefreshCw, Swords, ClipboardList, Scale, Megaphone, Building2, Crown, Import, Sparkles, Gift, ShieldCheck, BarChart3 } from 'lucide-react'
+import { User, Bell, Globe, Shield, Info, LogOut, ChevronRight, Camera, Phone, RefreshCw, Swords, ClipboardList, Scale, Megaphone, Building2, Crown, Sparkles, Gift, ShieldCheck, BarChart3 } from 'lucide-react'
 import { useState, useRef } from 'react'
 
 const ROLE_ICONS = {
@@ -145,23 +145,6 @@ export default function Settings() {
             </div>
           )}
         </div>
-
-        {/* CricHeroes Import — shown to all non-fan roles */}
-        {role !== 'fan' && (
-          <button
-            onClick={() => navigate('/cricheros-import')}
-            className="card mb-2 w-full text-left flex items-center gap-3 animate-slide-up hover:border-brand-200 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-              <Import size={18} className="text-orange-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-navy-900 text-sm">Import from CricHeroes</p>
-              <p className="text-navy-400 text-xs mt-0.5">Bring your match history and stats across</p>
-            </div>
-            <ChevronRight size={16} className="text-navy-300 flex-shrink-0" />
-          </button>
-        )}
 
         {/* New CricYaar master PRD settings */}
         <button onClick={() => navigate('/invite')}

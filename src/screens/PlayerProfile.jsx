@@ -5,7 +5,7 @@ import { avg, sr, eco } from '../utils/cricket'
 import { supabase } from '../lib/supabase'
 import { uploadAvatar } from '../lib/uploads'
 import TopBar from '../components/TopBar'
-import { BarChart2, Activity, Star, Edit, Users, Trophy, X, MapPin, Check, ChevronRight, Camera } from 'lucide-react'
+import { BarChart2, Activity, Star, Edit, Users, Trophy, X, MapPin, Check, ChevronRight, Camera, Phone, LogOut, RefreshCw, Crown } from 'lucide-react'
 import { useState, useMemo, useRef } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
@@ -98,7 +98,7 @@ function EditProfileSheet({ player, onClose, onSave }) {
 }
 
 export default function PlayerProfile() {
-  const { user, setUser, addToast } = useStore()
+  const { user, setUser, addToast, logout, setOtpMode, setProIntent } = useStore()
   const navigate = useNavigate()
   const { playerId } = useParams()
   // Viewing someone else (/profile/:id) still shows mock demo data — there's
@@ -109,8 +109,28 @@ export default function PlayerProfile() {
   const isOwnProfile = !playerId || player.id === user?.id
   const [tab, setTab] = useState('Overview')
   const [showEdit, setShowEdit] = useState(false)
+  const [showSignOut, setShowSignOut] = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
   const photoRef = useRef(null)
+
+  const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
+
+  const handleChangeRole = () => {
+    if (!user?.phone) {
+      setOtpMode('role-switch')
+      setProIntent(false)
+      navigate('/login?mode=signup')
+    } else {
+      navigate('/role-select')
+    }
+  }
+
+  const handleSignOut = () => {
+    if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
+    logout()
+    navigate('/login')
+    addToast('Logged out. Sign in to continue.', 'info')
+  }
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files?.[0]
@@ -200,9 +220,28 @@ export default function PlayerProfile() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="font-extrabold text-navy-900 text-xl">{displayPlayer.name}</h1>
-            <p className="text-navy-500 text-sm">@{player.username} · {displayPlayer.city}</p>
-            <div className="flex flex-wrap gap-1 mt-1">
+            <p className="text-navy-500 text-sm">@{player.username}</p>
+            {displayPlayer.city && (
+              <p className="text-navy-500 text-xs flex items-center gap-1 mt-0.5">
+                <MapPin size={11} className="text-navy-400 flex-shrink-0" />
+                {displayPlayer.city}
+              </p>
+            )}
+            {isOwnProfile && user?.phone && (
+              <p className="text-navy-500 text-xs flex items-center gap-1 mt-0.5">
+                <Phone size={11} className="text-navy-400 flex-shrink-0" />
+                {user.phone}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-1 mt-1.5">
               {player.roles.map(r => <span key={r} className="badge badge-green text-[10px]">{r.replace('_',' ')}</span>)}
+              {isOwnProfile && (
+                <span className={`badge text-[10px] flex items-center gap-0.5 ${isPro ? '' : 'badge-navy'}`}
+                  style={isPro ? { background: '#fef3c7', color: '#d97706' } : undefined}>
+                  {isPro && <Crown size={9} className="fill-amber-500" style={{ color: '#d97706' }} />}
+                  {isPro ? 'PRO' : 'Free plan'}
+                </span>
+              )}
             </div>
           </div>
           {isOwnProfile && (
@@ -214,6 +253,33 @@ export default function PlayerProfile() {
             </button>
           )}
         </div>
+
+        {/* Account actions — own profile only */}
+        {isOwnProfile && (
+          <div className="flex gap-2 mb-3 overflow-x-auto pb-1 scrollbar-none">
+            <button
+              onClick={handleChangeRole}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 bg-slate-50 text-navy-700 hover:bg-slate-100 transition-colors"
+            >
+              <RefreshCw size={12} />
+              Change Role
+            </button>
+            <button
+              onClick={() => navigate('/pro')}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+            >
+              <Crown size={12} className="fill-amber-500 text-amber-500" />
+              {isPro ? 'Manage PRO' : 'Upgrade to PRO'}
+            </button>
+            <button
+              onClick={() => setShowSignOut(true)}
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+            >
+              <LogOut size={12} />
+              Sign out
+            </button>
+          </div>
+        )}
 
         {/* Teams this player is in */}
         {playerTeams.length > 0 && (
@@ -456,6 +522,24 @@ export default function PlayerProfile() {
           onClose={() => setShowEdit(false)}
           onSave={handleSaveProfile}
         />
+      )}
+
+      {/* Sign out confirm modal */}
+      {showSignOut && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowSignOut(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in text-center" onClick={e => e.stopPropagation()}>
+            <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <LogOut size={20} className="text-red-600" />
+            </div>
+            <h3 className="font-bold text-navy-900 text-lg mb-1">Sign out?</h3>
+            <p className="text-navy-500 text-sm mb-5">You'll need to verify your phone number again to sign back in.</p>
+            <div className="flex gap-3">
+              <button className="btn-secondary flex-1" onClick={() => setShowSignOut(false)}>Cancel</button>
+              <button className="btn-danger flex-1" onClick={handleSignOut}>Sign out</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

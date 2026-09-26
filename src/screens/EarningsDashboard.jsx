@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, TrendingUp, TrendingDown, IndianRupee, Clock, CheckCircle, XCircle, BarChart3, Settings } from 'lucide-react'
+import { useStore } from '../store/useStore'
+import { RoleGuard, VerificationGate } from './GroundOwnerDashboard'
 
 const MONTHS = ['Dec','Jan','Feb','Mar','Apr','May']
 const OCCUPANCY = [42, 58, 71, 65, 83, 76]
@@ -22,10 +24,17 @@ const statusCfg = {
 
 export default function EarningsDashboard() {
   const navigate = useNavigate()
+  const { user } = useStore()
   const [filter, setFilter] = useState('all')
 
   const filtered = filter === 'all' ? BOOKINGS : BOOKINGS.filter(b => b.status === filter)
   const maxOcc = Math.max(...OCCUPANCY)
+
+  // Earnings and payout data are ground-owner-sensitive — gate on the same
+  // role + Aadhaar verification checks as the ground owner dashboard itself,
+  // instead of letting anyone who knows the /earnings URL view them.
+  const isGroundOwnerOrAdmin = user?.role === 'ground_owner' || user?.role === 'admin'
+  const isVerified = user?.groundOwnerVerified
 
   return (
     <div className="min-h-dvh bg-navy-50 flex flex-col">
@@ -38,12 +47,21 @@ export default function EarningsDashboard() {
             <h1 className="font-bold text-navy-900 text-base">Earnings Dashboard</h1>
             <p className="text-navy-500 text-xs">Bengaluru Turf Ground</p>
           </div>
-          <button className="ml-auto w-9 h-9 flex items-center justify-center rounded-xl bg-navy-100 text-navy-700">
+          <button
+            onClick={() => navigate('/ground-owner#bank-details')}
+            className="ml-auto w-9 h-9 flex items-center justify-center rounded-xl bg-navy-100 text-navy-700"
+            aria-label="Payout settings"
+          >
             <Settings size={18} />
           </button>
         </div>
       </div>
 
+      {!isGroundOwnerOrAdmin ? (
+        <RoleGuard />
+      ) : !isVerified ? (
+        <VerificationGate />
+      ) : (
       <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-8">
 
         {/* Metrics row */}
@@ -126,10 +144,14 @@ export default function EarningsDashboard() {
           </div>
         </div>
 
-        <button className="btn-primary w-full flex items-center justify-center gap-2">
+        <button
+          onClick={() => navigate('/ground-owner#bank-details')}
+          className="btn-primary w-full flex items-center justify-center gap-2"
+        >
           <Settings size={16} />Payout Settings
         </button>
       </div>
+      )}
     </div>
   )
 }
