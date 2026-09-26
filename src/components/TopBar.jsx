@@ -23,12 +23,15 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
 
   return (
     <header
-      className="sticky top-0 z-20 h-[60px] px-4 flex items-center justify-between gap-2"
+      className="sticky top-0 z-20 flex flex-col"
       style={{
         background: '#fff',
         borderBottom: `2px solid ${roleColor.primary}`,
       }}
     >
+      {/* Status-bar spacer — fills the safe area so content isn't hidden under the notch */}
+      <div style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+    <div className="h-[60px] px-4 flex items-center justify-between gap-2">
       {/* LEFT: back/home + logo + name/title */}
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {showBack && (
@@ -110,6 +113,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           )}
         </button>
       </div>
+    </div>
     </header>
   )
 }

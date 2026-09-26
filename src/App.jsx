@@ -16,6 +16,7 @@ import RoleWelcomeModal  from './components/RoleWelcomeModal'
 import SplashOverlay     from './components/SplashOverlay'
 import AIAssistant       from './components/AIAssistant'
 import { ShareAchievementSheet } from './components/ShareAchievement'
+import InviteOnOpenSheet from './components/InviteOnOpenSheet'
 import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
@@ -110,7 +111,9 @@ function WhatsNewGate({ children }) {
     // cy_last_active check above is the only auto-logout gate.
     supabase.auth.getSession().then(({ data: { session } }) => {
       const storeUser = useStore.getState().user
-      if (session && !storeUser) {
+      // Don't restore session if the user just signed out — prevents redirect loop
+      const fromSignout = window.location.search.includes('from=signout')
+      if (session && !storeUser && !fromSignout) {
         // Have a valid Supabase session but no Zustand user — restore it
         supabase.from('profiles').select('*').eq('id', session.user.id).single()
           .then(({ data: profile }) => {
@@ -133,12 +136,16 @@ function WhatsNewGate({ children }) {
     })
 
     // Keep last_active fresh whenever Supabase auto-refreshes the JWT
+    // SIGNED_OUT: only clear Zustand state — don't call logout() which would re-trigger signOut()
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'TOKEN_REFRESHED') {
         localStorage.setItem('cy_last_active', String(Date.now()))
       }
-      if (event === 'SIGNED_OUT' && useStore.getState().user) {
-        useStore.getState().logout()
+      if (event === 'SIGNED_OUT') {
+        const { user: storeUser } = useStore.getState()
+        if (storeUser) {
+          useStore.setState({ user: null, isAuthenticated: false })
+        }
       }
     })
     return () => authSub.unsubscribe()
@@ -197,6 +204,7 @@ function WhatsNewGate({ children }) {
       <AIAssistant />
       <FloatingSignOut />
       <GlobalShareSheet />
+      <InviteOnOpenSheet />
     </>
   )
 }
@@ -214,10 +222,13 @@ function GlobalShareSheet() {
   )
 }
 
+const PRE_LOGIN_PATHS = ['/landing', '/welcome', '/login', '/otp', '/setup', '/profile-match', '/celebration', '/city-select', '/role-select', '/player-match', '/role-onboard', '/player-setup']
+
 function FloatingSignOut() {
   const navigate  = useNavigate()
+  const { pathname } = useLocation()
   const { user, logout, addToast } = useStore()
-  if (!user) return null
+  if (!user || PRE_LOGIN_PATHS.includes(pathname)) return null
   const handleSignOut = () => {
     logout()
     navigate('/landing?from=signout')

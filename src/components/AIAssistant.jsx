@@ -7,7 +7,11 @@ import {
 } from 'lucide-react'
 
 // ── Pages where chat should NOT appear ──────────────────────────────────────
-const SKIP_PATHS = ['/welcome', '/login', '/otp', '/usp', '/role-onboard', '/player-setup', '/celebration', '/player-match']
+const SKIP_PATHS = [
+  '/welcome', '/login', '/otp', '/usp', '/role-onboard', '/player-setup',
+  '/celebration', '/player-match', '/landing', '/profile-match', '/city-select',
+  '/role-select', '/setup',
+]
 
 // ── Context labels for current page ─────────────────────────────────────────
 const PAGE_CONTEXT = {

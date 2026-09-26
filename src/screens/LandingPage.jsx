@@ -30,8 +30,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-[#09111f] flex flex-col items-center justify-center px-6 relative overflow-hidden select-none">
       {/* Ambient glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-orange-700/15 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-emerald-700/10 blur-[60px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-green-700/20 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-emerald-600/12 blur-[60px] pointer-events-none" />
 
       {/* Pitch line overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.04]">
@@ -52,8 +52,8 @@ export default function LandingPage() {
         <div
           className="w-20 h-20 rounded-3xl flex items-center justify-center mb-6 shadow-2xl"
           style={{
-            background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
-            boxShadow: '0 0 48px rgba(234,88,12,0.45), 0 8px 24px rgba(0,0,0,0.5)',
+            background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+            boxShadow: '0 0 48px rgba(22,163,74,0.5), 0 8px 24px rgba(0,0,0,0.5)',
           }}
         >
           <span className="text-white font-black text-3xl tracking-tight">CY</span>
@@ -65,7 +65,7 @@ export default function LandingPage() {
 
         <p
           className="font-bold text-[10px] tracking-[0.28em] uppercase mb-10"
-          style={{ color: '#ea580c' }}
+          style={{ color: '#22c55e' }}
         >
           Your Game. Your Record. For Real.
         </p>
