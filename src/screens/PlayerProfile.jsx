@@ -209,7 +209,7 @@ export default function PlayerProfile() {
     if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
     logout()
     resetSplash()
-    navigate('/landing?from=signout')
+    navigate('/welcome')
     addToast('Signed out successfully', 'info')
   }
 

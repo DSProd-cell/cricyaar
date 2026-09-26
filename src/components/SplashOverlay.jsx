@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
 // Resets when the JS module is re-evaluated (fresh page load / app reopen)
@@ -38,15 +39,16 @@ function easeOut(t) { return 1 - Math.pow(1 - t, 3) }
 
 export default function SplashOverlay() {
   const { user } = useStore()
+  const navigate  = useNavigate()
   const [visible, setVisible] = useState(!_shown)
   const [fading, setFading]   = useState(false)
   const [phase, setPhase]     = useState(0)
   const [progress, setProgress] = useState(0)
   const rafRef = useRef(null)
 
-  const dismiss = () => {
+  const dismissTo = (path) => {
     setFading(true)
-    setTimeout(() => setVisible(false), 600)
+    setTimeout(() => { setVisible(false); if (path) navigate(path) }, 600)
   }
 
   // Stats counter
@@ -70,7 +72,6 @@ export default function SplashOverlay() {
       setTimeout(() => setPhase(1), 600),
       setTimeout(() => setPhase(2), 2000),
       setTimeout(() => setPhase(3), 3100),
-      setTimeout(() => dismiss(),   6800),
     ]
     return () => T.forEach(clearTimeout)
   }, [visible]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -284,27 +285,68 @@ export default function SplashOverlay() {
           </div>
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={dismiss}
+        {/* CTAs */}
+        <div
           style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
-            color: '#fff',
-            fontSize: 16,
-            fontWeight: 700,
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
             opacity: phase >= 1 ? 1 : 0,
             transform: phase >= 1 ? 'translateY(0)' : 'translateY(20px)',
             transition: 'opacity 0.55s ease 1.0s, transform 0.55s ease 1.0s',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
           }}
         >
-          {user ? 'Continue to App  →' : 'Get Started  →'}
-        </button>
+          {user ? (
+            <button
+              onClick={() => dismissTo('/')}
+              style={{
+                width: '100%', padding: '16px', borderRadius: 16,
+                background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+                color: '#fff', fontSize: 16, fontWeight: 700,
+                border: 'none', cursor: 'pointer',
+                boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
+              }}
+            >
+              Continue to App →
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => dismissTo('/login?mode=signup')}
+                style={{
+                  width: '100%', padding: '16px', borderRadius: 16,
+                  background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+                  color: '#fff', fontSize: 16, fontWeight: 700,
+                  border: 'none', cursor: 'pointer',
+                  boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
+                }}
+              >
+                Create Account
+              </button>
+              <button
+                onClick={() => dismissTo('/login?mode=login')}
+                style={{
+                  width: '100%', padding: '16px', borderRadius: 16,
+                  background: 'transparent',
+                  color: '#C4B5FD', fontSize: 16, fontWeight: 700,
+                  border: '2px solid rgba(196,181,253,0.5)',
+                  cursor: 'pointer',
+                }}
+              >
+                Log In
+              </button>
+              <p style={{
+                textAlign: 'center', fontSize: 11,
+                color: 'rgba(255,255,255,0.38)', lineHeight: 1.6, marginTop: 4,
+              }}>
+                By continuing you agree to our{' '}
+                <span style={{ color: '#A78BFA', textDecoration: 'underline' }}>Terms of Service</span>
+                {' '}and{' '}
+                <span style={{ color: '#A78BFA', textDecoration: 'underline' }}>Privacy Policy</span>
+              </p>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )

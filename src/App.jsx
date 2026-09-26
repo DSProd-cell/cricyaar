@@ -13,7 +13,7 @@ import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
-import SplashOverlay     from './components/SplashOverlay'
+import SplashOverlay, { resetSplash } from './components/SplashOverlay'
 import AIAssistant       from './components/AIAssistant'
 import { ShareAchievementSheet } from './components/ShareAchievement'
 import InviteOnOpenSheet from './components/InviteOnOpenSheet'
@@ -238,6 +238,7 @@ function FloatingSignOut() {
   if (!user || PRE_LOGIN_PATHS.includes(pathname)) return null
   const handleSignOut = () => {
     logout()
+    resetSplash()
     navigate('/welcome')
     addToast('Signed out successfully', 'info')
   }
