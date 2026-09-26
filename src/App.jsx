@@ -13,6 +13,8 @@ import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
+import SplashOverlay     from './components/SplashOverlay'
+import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
 import USPScreen      from './screens/USPScreen'
@@ -20,6 +22,10 @@ import Welcome        from './screens/Welcome'
 import Login          from './screens/Login'
 import OtpVerify      from './screens/OtpVerify'
 import ProfileSetup   from './screens/ProfileSetup'
+import Celebration    from './screens/Celebration'
+import PlayerMatch    from './screens/PlayerMatch'
+import RoleOnboard    from './screens/RoleOnboard'
+import PlayerSetup    from './screens/PlayerSetup'
 import ProPayment     from './screens/ProPayment'
 
 // Screens — main app
@@ -75,6 +81,64 @@ function WhatsNewGate({ children }) {
       localStorage.setItem('whats_new_seen_version', 'v3')
     }
   }, [])
+
+  // ── 30-day session persistence ─────────────────────────────────────────────
+  // On every app open: stamp last_active, sign out if inactive >30 days,
+  // restore Zustand user from Supabase session if page was hard-refreshed.
+  useEffect(() => {
+    const now = Date.now()
+    const lastActive = localStorage.getItem('cy_last_active')
+    const { setUser: _setUser, logout } = useStore.getState()
+
+    if (lastActive) {
+      const daysSince = (now - parseInt(lastActive, 10)) / 86400000
+      if (daysSince > 30) {
+        logout()
+        return
+      }
+    }
+    localStorage.setItem('cy_last_active', String(now))
+
+    // Restore user if Zustand lost it (e.g. hard refresh cleared memory)
+    // but Supabase still has a valid session in localStorage.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const storeUser = useStore.getState().user
+      if (!session && storeUser) {
+        // Supabase session expired — sign the user out cleanly
+        logout()
+      } else if (session && !storeUser) {
+        // Have a valid Supabase session but no Zustand user — restore it
+        supabase.from('profiles').select('*').eq('id', session.user.id).single()
+          .then(({ data: profile }) => {
+            if (profile) {
+              _setUser({
+                id: session.user.id,
+                phone: session.user.phone,
+                name: profile.name || '',
+                username: profile.username || '',
+                city: profile.city || '',
+                role: profile.role || 'fan',
+                roles: profile.roles || ['fan'],
+                isNew: !profile.onboarded,
+                avatar: profile.avatar_url || null,
+                subscription: profile.subscription || 'free',
+              })
+            }
+          })
+      }
+    })
+
+    // Keep last_active fresh whenever Supabase auto-refreshes the JWT
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'TOKEN_REFRESHED') {
+        localStorage.setItem('cy_last_active', String(Date.now()))
+      }
+      if (event === 'SIGNED_OUT') {
+        useStore.getState().logout()
+      }
+    })
+    return () => authSub.unsubscribe()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (user?.id) registerPush(user.id) }, [user?.id])
 
@@ -136,7 +200,7 @@ function AppShell({ children }) {
   const { pathname } = useLocation()
   const { user } = useStore()
 
-  const noShell = ['/welcome','/login','/otp','/setup','/role-warning','/role-select','/whats-new','/usp','/pro-payment'].includes(pathname)
+  const noShell = ['/welcome','/login','/otp','/setup','/role-warning','/role-select','/whats-new','/usp','/pro-payment','/celebration','/player-match','/role-onboard','/player-setup'].includes(pathname)
     || pathname.startsWith('/score')
     || pathname.startsWith('/ground-booking')
     || pathname === '/aadhaar-verify'
@@ -160,6 +224,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toast />
+      <SplashOverlay />
       <WhatsNewGate>
       <AppShell>
         <Routes>
@@ -168,7 +233,11 @@ export default function App() {
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/login"   element={<Login />} />
           <Route path="/otp"         element={<OtpVerify />} />
-          <Route path="/setup"       element={<ProfileSetup />} />
+          <Route path="/setup"         element={<ProfileSetup />} />
+          <Route path="/celebration"   element={<Celebration />} />
+          <Route path="/player-match"  element={<PlayerMatch />} />
+          <Route path="/role-onboard"  element={<RoleOnboard />} />
+          <Route path="/player-setup"  element={<PlayerSetup />} />
           <Route path="/pro-payment" element={<AuthGuard><ProPayment /></AuthGuard>} />
 
           {/* Main app */}

@@ -19,7 +19,7 @@ export default function Welcome() {
           <span className="text-white font-black text-3xl tracking-tight">CY</span>
         </div>
         <h1 className="text-4xl font-extrabold text-navy-900 tracking-tight">CricYaar</h1>
-        <p className="text-navy-400 mt-2 text-lg font-medium">Cricket. Organised.</p>
+        <p className="text-brand-500 mt-2 text-[11px] font-bold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
       </div>
 
       {/* Action buttons */}
@@ -28,13 +28,13 @@ export default function Welcome() {
           className="btn-primary w-full text-base py-4"
           onClick={() => navigate('/login?mode=signup')}
         >
-          Sign Up
+          Create Account
         </button>
         <button
           className="w-full py-4 rounded-2xl font-bold text-brand-600 border-2 border-brand-400 bg-white hover:bg-brand-50 transition-colors text-base"
           onClick={() => navigate('/login?mode=login')}
         >
-          Sign In
+          Log In
         </button>
       </div>
 
@@ -44,11 +44,6 @@ export default function Welcome() {
         <button className="text-brand-500 font-medium underline-offset-2 hover:underline">Terms of Service</button>
         {' '}and{' '}
         <button className="text-brand-500 font-medium underline-offset-2 hover:underline">Privacy Policy</button>
-      </p>
-
-      {/* Demo hint */}
-      <p className="mt-4 text-xs text-navy-300 animate-fade-in" style={{ animationDelay:'0.3s' }}>
-        Demo mode — tap either button to continue
       </p>
     </div>
   )

@@ -2,11 +2,12 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase, toE164 } from '../lib/supabase'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
+import PageHeader from '../components/PageHeader'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
-  const { pendingPhone, setUser, addToast, otpMode, proIntent, user } = useStore()
+  const { pendingPhone, setUser, addToast, otpMode, proIntent, user, pendingSignup } = useStore()
   const [digits, setDigits]     = useState(['','','','','',''])
   const [error, setError]       = useState('')
   const [attempts, setAttempts] = useState(0)
@@ -112,23 +113,29 @@ export default function OtpVerify() {
       navigate('/role-select')
     } else {
       const isNewUser = !profile?.onboarded
-      // Restore previously selected role for returning users
       const savedRole = localStorage.getItem('cricyaar_last_role')
       const restoredRole = profile?.role || savedRole || 'fan'
+
+      // For new users with pending signup data, persist name immediately
+      if (isNewUser && pendingSignup) {
+        await supabase.from('profiles').update({
+          name: pendingSignup.fullName,
+          username: pendingSignup.cricketName,
+        }).eq('id', authUser.id)
+      }
+
       setUser({
-        id: authUser.id, phone: authUser.phone, name: profile?.name || '', username: profile?.username || '',
+        id: authUser.id, phone: authUser.phone,
+        name: (isNewUser && pendingSignup) ? pendingSignup.fullName : (profile?.name || ''),
+        username: (isNewUser && pendingSignup) ? pendingSignup.cricketName : (profile?.username || ''),
         city: profile?.city || '', role: restoredRole, roles: profile?.roles || [restoredRole],
         isNew: isNewUser, avatar: profile?.avatar_url || null,
         lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
         upiId: profile?.upi_id || null,
       })
-      // Mark What's New as seen so returning users skip it
       localStorage.setItem('whats_new_seen_version', 'v3')
       if (isNewUser) {
-        // Never logged in before — collect name/username/city/role before
-        // they see anything else (no Pro nag, no role-welcome modal yet).
-        addToast('Phone verified! Let\'s set up your profile.', 'success')
-        navigate('/setup')
+        navigate('/celebration')
       } else if (proIntent) {
         addToast('Phone verified! Complete your Pro setup.', 'success')
         navigate('/pro-payment')
@@ -148,14 +155,11 @@ export default function OtpVerify() {
   const lockMinutes = lockEnd ? Math.ceil((lockEnd - Date.now()) / 60000) : 0
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm animate-slide-up">
-        {/* Back */}
-        <button onClick={() => navigate('/login')} className="flex items-center gap-2 text-navy-500 hover:text-navy-900 mb-6 transition-colors">
-          <ArrowLeft size={18} />
-          <span className="text-sm font-medium">Back</span>
-        </button>
+    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
+      <PageHeader backTo="/login" showTagline />
 
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm animate-slide-up">
         <div className="bg-white rounded-2xl shadow-card p-6">
           <h2 className="font-bold text-navy-900 text-xl mb-1">Enter OTP</h2>
           <p className="text-navy-500 text-sm mb-6">
@@ -222,6 +226,8 @@ export default function OtpVerify() {
           </div>
         </div>
       </div>
+      </div>
+    </div>
     </div>
   )
 }
