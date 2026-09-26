@@ -6,7 +6,7 @@ import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
-  const { pendingPhone, setUser, addToast, otpMode, proIntent, user } = useStore()
+  const { pendingPhone, setUser, addToast, otpMode, proIntent, user, pendingSignup } = useStore()
   const [digits, setDigits]     = useState(['','','','','',''])
   const [error, setError]       = useState('')
   const [attempts, setAttempts] = useState(0)
@@ -111,22 +111,28 @@ export default function OtpVerify() {
       navigate('/role-select')
     } else {
       const isNewUser = !profile?.onboarded
-      // Restore previously selected role for returning users
       const savedRole = localStorage.getItem('cricyaar_last_role')
       const restoredRole = profile?.role || savedRole || 'fan'
+
+      // For new users with pending signup data, persist name immediately
+      if (isNewUser && pendingSignup) {
+        await supabase.from('profiles').update({
+          name: pendingSignup.fullName,
+          username: pendingSignup.cricketName,
+        }).eq('id', authUser.id)
+      }
+
       setUser({
-        id: authUser.id, phone: authUser.phone, name: profile?.name || '', username: profile?.username || '',
+        id: authUser.id, phone: authUser.phone,
+        name: (isNewUser && pendingSignup) ? pendingSignup.fullName : (profile?.name || ''),
+        username: (isNewUser && pendingSignup) ? pendingSignup.cricketName : (profile?.username || ''),
         city: profile?.city || '', role: restoredRole, roles: profile?.roles || [restoredRole],
         isNew: isNewUser, avatar: profile?.avatar_url || null,
         lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
       })
-      // Mark What's New as seen so returning users skip it
       localStorage.setItem('whats_new_seen_version', 'v3')
       if (isNewUser) {
-        // Never logged in before — collect name/username/city/role before
-        // they see anything else (no Pro nag, no role-welcome modal yet).
-        addToast('Phone verified! Let\'s set up your profile.', 'success')
-        navigate('/setup')
+        navigate('/celebration')
       } else if (proIntent) {
         addToast('Phone verified! Complete your Pro setup.', 'success')
         navigate('/pro-payment')

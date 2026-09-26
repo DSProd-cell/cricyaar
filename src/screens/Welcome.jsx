@@ -28,13 +28,13 @@ export default function Welcome() {
           className="btn-primary w-full text-base py-4"
           onClick={() => navigate('/login?mode=signup')}
         >
-          Sign Up
+          Create Account
         </button>
         <button
           className="w-full py-4 rounded-2xl font-bold text-brand-600 border-2 border-brand-400 bg-white hover:bg-brand-50 transition-colors text-base"
           onClick={() => navigate('/login?mode=login')}
         >
-          Sign In
+          Log In
         </button>
       </div>
 
@@ -44,11 +44,6 @@ export default function Welcome() {
         <button className="text-brand-500 font-medium underline-offset-2 hover:underline">Terms of Service</button>
         {' '}and{' '}
         <button className="text-brand-500 font-medium underline-offset-2 hover:underline">Privacy Policy</button>
-      </p>
-
-      {/* Demo hint */}
-      <p className="mt-4 text-xs text-navy-300 animate-fade-in" style={{ animationDelay:'0.3s' }}>
-        Demo mode — tap either button to continue
       </p>
     </div>
   )

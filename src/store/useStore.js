@@ -9,9 +9,11 @@ export const useStore = create(
       user: null,              // start unauthenticated — USP/landing page shows first
       isAuthenticated: false,
       pendingPhone: null,
+      pendingSignup: null,     // { firstName, lastName, cricketName } collected at login
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
+      setPendingSignup: (data) => set({ pendingSignup: data }),
       logout: () => {
         supabase.auth.signOut()
         set({
