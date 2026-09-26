@@ -43,68 +43,67 @@ export default function Celebration() {
   useEffect(() => { const t = setTimeout(() => setShow(true), 80); return () => clearTimeout(t) }, [])
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-[#0f4c1e] via-[#166534] to-[#14532d] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div style={{ minHeight:'100dvh', background:'linear-gradient(160deg,#1a0533 0%,#2D1B69 40%,#4C1D95 75%,#1a0533 100%)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px', position:'relative', overflow:'hidden' }}>
       <Confetti />
 
-      {/* Subtle pitch lines */}
-      <div className="absolute inset-0 opacity-[0.06]">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="absolute w-full h-px bg-white" style={{ top:`${18 + i * 16}%` }} />
-        ))}
-      </div>
+      {/* Glowing orbs */}
+      <div style={{ position:'absolute', top:'15%', left:'50%', transform:'translateX(-50%)', width:320, height:320, borderRadius:'50%', background:'radial-gradient(ellipse,rgba(124,58,237,0.18) 0%,transparent 70%)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'10%', left:'20%', width:180, height:180, borderRadius:'50%', background:'radial-gradient(ellipse,rgba(196,181,253,0.08) 0%,transparent 70%)', pointerEvents:'none' }} />
 
       <div
-        className="relative z-20 flex flex-col items-center text-center max-w-xs"
         style={{
+          position:'relative', zIndex:20, display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', maxWidth:300,
           opacity: show ? 1 : 0,
           transform: show ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
           transition: 'all 0.55s cubic-bezier(0.34,1.56,0.64,1)',
         }}
       >
         {/* CY Logo */}
-        <div className="w-14 h-14 bg-white/15 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center mb-5 shadow-xl">
-          <span className="text-white font-black text-xl tracking-tight">CY</span>
+        <div style={{ width:56, height:56, background:'linear-gradient(135deg,#7C3AED,#5B21B6)', borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:20, boxShadow:'0 0 0 2px rgba(196,181,253,0.2), 0 0 28px rgba(124,58,237,0.5)' }}>
+          <span style={{ color:'#fff', fontWeight:900, fontSize:20, letterSpacing:'-0.04em' }}>CY</span>
         </div>
 
         {/* Emoji */}
-        <div className="text-6xl mb-4" style={{ animation:'celebBounce 1s ease-in-out infinite alternate' }}>
+        <div style={{ fontSize:64, marginBottom:16, animation:'celebBounce 1s ease-in-out infinite alternate' }}>
           🏏
         </div>
         <style>{`@keyframes celebBounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}`}</style>
 
         {/* Headline */}
-        <h1 className="text-white font-black text-3xl leading-tight mb-2">
-          Ab Hum Yaars Hain,<br />
-          <span className="text-emerald-300">{firstName}! 🤝</span>
+        <h1 style={{ color:'#fff', fontWeight:900, fontSize:30, lineHeight:1.2, marginBottom:8 }}>
+          Pitch Pe Mil Gaye,<br />
+          <span style={{ color:'#C4B5FD' }}>{firstName}! 🤝</span>
         </h1>
-        <p className="text-emerald-400 text-[11px] font-bold tracking-[0.2em] uppercase mb-1">
+        <p style={{ color:'#A78BFA', fontSize:10, fontWeight:800, letterSpacing:'0.2em', textTransform:'uppercase', marginBottom:4 }}>
           CricYaar — Your Game. Your Record. For Real.
         </p>
 
         {/* Subtext */}
-        <p className="text-white/70 text-sm leading-relaxed mt-3 mb-2">
+        <p style={{ color:'rgba(255,255,255,0.65)', fontSize:14, lineHeight:1.6, marginTop:12, marginBottom:8 }}>
           Every run, wicket & catch you play is now<br />
-          <span className="text-emerald-300 font-semibold">verified and fraud-proof</span> — for life.
+          <span style={{ color:'#C4B5FD', fontWeight:600 }}>verified and fraud-proof</span> — for life.
         </p>
 
         {/* Trust badges */}
-        <div className="flex items-center justify-center gap-4 my-4">
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:16, margin:'12px 0' }}>
           {['✅ Verified Stats', '🏏 Live Scoring', '🏆 Tournaments'].map(b => (
-            <span key={b} className="text-[10px] font-bold text-white/60 text-center leading-tight">{b}</span>
+            <span key={b} style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.5)', textAlign:'center', lineHeight:1.3 }}>{b}</span>
           ))}
         </div>
 
         {/* CTA */}
         <button
           onClick={() => navigate('/city-select')}
-          className="w-full py-4 bg-white text-[#166534] font-black rounded-2xl text-[15px] shadow-2xl shadow-black/40 active:scale-[0.98] transition-all mb-3"
+          style={{ width:'100%', padding:'16px', background:'linear-gradient(135deg,#7C3AED,#5B21B6)', color:'#fff', fontWeight:900, borderRadius:16, fontSize:15, border:'none', cursor:'pointer', boxShadow:'0 4px 24px rgba(124,58,237,0.55)', marginBottom:12, transition:'transform 0.1s', }}
+          onMouseDown={e=>e.currentTarget.style.transform='scale(0.98)'}
+          onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
         >
           🏙️ Pick My City — Let's Go!
         </button>
 
         <button
           onClick={() => navigate('/role-select')}
-          className="w-full py-3.5 border border-white/20 text-white/70 font-medium rounded-2xl text-sm active:bg-white/10 transition-colors"
+          style={{ width:'100%', padding:'14px', background:'transparent', border:'1px solid rgba(196,181,253,0.2)', color:'rgba(255,255,255,0.6)', fontWeight:500, borderRadius:16, fontSize:14, cursor:'pointer' }}
         >
           Skip to Role Selection →
         </button>
