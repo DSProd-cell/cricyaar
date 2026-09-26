@@ -94,11 +94,16 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
         )}
         <button
           onClick={() => navigate('/invite')}
-          className="flex items-center gap-1 px-2.5 h-9 rounded-xl hover:bg-slate-100 text-navy-600 transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 h-8 rounded-full flex-shrink-0 active:scale-95 transition-all"
+          style={{
+            padding: '0 12px',
+            background: 'linear-gradient(135deg,#16a34a,#15803d)',
+            boxShadow: '0 2px 10px rgba(22,163,74,0.4)',
+          }}
           aria-label="Refer & Earn"
         >
-          <Gift size={17} strokeWidth={2} />
-          <span className="text-[11px] font-semibold">Refer &amp; Earn</span>
+          <Gift size={13} strokeWidth={2.5} color="#fff" />
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.01em' }}>Refer &amp; Earn</span>
         </button>
         <button
           onClick={() => navigate('/notifications')}
