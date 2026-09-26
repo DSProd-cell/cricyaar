@@ -75,6 +75,12 @@ export default function RoleSelect() {
     setLoading(true)
     await new Promise(r => setTimeout(r, 700))
     setRole(chosen)
+    // Mark onboarding complete so returning users skip the signup flow
+    const userId = useStore.getState().user?.id
+    if (userId) {
+      const { supabase } = await import('../lib/supabase')
+      await supabase.from('profiles').update({ onboarded: true, role: chosen }).eq('id', userId)
+    }
     setLoading(false)
     setShowRoleModal(true)
     setProIntent(false)

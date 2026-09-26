@@ -428,8 +428,8 @@ export default function PlayerProfile() {
                 </p>
                 <p className="text-navy-400 text-xs mt-0.5">
                   {isPro
-                    ? isCancelled ? 'Cancelling soon · manage plan' : 'Active · ₹99/mo'
-                    : 'Tournaments, career stats, scoring · ₹99/mo'
+                    ? isCancelled ? 'Cancelling soon · manage plan' : 'Active · ₹1/mo'
+                    : 'Tournaments, career stats, scoring · ₹1/mo'
                   }
                 </p>
               </div>
