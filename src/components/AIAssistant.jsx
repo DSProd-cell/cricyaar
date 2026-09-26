@@ -134,11 +134,6 @@ const INTENTS = [
     actions: [{ label: 'Earnings Dashboard', path: '/earnings' }]
   },
   {
-    match: ['import crichero', 'crichero', 'import stats', 'import career'],
-    answer: "To **import from CricHeroes**:\n\n1️⃣ Go to **Import from CricHeroes** below\n2️⃣ Enter your CricHeroes username\n3️⃣ Confirm the import — your career history syncs!\n\nRequires **Pro** subscription.",
-    actions: [{ label: 'Import from CricHeroes', path: '/cricheros-import' }]
-  },
-  {
     match: ['find opponent', 'challenge team', 'opponent', 'looking for match', 'find a match'],
     answer: "To **find an opponent**:\n\n1️⃣ Tap **Find Opponent** below\n2️⃣ Set your city, format & preferred date\n3️⃣ Browse available teams looking for matches\n4️⃣ Send a **Challenge Request**!\n\nRequires **Pro** for Captains/Organisers.",
     actions: [{ label: 'Find Opponent', path: '/opponent-finder' }]
@@ -150,7 +145,7 @@ const INTENTS = [
   },
   {
     match: ['what can i do', 'features', 'what is cricyaar', 'how does it work', 'get started', 'help me'],
-    answer: "Welcome to **CricYaar** 🏏 Here's what you can do:\n\n🆓 **Free (Fan):** Watch live scores, browse grounds & teams\n\n👑 **Pro (₹99/mo):**\n• Score matches ball-by-ball\n• Create & manage teams\n• Join & run tournaments\n• Book grounds via Razorpay\n• Import CricHeroes stats\n• AI Ground Assistant\n\nWhat would you like to do first?",
+    answer: "Welcome to **CricYaar** 🏏 Here's what you can do:\n\n🆓 **Free (Fan):** Watch live scores, browse grounds & teams\n\n👑 **Pro (₹99/mo):**\n• Score matches ball-by-ball\n• Create & manage teams\n• Join & run tournaments\n• Book grounds via Razorpay\n• AI Ground Assistant\n\nWhat would you like to do first?",
     actions: [
       { label: 'Upgrade to Pro', path: '/pro-payment' },
       { label: 'Browse Grounds', path: '/grounds' },

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { MATCHES, PLAYERS, TEAMS, TOURNAMENTS, UMPIRE_PROFILE, teamById, playerById } from '../data/mock'
-import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, LayoutGrid, Star, Crown, Plus, X, BookOpen, Swords, Users, GraduationCap, Gift, RefreshCw, LogIn } from 'lucide-react'
+import { Activity, BarChart2, MapPin, Trophy, ChevronRight, Circle, Lock, LayoutGrid, Star, Crown, Plus, X, BookOpen, Swords, GraduationCap, Gift, RefreshCw, LogIn } from 'lucide-react'
 import TopBar from '../components/TopBar'
 import RoleLockedModal from '../components/RoleLockedModal'
 import FanHome from './FanHome'
@@ -121,7 +121,6 @@ function CricYaarFAB({ role, isPro }) {
     { icon: LogIn, label: 'Join a Team', path: '/teams', roles: ['player','captain','organiser','admin'], pro: true },
     { icon: GraduationCap, label: 'Join a Tournament', path: '/open-tournaments', roles: ['player','captain','organiser','umpire','admin'], pro: true },
     { icon: BookOpen, label: 'Book a Ground', path: '/ground-booking', roles: ['captain','organiser','admin'], pro: true },
-    { icon: Users, label: 'Import from CricHeroes', path: '/cricheros-import', roles: ['player','captain','organiser','umpire','admin'], pro: true },
     { icon: Gift, label: 'Invite Friends', path: '/invite', roles: ['player','captain','organiser','umpire','fan','admin'] },
     { icon: Crown, label: isPro ? 'Manage Pro' : 'Upgrade to Pro', path: '/pro', roles: ['player','captain','organiser','umpire'], proGate: false },
   ].filter(a => a.roles.includes(role))

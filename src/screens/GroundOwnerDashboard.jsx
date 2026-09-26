@@ -1,15 +1,17 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import TopBar from '../components/TopBar'
 import {
   Shield, MapPin, Camera, Banknote, Check, Upload,
   Lock, X, Eye, EyeOff, IndianRupee, ChevronRight,
-  AlertCircle, Building2
+  AlertCircle, Building2, Phone, MessageCircle, Bell
 } from 'lucide-react'
 
 // ── Role guard — renders if user is NOT ground_owner/admin ─────────────────
-function RoleGuard() {
+// Exported so other ground-owner-only screens (e.g. EarningsDashboard) can
+// reuse the same gate instead of re-implementing role/verification checks.
+export function RoleGuard() {
   const navigate = useNavigate()
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 text-center py-12">
@@ -24,15 +26,15 @@ function RoleGuard() {
       <button onClick={() => navigate('/role-select')} className="btn-primary w-full max-w-xs mb-3">
         Change Role
       </button>
-      <button onClick={() => navigate(-1)} className="text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors">
-        Go Back
-      </button>
+      {/* No separate "Go Back" link here — the screen's TopBar already has a
+          back arrow, and a second back affordance in the body was a
+          duplicate control (audited as part of the v5 nav cleanup). */}
     </div>
   )
 }
 
 // ── Aadhaar verification gate ───────────────────────────────────────────────
-function VerificationGate() {
+export function VerificationGate() {
   const navigate = useNavigate()
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 text-center py-8">
@@ -70,14 +72,19 @@ function VerificationGate() {
 }
 
 // ── Helper components ───────────────────────────────────────────────────────
-function SectionCard({ title, icon, children, badge }) {
+const BADGE_COLORS = {
+  green: 'bg-green-100 text-green-700 border-green-200',
+  amber: 'bg-amber-100 text-amber-700 border-amber-200',
+}
+
+function SectionCard({ title, icon, children, badge, badgeColor = 'green' }) {
   return (
     <div className="bg-white rounded-2xl shadow-card overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
         <span className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0">{icon}</span>
         <p className="font-bold text-navy-900 text-sm flex-1">{title}</p>
         {badge && (
-          <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-green-200">{badge}</span>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${BADGE_COLORS[badgeColor] || BADGE_COLORS.green}`}>{badge}</span>
         )}
       </div>
       <div className="p-4">{children}</div>
@@ -116,9 +123,156 @@ function SaveBtn({ onClick, loading, label, color = '#0891b2', icon }) {
   )
 }
 
+// ── Payment Collection — bookings where the renter still owes money ────────
+const INITIAL_DUE_PAYMENTS = [
+  { id: 'dp1', renter: "Rahul's XI",        phone: '+919876543210', amount: 1600, slot: 'Sun, 25 May · 07:00–09:00', remindersSent: 0 },
+  { id: 'dp2', renter: 'Mumbai Warriors',   phone: '+919823456780', amount: 1800, slot: 'Sat, 24 May · 16:00–18:00', remindersSent: 1 },
+  { id: 'dp3', renter: 'Delhi Daredevils',  phone: '+919845612378', amount: 1600, slot: 'Sun, 1 Jun · 07:00–09:00',  remindersSent: 0 },
+]
+
+// Builds a standard UPI deep link (the same `upi://pay` intent used by
+// GPay/PhonePe/Paytm "Pay" buttons across the web). Opening this URL on a
+// phone hands off to whichever UPI apps are installed — no bank account
+// number or IFSC is ever involved.
+function buildUpiLink({ payeeVpa, payeeName, amount, note }) {
+  const params = new URLSearchParams({
+    pa: payeeVpa,            // payee VPA (the ground owner's UPI ID)
+    pn: payeeName,           // payee name
+    am: String(amount),      // amount
+    cu: 'INR',
+    tn: note,                // transaction note
+  })
+  return `upi://pay?${params.toString()}`
+}
+
+function PaymentCollection({ addToast, groundName }) {
+  const [dues, setDues] = useState(INITIAL_DUE_PAYMENTS)
+  const [upiId, setUpiId] = useState('')
+  const [savedUpiId, setSavedUpiId] = useState('')
+  const [savingUpi, setSavingUpi] = useState(false)
+
+  const handleSaveUpi = async () => {
+    if (!/^[\w.\-]{2,}@[a-zA-Z]{2,}$/.test(upiId.trim())) {
+      addToast('Enter a valid UPI ID, e.g. name@okhdfcbank', 'error'); return
+    }
+    setSavingUpi(true)
+    await new Promise(r => setTimeout(r, 600))
+    setSavedUpiId(upiId.trim())
+    setSavingUpi(false)
+    addToast('UPI ID saved — you can now collect payments directly', 'success')
+  }
+
+  const handleCollectUpi = (due) => {
+    if (!savedUpiId) { addToast('Add and save your UPI ID above first', 'error'); return }
+    const link = buildUpiLink({
+      payeeVpa: savedUpiId,
+      payeeName: groundName || 'CricYaar Ground',
+      amount: due.amount,
+      note: `Ground booking - ${due.renter}`,
+    })
+    // This is a native URI scheme — on a phone it hands off straight to the
+    // installed UPI apps (GPay/PhonePe/Paytm/BHIM); on desktop, with none
+    // registered to handle it, the browser will simply do nothing visible.
+    window.location.href = link
+  }
+
+  const handleRemind = (due) => {
+    const upiLine = savedUpiId
+      ? `\n\nPay directly via UPI: ${buildUpiLink({ payeeVpa: savedUpiId, payeeName: groundName || 'CricYaar Ground', amount: due.amount, note: `Ground booking - ${due.renter}` })}`
+      : ''
+    const message = `Hi ${due.renter}, this is a reminder that ₹${due.amount.toLocaleString('en-IN')} is pending for your ground booking (${due.slot}).${upiLine}\n\n— CricYaar`
+    const waNumber = due.phone.replace(/\D/g, '')
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+    setDues(d => d.map(x => x.id === due.id ? { ...x, remindersSent: x.remindersSent + 1 } : x))
+    addToast('Reminder message opened in WhatsApp', 'success')
+  }
+
+  const handleCall = (due) => {
+    window.location.href = `tel:${due.phone}`
+  }
+
+  const totalDue = dues.reduce((sum, d) => sum + d.amount, 0)
+
+  return (
+    <SectionCard title="Payment Collection" icon={<Bell size={15} className="text-red-500" />} badge={dues.length > 0 ? `₹${totalDue.toLocaleString('en-IN')} due` : null} badgeColor="amber">
+      {/* UPI ID setup — collection happens over UPI, not bank transfer */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4">
+        <label className="text-xs font-semibold text-navy-700 mb-1.5 block">Your UPI ID (for collecting payments)</label>
+        <div className="flex gap-2">
+          <input
+            value={upiId}
+            onChange={e => setUpiId(e.target.value)}
+            placeholder="e.g. yourname@okhdfcbank"
+            className="flex-1 min-w-0 border border-slate-200 rounded-lg px-3 py-2 text-sm text-navy-900 bg-white focus:outline-none focus:border-brand-500 transition-colors"
+          />
+          <button
+            onClick={handleSaveUpi}
+            disabled={savingUpi}
+            className="flex-shrink-0 px-3 py-2 rounded-lg bg-navy-900 text-white text-xs font-semibold disabled:opacity-60"
+          >
+            {savingUpi ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+        {savedUpiId && <p className="text-green-600 text-xs mt-1.5 flex items-center gap-1"><Check size={11} />Collecting to {savedUpiId}</p>}
+      </div>
+
+      {dues.length === 0 ? (
+        <p className="text-navy-400 text-sm text-center py-4">All payments collected. Nothing pending 🎉</p>
+      ) : (
+        <div className="space-y-3">
+          {dues.map(due => (
+            <div key={due.id} className="border border-slate-100 rounded-xl p-3">
+              <div className="flex items-start justify-between gap-2 mb-2.5">
+                <div className="min-w-0">
+                  <p className="font-bold text-navy-900 text-sm truncate">{due.renter}</p>
+                  <p className="text-navy-400 text-xs mt-0.5">{due.slot}</p>
+                </div>
+                <p className="font-extrabold text-red-600 text-sm flex-shrink-0">₹{due.amount.toLocaleString('en-IN')}</p>
+              </div>
+              <button
+                onClick={() => handleCollectUpi(due)}
+                className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-white text-xs font-bold mb-2 transition-all active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #16a34a, #15803d)' }}
+              >
+                <IndianRupee size={13} />
+                Collect ₹{due.amount.toLocaleString('en-IN')} via UPI
+              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleRemind(due)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors"
+                >
+                  <MessageCircle size={13} />
+                  {due.remindersSent > 0 ? `Remind again (${due.remindersSent} sent)` : 'Send Reminder'}
+                </button>
+                <button
+                  onClick={() => handleCall(due)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition-colors"
+                >
+                  <Phone size={13} />
+                  Call
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </SectionCard>
+  )
+}
+
 // ── Verified dashboard ──────────────────────────────────────────────────────
 function VerifiedDashboard({ user, addToast }) {
   const navigate = useNavigate()
+  const { hash } = useLocation()
+
+  // Deep-link support — EarningsDashboard's "Payout Settings" button links
+  // here as /ground-owner#bank-details.
+  useEffect(() => {
+    if (hash !== '#bank-details') return
+    const el = document.getElementById('bank-details')
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [hash])
 
   // Ground Info
   const [groundName, setGroundName] = useState('My Cricket Ground')
@@ -283,7 +437,11 @@ function VerifiedDashboard({ user, addToast }) {
         </div>
       </SectionCard>
 
-      {/* ── 4. Bank Account Details ───────────────────────────────────────── */}
+      {/* ── 4. Payment Collection ─────────────────────────────────────────── */}
+      <PaymentCollection addToast={addToast} groundName={groundName} />
+
+      {/* ── 5. Bank Account Details ───────────────────────────────────────── */}
+      <div id="bank-details" />
       <SectionCard title="Bank Account Details" icon={<Banknote size={15} className="text-blue-600" />} badge="Secured">
         <div className="space-y-3">
           {/* Security note */}

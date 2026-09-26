@@ -54,7 +54,6 @@ import MyTournaments     from './screens/MyTournaments'
 
 // Screens — v3
 import WhatIsNew         from './screens/WhatIsNew'
-import CricHeroesImport  from './screens/CricHeroesImport'
 import CreateTournament  from './screens/CreateTournament'
 
 // Screens — CricYaar master PRD
@@ -268,7 +267,6 @@ export default function App() {
 
           {/* v3 */}
           <Route path="/whats-new"           element={<WhatIsNew />} />
-          <Route path="/cricheros-import"    element={<AuthGuard><CricHeroesImport /></AuthGuard>} />
           <Route path="/create-tournament"   element={<AuthGuard><CreateTournament /></AuthGuard>} />
           <Route path="/profile/:playerId"   element={<AuthGuard><PlayerProfile /></AuthGuard>} />
 
