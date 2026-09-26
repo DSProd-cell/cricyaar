@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Crown, Check, X, Zap, CheckCircle } from 'lucide-react'
+import { Crown, Check, X, Zap, CheckCircle, Gift } from 'lucide-react'
 
 const PERKS = [
   'Create & join tournaments',
@@ -22,6 +22,11 @@ export default function ProSignupSheet() {
     navigate('/pro-payment')
   }
 
+  const handleReferral = () => {
+    setShowProSheet(false)
+    navigate('/invite')
+  }
+
   const handleDismiss = () => {
     setShowProSheet(false)
   }
@@ -32,7 +37,7 @@ export default function ProSignupSheet() {
       <div className="absolute inset-0 bg-black/60" onClick={handleDismiss} />
 
       {/* Sheet */}
-      <div className="relative bg-white rounded-t-3xl shadow-modal animate-slide-up max-h-[85dvh] overflow-y-auto">
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl shadow-modal animate-slide-up max-h-[85dvh] overflow-y-auto">
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 bg-slate-200 rounded-full" />
@@ -76,7 +81,7 @@ export default function ProSignupSheet() {
               </div>
 
               {/* Perks */}
-              <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-5">
+              <div className="bg-[var(--cy-subtle)] border border-[var(--cy-border)] rounded-2xl p-4 mb-5">
                 <ul className="space-y-2.5">
                   {PERKS.map((p, i) => (
                     <li key={i} className="flex items-center gap-2.5">
@@ -100,6 +105,23 @@ export default function ProSignupSheet() {
                   Start Pro — Just ₹1/month
                 </span>
                 <span className="text-purple-200 text-xs font-medium opacity-90">UPI / Cards · Cancel anytime</span>
+              </button>
+
+              <div className="flex items-center gap-3 my-3">
+                <div className="flex-1 h-px bg-slate-100" />
+                <span className="text-navy-300 text-xs font-semibold">OR</span>
+                <div className="flex-1 h-px bg-slate-100" />
+              </div>
+
+              <button
+                onClick={handleReferral}
+                className="w-full py-4 rounded-2xl font-bold flex flex-col items-center gap-0.5 active:scale-[0.98] transition-all border-2 border-purple-200 bg-purple-50"
+              >
+                <span className="flex items-center gap-2 text-base font-extrabold text-purple-700">
+                  <Gift size={17} />
+                  Get Your Yaar Onboard
+                </span>
+                <span className="text-purple-500 text-xs font-medium">Refer a friend — Pro on us, free</span>
               </button>
             </>
           )}

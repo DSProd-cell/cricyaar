@@ -138,7 +138,7 @@ export default function AIGroundAssistant({ visible, onClose }) {
 
       {/* Sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-modal flex flex-col animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--cy-surface)] rounded-t-3xl shadow-modal flex flex-col animate-slide-up"
         style={{ height: '70dvh', maxWidth: '640px', margin: '0 auto' }}
         onClick={e => e.stopPropagation()}
       >

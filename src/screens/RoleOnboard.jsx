@@ -133,7 +133,7 @@ export default function RoleOnboard() {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
+    <div className="min-h-dvh flex flex-col">
 
       {/* Header */}
       <div className="px-4 pt-12 pb-4 flex items-center gap-3">

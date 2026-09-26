@@ -604,7 +604,7 @@ function SquadSetup({assignment, tossResult, onStart, onClose}) {
     return (
       <div className="fixed inset-0 z-[85] bg-slate-50 flex flex-col">
         {/* Header */}
-        <div className="bg-navy-900 px-4 pt-safe-top pb-4 flex-shrink-0">
+        <div className="bg-navy-900 theme-pin-fixed px-4 pt-safe-top pb-4 flex-shrink-0">
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-extrabold text-white text-base">{assignment.teams}</h2>
             <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -621,7 +621,7 @@ function SquadSetup({assignment, tossResult, onStart, onClose}) {
         </div>
 
         {/* Overs config */}
-        <div className="bg-white border-b border-slate-100 px-4 py-3 flex gap-4 flex-shrink-0">
+        <div className="bg-[var(--cy-surface)] border-b border-slate-100 px-4 py-3 flex gap-4 flex-shrink-0">
           <div className="flex-1">
             <p className="text-[10px] text-navy-400 font-semibold uppercase mb-1">Overs</p>
             <input type="number" min="1" max="50" value={overs} onChange={e=>setOvers(e.target.value)}
@@ -649,7 +649,7 @@ function SquadSetup({assignment, tossResult, onStart, onClose}) {
 
           {/* Team 1 XI */}
           {[{ team: t1, players: xi1Players, label: label1 }, { team: t2, players: xi2Players, label: label2 }].map(({ team, players, label }) => (
-            <div key={team.id} className="bg-white rounded-2xl shadow-card overflow-hidden">
+            <div key={team.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
                 <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: team.color || '#22c55e' }}/>
                 <p className="font-bold text-navy-900 text-sm flex-1">{team.name}</p>
@@ -725,7 +725,7 @@ function SquadSetup({assignment, tossResult, onStart, onClose}) {
           onClose={()=>setShowAddMobile(false)}
         />
       )}
-      <div className="bg-navy-900 px-4 pt-safe-top pb-4 flex-shrink-0">
+      <div className="bg-navy-900 theme-pin-fixed px-4 pt-safe-top pb-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-extrabold text-white text-base">{assignment.teams}</h2>
           <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -746,7 +746,7 @@ function SquadSetup({assignment, tossResult, onStart, onClose}) {
         <span className="text-xs font-bold text-amber-900">{teamById(battingFirst)?.name}</span>
       </div>
 
-      <div className="bg-white border-b border-slate-100 px-4 py-3 flex gap-4 flex-shrink-0">
+      <div className="bg-[var(--cy-surface)] border-b border-slate-100 px-4 py-3 flex gap-4 flex-shrink-0">
         <div className="flex-1">
           <p className="text-[10px] text-navy-400 font-semibold uppercase mb-1">Overs</p>
           <input type="number" min="1" max="50" value={overs} onChange={e=>setOvers(e.target.value)}
@@ -834,7 +834,7 @@ function InningsBreak({inn1, config, onContinue}) {
   const bat=teamById(inn1.battingTeamId), bowl=teamById(inn1.bowlingTeamId)
   const target=inn1.runs+1
   return (
-    <div className="fixed inset-0 z-[85] bg-navy-900 flex flex-col items-center justify-center p-6">
+    <div className="fixed inset-0 z-[85] bg-navy-900 theme-pin-fixed flex flex-col items-center justify-center p-6">
       <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5" style={{background:'linear-gradient(135deg,#fbbf24,#d97706)'}}>
         <span className="text-3xl">🏏</span>
       </div>
@@ -870,7 +870,7 @@ function MatchResult({inn1, inn2, result, specialOutcome, onClose}) {
     const extras=inn.extras.wd+inn.extras.nb+inn.extras.b+inn.extras.lb
     return(
       <div className="mb-4">
-        <div className="flex items-center justify-between bg-navy-900 rounded-t-xl px-3 py-2">
+        <div className="flex items-center justify-between bg-navy-900 theme-pin-fixed rounded-t-xl px-3 py-2">
           <p className="text-white font-bold text-sm">{label} — {team?.name}</p>
           <p className="text-amber-300 font-extrabold text-sm">{inn.runs}/{inn.wkts} ({fmtOvers(inn.legalBalls)} ov)</p>
         </div>
@@ -936,7 +936,7 @@ function MatchResult({inn1, inn2, result, specialOutcome, onClose}) {
 
   return(
     <div className="fixed inset-0 z-[85] bg-slate-50 flex flex-col">
-      <div className="bg-navy-900 px-4 py-5 flex-shrink-0">
+      <div className="bg-navy-900 theme-pin-fixed px-4 py-5 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <p className="text-amber-200 text-xs font-bold uppercase tracking-wide">Match Complete</p>
           <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -987,7 +987,7 @@ function MatchResult({inn1, inn2, result, specialOutcome, onClose}) {
         {inn2&&<InningsTable inn={inn2} label="2nd Innings"/>}
       </div>
       <div className="px-4 pb-6 pt-2 border-t border-slate-100 bg-white flex-shrink-0">
-        <button onClick={onClose} className="w-full py-3.5 rounded-2xl bg-navy-900 text-white font-bold text-sm">
+        <button onClick={onClose} className="w-full py-3.5 rounded-2xl bg-navy-900 theme-pin-fixed text-white font-bold text-sm">
           Back to Assignments
         </button>
       </div>

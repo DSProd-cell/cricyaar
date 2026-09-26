@@ -76,7 +76,7 @@ export default function ProfileSetup() {
   const canSubmit = name.trim().length >= 2 && username.length >= 3 && !!selectedRole
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-dvh flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm animate-slide-up">
         <div className="text-center mb-6">
           <div className="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-brand-500/25">
@@ -86,7 +86,7 @@ export default function ProfileSetup() {
           <p className="text-navy-500 text-sm mt-1">Tell us a bit about yourself to get started.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5">
+        <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-6 space-y-5">
           {/* Full Name */}
           <div>
             <label className="block text-sm font-semibold text-navy-700 mb-1.5">Full name <span className="text-red-500">*</span></label>

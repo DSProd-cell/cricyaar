@@ -91,7 +91,7 @@ function ScorecardViewer({ match, onClose }) {
           <p className="text-white font-bold text-sm">{label} — {team?.name}</p>
           <p className="text-amber-300 font-extrabold text-sm">{inn.runs}/{inn.wkts} ({fmtOvers(inn.legalBalls)} ov)</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-b-xl overflow-hidden">
+        <div className="bg-[var(--cy-surface)] border border-slate-200 rounded-b-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead><tr className="bg-slate-50 border-b border-slate-200">
@@ -198,7 +198,7 @@ function ScorecardViewer({ match, onClose }) {
           </div>
         )}
       </div>
-      <div className="px-4 pb-6 pt-2 border-t border-slate-100 bg-white flex-shrink-0">
+      <div className="px-4 pb-6 pt-2 border-t border-slate-100 bg-[var(--cy-surface)] flex-shrink-0">
         <button onClick={onClose} className="w-full py-3.5 rounded-2xl bg-navy-900 text-white font-bold text-sm">
           Close Scorecard
         </button>
@@ -261,7 +261,7 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
   const labelCls = "text-xs text-navy-400 mb-0.5 block"
 
   return (
-    <div className="fixed inset-0 z-[80] bg-white flex flex-col">
+    <div className="fixed inset-0 z-[80] bg-[var(--cy-surface)] flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 flex-shrink-0 pt-safe-top">
         <button onClick={onClose} className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
@@ -318,7 +318,7 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
                   className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
                     matchType === t.id
                       ? 'bg-brand-500 text-white border-brand-500'
-                      : 'bg-white text-navy-700 border-slate-300'
+                      : 'bg-[var(--cy-surface)] text-navy-700 border-slate-300'
                   }`}>
                   {t.label}
                 </button>
@@ -420,7 +420,7 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
                   className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
                     pitchType === p
                       ? 'bg-brand-500 text-white border-brand-500'
-                      : 'bg-white text-navy-700 border-slate-300'
+                      : 'bg-[var(--cy-surface)] text-navy-700 border-slate-300'
                   }`}>
                   {p}
                 </button>
@@ -433,7 +433,7 @@ function MatchConfigScreen({ assignment, onNext, onSchedule, onClose }) {
       {/* Bottom buttons */}
       <div className="flex border-t border-slate-200 flex-shrink-0">
         <button onClick={onSchedule}
-          className="flex-1 py-4 bg-white text-navy-700 font-bold text-sm border-r border-slate-200 active:bg-slate-50">
+          className="flex-1 py-4 bg-[var(--cy-surface)] text-navy-700 font-bold text-sm border-r border-slate-200 active:bg-slate-50">
           Schedule match
         </button>
         <button
@@ -514,7 +514,7 @@ function MyAssignments({ navigate, addToast }) {
       )}
 
       {/* Upcoming assignments — only truly pending/in-progress ones */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
           <Calendar size={15} className="text-amber-500" />
           <p className="font-bold text-navy-900 text-sm flex-1">Upcoming Assignments</p>
@@ -661,7 +661,7 @@ function MyAssignments({ navigate, addToast }) {
       {viewScorecard && <ScorecardViewer match={viewScorecard} onClose={() => setViewScorecard(null)} />}
 
       {/* Match history — store completed + mock completed */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
           <CheckCircle size={15} className="text-green-500" />
           <p className="font-bold text-navy-900 text-sm flex-1">Match History</p>
@@ -762,7 +762,7 @@ function MyStats() {
           { key:'completed', label:'Completed', count: totalCompleted },
         ].map(t => (
           <button key={t.key} onClick={() => setSubTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${subTab === t.key ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500'}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${subTab === t.key ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm' : 'text-navy-500'}`}>
             {t.label}
             <span className={`min-w-[16px] h-4 rounded-full text-[9px] font-bold inline-flex items-center justify-center px-1 ${t.count > 0 ? 'bg-amber-500 text-white' : 'bg-slate-300 text-slate-500'}`}>
               {t.count}
@@ -784,7 +784,7 @@ function MyStats() {
             const sess = sessions[a.id]
             const tossComplete = !!sess?.tossResult
             return (
-              <div key={a.id} className="bg-white rounded-2xl shadow-card p-4 border border-amber-200">
+              <div key={a.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4 border border-amber-200">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⚖️ To Umpire</span>
                   <span className="text-[10px] text-navy-400">{a.date}</span>
@@ -831,7 +831,7 @@ function MyStats() {
                       ? `${cm.specialOutcome.winner.name} won`
                       : 'Tied'
                 return (
-                  <div key={cm.id} className="bg-white rounded-2xl shadow-card p-4 border border-green-200">
+                  <div key={cm.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4 border border-green-200">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Result Declared</span>
                       <span className="text-[10px] text-navy-400">{cm.assignment?.date}</span>
@@ -859,7 +859,7 @@ function MyStats() {
                 const cm = storeDone.find(c => c.assignment?.id === a.id)
                 if (!cm) return null
                 return (
-                  <div key={a.id} className="bg-white rounded-2xl shadow-card p-4 border border-green-200">
+                  <div key={a.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4 border border-green-200">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">✅ Result Declared</span>
                       <span className="text-[10px] text-navy-400">{a.date}</span>
@@ -875,7 +875,7 @@ function MyStats() {
 
               {/* Mock completed (no scorecard stored, show limited info) */}
               {mockCompleted.map(a => (
-                <div key={a.id} className="bg-white rounded-2xl shadow-card p-4">
+                <div key={a.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">📋 Past Match</span>
                     <span className="text-[10px] text-navy-400">{a.date}</span>
@@ -925,7 +925,7 @@ function MyStats() {
       </div>
 
       {/* Nearest ground visited */}
-      <div className="bg-white rounded-2xl shadow-card p-4">
+      <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Navigation size={15} className="text-brand-500" />
           <p className="font-bold text-navy-900 text-sm">Nearest Ground Visited</p>
@@ -946,7 +946,7 @@ function MyStats() {
       </div>
 
       {/* All grounds visited */}
-      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
           <MapPin size={15} className="text-amber-500" />
           <p className="font-bold text-navy-900 text-sm flex-1">Grounds Visited</p>
@@ -974,7 +974,7 @@ function MyStats() {
       </div>
 
       {/* Rating breakdown */}
-      <div className="bg-white rounded-2xl shadow-card p-4">
+      <div className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
         <p className="font-bold text-navy-900 text-sm mb-3">Rating Breakdown</p>
         <div className="space-y-2">
           {[5,4,3,2,1].map(star => {
@@ -1054,7 +1054,7 @@ function OngoingMatches({ user, addToast, umpireRequests, addUmpireRequest, with
             key={t.key}
             onClick={() => setSubTab(t.key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
-              subTab === t.key ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500'
+              subTab === t.key ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm' : 'text-navy-500'
             }`}
           >
             {t.label}
@@ -1092,7 +1092,7 @@ function OngoingMatches({ user, addToast, umpireRequests, addUmpireRequest, with
           {OPEN_MATCHES.map(match => {
             const requested = isMatchRequested(match.id)
             return (
-              <div key={match.id} className="bg-white rounded-2xl shadow-card p-4">
+              <div key={match.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
                 <div className="flex items-start justify-between gap-2 mb-2.5">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -1151,7 +1151,7 @@ function OngoingMatches({ user, addToast, umpireRequests, addUmpireRequest, with
             const isExpanded = expandedTournament === tournament.id
 
             return (
-              <div key={tournament.id} className="bg-white rounded-2xl shadow-card p-4">
+              <div key={tournament.id} className="bg-[var(--cy-surface)] rounded-2xl shadow-card p-4">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -1289,7 +1289,7 @@ function TossModal({ assignment, onComplete, onClose, addToast }) {
     <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-2xl max-h-[90dvh] overflow-y-auto"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-2xl max-h-[90dvh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Handle */}
@@ -1316,7 +1316,7 @@ function TossModal({ assignment, onComplete, onClose, addToast }) {
           <div className="bg-slate-50 rounded-2xl px-4 py-3 mb-5">
             <div className="flex items-center justify-between gap-3">
               <p className="font-extrabold text-navy-900 text-sm text-center flex-1">{team1}</p>
-              <span className="text-xs font-bold text-navy-400 px-2 py-1 bg-white rounded-full border border-slate-200 flex-shrink-0">vs</span>
+              <span className="text-xs font-bold text-navy-400 px-2 py-1 bg-[var(--cy-surface)] rounded-full border border-slate-200 flex-shrink-0">vs</span>
               <p className="font-extrabold text-navy-900 text-sm text-center flex-1">{team2}</p>
             </div>
           </div>
@@ -1464,7 +1464,7 @@ function TournamentRequestModal({ tournament, onClose, onSend }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[88dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[88dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3">
           <div>
@@ -1481,7 +1481,7 @@ function TournamentRequestModal({ tournament, onClose, onSend }) {
                 key={i}
                 onClick={() => toggleDate(i)}
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
-                  selectedDates[i] ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-navy-500'
+                  selectedDates[i] ? 'border-amber-400 bg-amber-50 text-amber-700' : 'border-slate-200 bg-[var(--cy-surface)] text-navy-500'
                 }`}
               >
                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${selectedDates[i] ? 'border-amber-500 bg-amber-500' : 'border-slate-300'}`}>
@@ -1693,7 +1693,7 @@ export default function UmpireHome() {
               onClick={() => setActiveTab(tab.key)}
               className={`flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeTab === tab.key
-                  ? 'bg-white text-navy-900 shadow-sm'
+                  ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm'
                   : 'text-navy-500 hover:text-navy-700'
               }`}
             >

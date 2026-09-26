@@ -179,7 +179,7 @@ export default function GroundBooking() {
   return (
     <div className="min-h-dvh bg-navy-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-navy-200 sticky top-0 z-10">
+      <div className="bg-[var(--cy-surface)] border-b border-navy-200 sticky top-0 z-10">
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={() => {
             if (awaitingUpiConfirm) setAwaitingUpiConfirm(false)
@@ -219,7 +219,7 @@ export default function GroundBooking() {
                     disabled={!d.available}
                     className={`flex-shrink-0 flex flex-col items-center w-14 py-2 rounded-xl border transition-all ${
                       selectedDay === d ? 'bg-brand-500 border-brand-500 text-white' :
-                      d.available ? 'bg-white border-navy-200 text-navy-700 hover:border-brand-400' :
+                      d.available ? 'bg-[var(--cy-surface)] border-navy-200 text-navy-700 hover:border-brand-400' :
                       'bg-navy-100 border-navy-200 text-navy-400 opacity-50'
                     }`}
                   >
@@ -243,7 +243,7 @@ export default function GroundBooking() {
                       disabled={!slot.available}
                       className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${
                         selectedSlot === slot ? 'bg-brand-50 border-brand-500' :
-                        slot.available ? 'bg-white border-navy-200 hover:border-brand-300' :
+                        slot.available ? 'bg-[var(--cy-surface)] border-navy-200 hover:border-brand-300' :
                         'bg-navy-100 border-navy-200 opacity-50'
                       }`}
                     >
@@ -294,7 +294,7 @@ export default function GroundBooking() {
                 <div className="grid grid-cols-4 gap-2">
                   {['Leather','Tennis','Rubber','Other'].map(b => (
                     <button key={b} onClick={() => setBallType(b)}
-                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${ballType === b ? 'bg-brand-500 border-brand-500 text-white' : 'bg-white border-navy-200 text-navy-700'}`}>
+                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${ballType === b ? 'bg-brand-500 border-brand-500 text-white' : 'bg-[var(--cy-surface)] border-navy-200 text-navy-700'}`}>
                       {b}
                     </button>
                   ))}
@@ -306,7 +306,7 @@ export default function GroundBooking() {
                 <div className="grid grid-cols-4 gap-2">
                   {['6','8','10','11'].map(p => (
                     <button key={p} onClick={() => setPlayers(p)}
-                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${players === p ? 'bg-brand-500 border-brand-500 text-white' : 'bg-white border-navy-200 text-navy-700'}`}>
+                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${players === p ? 'bg-brand-500 border-brand-500 text-white' : 'bg-[var(--cy-surface)] border-navy-200 text-navy-700'}`}>
                       {p}
                     </button>
                   ))}
@@ -366,7 +366,7 @@ export default function GroundBooking() {
                   <p className="font-semibold text-navy-900 text-sm mb-1">Did you complete the payment?</p>
                   <p className="text-navy-500 text-xs mb-3">We opened your UPI app for ₹{amount.toLocaleString('en-IN')} to {ground.ownerName || groundName}.</p>
                   <div className="flex gap-2">
-                    <button onClick={() => setAwaitingUpiConfirm(false)} className="flex-1 py-2.5 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-white">
+                    <button onClick={() => setAwaitingUpiConfirm(false)} className="flex-1 py-2.5 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-[var(--cy-surface)]">
                       Not yet
                     </button>
                     <button onClick={() => finalizeBooking('claimed_paid')} disabled={paying}
@@ -394,7 +394,7 @@ export default function GroundBooking() {
                   <div className="flex gap-2">
                     {ground?.ownerPhone && (
                       <button onClick={() => window.location.href = `tel:${ground.ownerPhone}`}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-white">
+                        className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-[var(--cy-surface)]">
                         <Phone size={14} />Call Owner
                       </button>
                     )}
@@ -427,7 +427,7 @@ export default function GroundBooking() {
                 <div className="flex items-center justify-center gap-2">
                   <span className="font-black text-navy-900 text-lg tracking-wider">{bookingRef}</span>
                   <button onClick={() => { navigator.clipboard?.writeText(bookingRef); addToast('Copied!') }}
-                    className="w-8 h-8 rounded-lg bg-white border border-navy-200 flex items-center justify-center">
+                    className="w-8 h-8 rounded-lg bg-[var(--cy-surface)] border border-navy-200 flex items-center justify-center">
                     <Copy size={14} className="text-navy-500" />
                   </button>
                 </div>
@@ -446,7 +446,7 @@ export default function GroundBooking() {
             </div>
             <WeatherBanner prob={rainProb} />
             <div className="grid grid-cols-2 gap-3">
-              <button className="flex items-center justify-center gap-2 py-3 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-white">
+              <button className="flex items-center justify-center gap-2 py-3 rounded-xl border border-navy-200 text-navy-700 font-semibold text-sm bg-[var(--cy-surface)]">
                 <Calendar size={16} />Add to Calendar
               </button>
               <button className="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500 text-white font-semibold text-sm">
@@ -460,7 +460,7 @@ export default function GroundBooking() {
       {/* Footer — step 3 has its own action buttons (Pay via UPI / pay at
           venue / confirm payment), so there's nothing generic to show here. */}
       {step < 3 && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg bg-white border-t border-navy-200 p-4 z-20">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg bg-[var(--cy-surface)] border-t border-navy-200 p-4 z-20">
           <button
             onClick={() => {
               if (step === 1) { if (selectedDay && selectedSlot) setStep(2) }
@@ -474,7 +474,7 @@ export default function GroundBooking() {
         </div>
       )}
       {step === 4 && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg bg-white border-t border-navy-200 p-4 z-20">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-lg bg-[var(--cy-surface)] border-t border-navy-200 p-4 z-20">
           <button onClick={() => navigate('/')} className="btn-primary w-full">Back to Home</button>
         </div>
       )}

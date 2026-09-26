@@ -1,14 +1,27 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { IPL_TEAMS } from '../lib/iplTeams'
 import IplCelebrationOverlay from '../components/IplCelebrationOverlay'
 
 export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { setIplTeam } = useStore()
   const [selected, setSelected] = useState(null)
   const [celebrating, setCelebrating] = useState(false)
+
+  // When reached mid-onboarding (Celebration screen), falling through to
+  // city-select/role-select is correct. When reached from Profile to just
+  // change an existing team, the caller passes returnTo: 'back' via route
+  // state so this doesn't drag an existing user back through onboarding.
+  const returnTo = location.state?.returnTo
+
+  const finish = () => {
+    if (onDone) onDone()
+    else if (returnTo === 'back') navigate(-1)
+    else navigate(returnTo || skipRoute)
+  }
 
   const handlePick = (team) => {
     setSelected(team)
@@ -18,14 +31,10 @@ export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
 
   const handleCelebrationDone = () => {
     setCelebrating(false)
-    if (onDone) onDone()
-    else navigate(skipRoute)
+    finish()
   }
 
-  const handleSkip = () => {
-    if (onDone) onDone()
-    else navigate(skipRoute)
-  }
+  const handleSkip = finish
 
   return (
     <div style={{

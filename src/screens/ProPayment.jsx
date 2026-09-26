@@ -68,7 +68,7 @@ export default function ProPayment() {
   // ── Payment success → choice screen ────────────────────────────────────────
   if (paid) {
     return (
-      <div className="min-h-dvh bg-navy-900 flex flex-col items-center justify-center px-5">
+      <div className="min-h-dvh bg-[#0f172a] flex flex-col items-center justify-center px-5">
         <div
           className="w-24 h-24 rounded-full flex items-center justify-center mb-5 shadow-lg"
           style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '2px solid #d97706' }}
@@ -93,7 +93,7 @@ export default function ProPayment() {
 
   // ── Payment screen ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-dvh bg-navy-900 flex flex-col overflow-y-auto">
+    <div className="min-h-dvh bg-[#0f172a] flex flex-col overflow-y-auto">
 
       {/* Top bar */}
       <div className="flex items-center justify-center h-14 px-4 flex-shrink-0">
@@ -112,7 +112,7 @@ export default function ProPayment() {
           <Crown size={34} className="text-amber-500 fill-amber-400" />
         </div>
         <h1 className="text-white font-extrabold text-2xl mb-1 text-center">One last step</h1>
-        <p className="text-navy-400 text-sm text-center mb-6 max-w-xs">
+        <p className="text-[#94a3b8] text-sm text-center mb-6 max-w-xs">
           Start your CricYaar Pro subscription and unlock the full experience.
         </p>
 
@@ -173,12 +173,12 @@ export default function ProPayment() {
         {/* UPI logos strip */}
         <div className="flex items-center gap-2 mb-5">
           {UPI_APPS.map(app => (
-            <div key={app} className="px-2.5 py-1 bg-navy-800 border border-navy-700 rounded-lg">
-              <span className="text-navy-400 text-[10px] font-semibold">{app}</span>
+            <div key={app} className="px-2.5 py-1 bg-[#1e293b] border border-[#334155] rounded-lg">
+              <span className="text-[#94a3b8] text-[10px] font-semibold">{app}</span>
             </div>
           ))}
-          <div className="px-2.5 py-1 bg-navy-800 border border-navy-700 rounded-lg">
-            <span className="text-navy-400 text-[10px] font-semibold">Cards</span>
+          <div className="px-2.5 py-1 bg-[#1e293b] border border-[#334155] rounded-lg">
+            <span className="text-[#94a3b8] text-[10px] font-semibold">Cards</span>
           </div>
         </div>
 
@@ -206,7 +206,7 @@ export default function ProPayment() {
             )}
           </button>
 
-          <div className="flex items-center justify-center gap-1.5 text-navy-500 text-xs">
+          <div className="flex items-center justify-center gap-1.5 text-[#64748b] text-xs">
             <Shield size={11} />
             <span>Secured by Razorpay · 256-bit encryption</span>
           </div>
@@ -214,7 +214,7 @@ export default function ProPayment() {
       </div>
 
       {/* Demo note */}
-      <p className="text-center text-xs text-navy-700 pb-5">
+      <p className="text-center text-xs text-[#334155] pb-5">
         Demo mode — no real payment is charged
       </p>
     </div>

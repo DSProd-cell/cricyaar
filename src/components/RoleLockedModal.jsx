@@ -21,7 +21,7 @@ export default function RoleLockedModal({ currentRole, featureName, eligibleRole
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
       <div
-        className="relative bg-white rounded-2xl w-full max-w-sm shadow-modal animate-slide-up p-6"
+        className="relative bg-[var(--cy-surface)] rounded-2xl w-full max-w-sm shadow-modal animate-slide-up p-6"
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}

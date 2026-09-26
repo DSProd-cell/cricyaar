@@ -34,7 +34,7 @@ export default function Tournament() {
     <div className="min-h-dvh flex flex-col">
       <TopBar title={tr.name} showBack />
       {/* Tab bar */}
-      <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar bg-white sticky top-14 z-10">
+      <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar bg-[var(--cy-surface)] sticky top-14 z-10">
         {TABS.map(t => (
           <button key={t} className={`tab-item flex-shrink-0 ${tab===t?'active':''}`} onClick={() => setTab(t)}>{t}</button>
         ))}

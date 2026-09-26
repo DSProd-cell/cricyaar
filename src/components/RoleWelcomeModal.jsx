@@ -54,7 +54,7 @@ export default function RoleWelcomeModal() {
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
         {/* Card */}
-        <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
+        <div className="relative bg-[var(--cy-surface)] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
           {/* Top colour band */}
           <div className="h-1.5 w-full bg-gradient-to-r from-slate-300 to-slate-400" />
 
@@ -112,7 +112,7 @@ export default function RoleWelcomeModal() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Card */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
+      <div className="relative bg-[var(--cy-surface)] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up">
         {/* Top colour band matching role colour */}
         <div className="h-1.5 w-full" style={{ background: `linear-gradient(to right, ${meta.color}, ${meta.color}99)` }} />
 

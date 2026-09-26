@@ -54,7 +54,7 @@ export default function Notifications() {
 
         {notifs.length === 0 ? (
           <div className="text-center py-20">
-            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--cy-surface)] border border-slate-200 flex items-center justify-center mx-auto mb-4">
               <Bell size={26} className="text-navy-300" />
             </div>
             <p className="font-semibold text-navy-500">No notifications yet</p>

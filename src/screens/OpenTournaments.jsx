@@ -23,7 +23,7 @@ function FreeAgentModal({ tournament, onClose, onSend }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[85dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[85dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3">
           <div>
@@ -47,7 +47,7 @@ function FreeAgentModal({ tournament, onClose, onSend }) {
                   className={`py-3 rounded-xl border-2 font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
                     selected
                       ? 'border-brand-400 bg-brand-50 text-brand-700'
-                      : 'border-slate-200 bg-white text-navy-600 hover:border-slate-300'
+                      : 'border-slate-200 bg-[var(--cy-surface)] text-navy-600 hover:border-slate-300'
                   }`}
                 >
                   {selected && <CheckCircle size={14} className="text-brand-500 flex-shrink-0" />}
@@ -96,7 +96,7 @@ function TeamJoinModal({ tournament, team, onClose, onSend }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[88dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[88dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
           <div>
@@ -162,7 +162,7 @@ function PlayerChoiceModal({ tournament, onFreeAgent, onAsTeam, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-5" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-3xl w-full max-w-sm shadow-2xl p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-3xl w-full max-w-sm shadow-2xl p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
         <div className="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-4">
           <Users size={22} className="text-brand-500" />
         </div>
@@ -210,7 +210,7 @@ function SwitchToCaptainSheet({ tournament, onSwitch, onClose }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-2xl animate-slide-up px-6 pt-5 pb-10" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-2xl animate-slide-up px-6 pt-5 pb-10" onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{ background: 'linear-gradient(135deg,#fef3c7,#fde68a)' }}>

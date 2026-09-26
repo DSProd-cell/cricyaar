@@ -74,7 +74,7 @@ export default function ProfileMatch() {
               <button
                 key={p.id}
                 onClick={() => setSelected(isSel ? null : p.id)}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 bg-white text-left transition-all active:scale-[0.98]"
+                className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 bg-[var(--cy-surface)] text-left transition-all active:scale-[0.98]"
                 style={{
                   borderColor: isSel ? roleColor.primary : '#e2e8f0',
                   background:  isSel ? roleColor.light   : '#fff',
@@ -121,7 +121,7 @@ export default function ProfileMatch() {
             )}
             <button
               onClick={() => navigate('/celebration')}
-              className="w-full py-3.5 rounded-2xl font-semibold text-sm border-2 border-slate-200 text-navy-500 bg-white hover:bg-slate-50 transition-colors active:scale-[0.98]"
+              className="w-full py-3.5 rounded-2xl font-semibold text-sm border-2 border-slate-200 text-navy-500 bg-[var(--cy-surface)] hover:bg-slate-50 transition-colors active:scale-[0.98]"
             >
               None of These Are Me — Start Fresh
             </button>

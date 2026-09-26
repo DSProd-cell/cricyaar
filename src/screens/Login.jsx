@@ -66,7 +66,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-dvh flex flex-col items-center justify-center p-6">
       <button
         onClick={() => navigate('/welcome')}
         className="absolute top-5 left-4 flex items-center gap-1.5 text-navy-500 hover:text-navy-700 transition-colors text-sm font-medium"
@@ -88,13 +88,13 @@ export default function Login() {
         <div className="flex bg-slate-100 rounded-2xl p-1">
           <button
             onClick={() => navigate('/login?mode=signup')}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${isSignup ? 'bg-white shadow-sm text-navy-900' : 'text-navy-500 hover:text-navy-700'}`}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${isSignup ? 'bg-[var(--cy-surface)] shadow-sm text-navy-900' : 'text-navy-500 hover:text-navy-700'}`}
           >
             Sign Up
           </button>
           <button
             onClick={() => navigate('/login?mode=login')}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${!isSignup ? 'bg-white shadow-sm text-navy-900' : 'text-navy-500 hover:text-navy-700'}`}
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${!isSignup ? 'bg-[var(--cy-surface)] shadow-sm text-navy-900' : 'text-navy-500 hover:text-navy-700'}`}
           >
             Log In
           </button>
@@ -102,7 +102,7 @@ export default function Login() {
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-card p-6 animate-slide-up space-y-4">
+      <div className="w-full max-w-sm bg-[var(--cy-surface)] rounded-2xl shadow-card p-6 animate-slide-up space-y-4">
         {isSignup ? (
           <>
             <div>

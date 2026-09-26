@@ -149,7 +149,7 @@ export default function CricYaarPro() {
       {showCancel && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowCancel(false)}>
           <div className="absolute inset-0 bg-black/50" />
-          <div className="relative bg-white rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-[var(--cy-surface)] rounded-2xl p-6 w-full max-w-sm shadow-modal animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
               <AlertCircle size={22} className="text-red-500" />
             </div>

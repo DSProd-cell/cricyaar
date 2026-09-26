@@ -33,7 +33,7 @@ function FilterSheet({ pitchFilters, floodlights, onApply, onClose }) {
     <div className="fixed inset-0 z-50 flex flex-col" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
       <div
-        className="relative mt-auto bg-white rounded-t-3xl animate-slide-up"
+        className="relative mt-auto bg-[var(--cy-surface)] rounded-t-3xl animate-slide-up"
         onClick={e => e.stopPropagation()}
       >
         {/* Handle */}
@@ -255,7 +255,7 @@ export default function GroundSearch() {
       <TopBar title="Find a Ground" />
 
       {/* Sticky search + filter row */}
-      <div className="bg-white border-b border-slate-100 sticky top-14 z-10 px-4 py-3 flex items-center gap-2">
+      <div className="bg-[var(--cy-surface)] border-b border-slate-100 sticky top-14 z-10 px-4 py-3 flex items-center gap-2">
         {/* Search input */}
         <div className="relative flex-1">
           <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -315,7 +315,7 @@ export default function GroundSearch() {
 
       {/* Active filter chips summary */}
       {activeFilterCount > 0 && (
-        <div className="bg-white px-4 pb-2 flex flex-wrap gap-1.5 border-b border-slate-100">
+        <div className="bg-[var(--cy-surface)] px-4 pb-2 flex flex-wrap gap-1.5 border-b border-slate-100">
           {pitchFilters.map(p => (
             <span
               key={p}

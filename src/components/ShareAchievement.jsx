@@ -1,7 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Share2, X, Download, Copy, CheckCircle, Sparkles } from 'lucide-react'
+import { Capacitor } from '@capacitor/core'
+import { Filesystem, Directory } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
 import { useStore } from '../store/useStore'
 import { getRoleColor } from '../lib/roleColors'
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result).split(',')[1])
+    r.onerror = reject
+    r.readAsDataURL(blob)
+  })
+}
 
 // ── Canvas image generator ────────────────────────────────────────────────────
 async function generateAchievementImage({ title, stats, matchName, tournamentName, roleColor, userName }) {
@@ -164,7 +176,15 @@ export function ShareAchievementSheet({ title, stats, matchName, tournamentName,
     setStatus('sharing')
     setHint('')
     try {
-      if (canShare && navigator.canShare?.({ files: [fileRef] })) {
+      if (Capacitor.isNativePlatform()) {
+        // Android's WebView generally can't share files via navigator.share
+        // (canShare({files}) returns false even though text-only share works),
+        // which silently dropped the image. Capacitor's native Share plugin
+        // hands the file to the real OS share sheet, same as ShareStorySheet.
+        const name = 'cricyaar-achievement.png'
+        const saved = await Filesystem.writeFile({ path: name, data: await blobToBase64(fileRef), directory: Directory.Cache })
+        await Share.share({ title: title || 'My Cricket Performance', text: shareText, files: [saved.uri], dialogTitle: 'Share your achievement' })
+      } else if (canShare && navigator.canShare?.({ files: [fileRef] })) {
         await navigator.share({
           title: title || 'My Cricket Performance',
           text: platform === 'whatsapp' ? shareText : undefined,
@@ -211,7 +231,7 @@ export function ShareAchievementSheet({ title, stats, matchName, tournamentName,
     <>
       {/* Inject confetti keyframe once */}
       <style>{`@keyframes cy-confetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(140px) rotate(var(--r,360deg));opacity:0}}`}</style>
-      <div className="bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up relative overflow-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <div className="bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up relative overflow-hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {status === 'ready' && <Confetti />}
 
         {/* Handle */}

@@ -12,7 +12,7 @@ function ProGate({ onClose }) {
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
       <div
-        className="relative bg-white rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up"
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up"
         onClick={e => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
@@ -265,7 +265,7 @@ export default function MatchScoreSheet({ match, onClose }) {
     <div className="fixed inset-0 z-50 flex flex-col" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
       <div
-        className="relative mt-auto bg-white rounded-t-3xl animate-slide-up max-h-[92vh] flex flex-col"
+        className="relative mt-auto bg-[var(--cy-surface)] rounded-t-3xl animate-slide-up max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Handle */}

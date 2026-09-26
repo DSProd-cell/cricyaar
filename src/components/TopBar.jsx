@@ -25,12 +25,15 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
     <header
       className="sticky top-0 z-20 flex flex-col"
       style={{
-        background: '#fff',
+        background: 'var(--cy-surface)',
         borderBottom: `2px solid ${roleColor.primary}`,
       }}
     >
-      {/* Status-bar spacer — fills the safe area so content isn't hidden under the notch */}
-      <div style={{ height: 'env(safe-area-inset-top, 0px)' }} />
+      {/* Status-bar spacer — fills the safe area so content isn't hidden under the notch.
+          Floored at 24px: some Android builds report env(safe-area-inset-top) as 0 even
+          though the status bar still overlays the WebView, which left this header flush
+          against the notification tray. */}
+      <div style={{ height: 'max(env(safe-area-inset-top, 0px), 24px)' }} />
     <div className="h-[60px] px-4 flex items-center justify-between gap-2">
       {/* LEFT: back/home + logo + name/title */}
       <div className="flex items-center gap-2 min-w-0 flex-1">

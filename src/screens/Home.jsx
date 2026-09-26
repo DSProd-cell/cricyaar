@@ -135,7 +135,7 @@ function CricYaarFAB({ role, isPro }) {
               <button
                 key={i}
                 onClick={() => { navigate(a.path); setOpen(false) }}
-                className="flex items-center gap-2 bg-white border border-navy-200 rounded-full px-3 py-2 shadow-md text-sm font-semibold text-navy-800 hover:bg-navy-50 transition-all active:scale-95"
+                className="flex items-center gap-2 bg-[var(--cy-surface)] border border-navy-200 rounded-full px-3 py-2 shadow-md text-sm font-semibold text-navy-800 hover:bg-navy-50 transition-all active:scale-95"
               >
                 {a.pro && !isPro && <Crown size={11} className="text-amber-500" />}
                 {a.label}

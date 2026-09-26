@@ -22,7 +22,7 @@ function TournamentRequestModal({ tournament, onClose, onSend }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60" />
-      <div className="relative bg-white rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[88dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg shadow-modal animate-slide-up max-h-[88dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
         <div className="flex items-center justify-between px-5 py-3">
           <div>
@@ -42,7 +42,7 @@ function TournamentRequestModal({ tournament, onClose, onSend }) {
                 className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
                   selectedDates[i]
                     ? 'border-brand-400 bg-brand-50 text-brand-700'
-                    : 'border-slate-200 bg-white text-navy-500'
+                    : 'border-slate-200 bg-[var(--cy-surface)] text-navy-500'
                 }`}
               >
                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${selectedDates[i] ? 'border-brand-500 bg-brand-500' : 'border-slate-300'}`}>
@@ -121,14 +121,14 @@ export default function BrowseOpenMatches() {
       <div className="flex bg-slate-100 rounded-2xl p-1 mx-4 mt-3 mb-0 animate-fade-in gap-1">
         <button
           onClick={() => setTab('matches')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab==='matches' ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700'}`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab==='matches' ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700'}`}
         >
           <Calendar size={15} />Open Matches
           {pendingMatchCount > 0 && <span className="min-w-[18px] h-[18px] rounded-full bg-brand-500 text-white text-[10px] font-bold inline-flex items-center justify-center px-1">{pendingMatchCount}</span>}
         </button>
         <button
           onClick={() => setTab('tournaments')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab==='tournaments' ? 'bg-white text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700'}`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab==='tournaments' ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm' : 'text-navy-500 hover:text-navy-700'}`}
         >
           <Trophy size={15} />Tournaments
           {pendingTournamentCount > 0 && <span className="min-w-[18px] h-[18px] rounded-full bg-brand-500 text-white text-[10px] font-bold inline-flex items-center justify-center px-1">{pendingTournamentCount}</span>}

@@ -22,8 +22,8 @@ const INTENTS = [
     answer:"To **change your role**, follow these steps:\n\n1️⃣ Tap **Settings** (gear icon)\n2️⃣ Scroll to **Role** section\n3️⃣ Tap **Change Role** → pick your new role\n4️⃣ Confirm — no OTP needed!\n\nYour data stays safe.",
     actions:[{label:'Open Settings',path:'/settings'}] },
   { match:['pro','upgrade','premium','subscription','paid plan','unlock','become pro','how to pay','how to subscribe'],
-    answer:"To **upgrade to Pro** (₹99/month):\n\n1️⃣ Tap **Upgrade to Pro** below\n2️⃣ Pay via UPI, Card, or Net Banking\n3️⃣ Pro activates instantly!\n\n✅ Unlocks: Live scoring, squad management, tournaments, ground booking & more.",
-    actions:[{label:'Upgrade to Pro — ₹99/mo',path:'/pro-payment'}] },
+    answer:"To **upgrade to Pro** (₹1/month):\n\n1️⃣ Tap **Upgrade to Pro** below\n2️⃣ Pay via UPI, Card, or Net Banking\n3️⃣ Pro activates instantly!\n\n✅ Unlocks: Live scoring, squad management, tournaments, ground booking & more.",
+    actions:[{label:'Upgrade to Pro — ₹1/mo',path:'/pro-payment'}] },
   { match:['create team','new team','make a team','start a team'],
     answer:"To **create a team** (Pro feature):\n\n1️⃣ Go to **Teams** in bottom nav\n2️⃣ Tap **Create Team**\n3️⃣ Add name, city & colour\n4️⃣ Add players to your squad\n\nNeeds **Pro subscription**.",
     actions:[{label:'Go to Teams',path:'/teams'},{label:'Upgrade to Pro',path:'/pro-payment'}] },
@@ -52,7 +52,7 @@ const INTENTS = [
     answer:"I'm sorry you're having trouble! Let me raise a support ticket for you. Please fill in your details below 👇",
     actions:[], showSupportForm:true },
   { match:['what can i do','features','what is cricyaar','how does it work','get started'],
-    answer:"Welcome to **CricYaar** 🏏\n\n🆓 **Free:** Live scores, browse grounds & teams\n\n👑 **Pro (₹99/mo):**\n• Live match scoring\n• Create & manage teams\n• Join & run tournaments\n• Book grounds\n• Import CricHeroes stats\n\nWhat would you like to do?",
+    answer:"Welcome to **CricYaar** 🏏\n\n🆓 **Free:** Live scores, browse grounds & teams\n\n👑 **Pro (₹1/mo):**\n• Live match scoring\n• Create & manage teams\n• Join & run tournaments\n• Book grounds\n• Import CricHeroes stats\n\nWhat would you like to do?",
     actions:[{label:'Upgrade to Pro',path:'/pro-payment'},{label:'Browse Grounds',path:'/grounds'}] },
 ]
 
@@ -106,7 +106,7 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
   const canSubmit = name.trim() && phone.trim().length >= 10 && query.trim()
 
   return (
-    <div className="mt-2 rounded-2xl border border-indigo-100 bg-white shadow-sm overflow-hidden">
+    <div className="mt-2 rounded-2xl border border-indigo-100 bg-[var(--cy-surface)] shadow-sm overflow-hidden">
       <div className="bg-indigo-50 px-4 py-2 border-b border-indigo-100">
         <p className="text-indigo-700 font-bold text-xs uppercase tracking-wider">Support Ticket</p>
       </div>
@@ -294,7 +294,7 @@ export default function FloatingActions() {
               <button
                 key={item.key}
                 onClick={() => { if (!didDrag.current) handleFABAction(item.key) }}
-                className="flex items-center gap-2.5 rounded-full pl-3 pr-2 py-1.5 shadow-lg font-semibold text-sm transition-all active:scale-95 whitespace-nowrap bg-white border border-slate-200"
+                className="flex items-center gap-2.5 rounded-full pl-3 pr-2 py-1.5 shadow-lg font-semibold text-sm transition-all active:scale-95 whitespace-nowrap bg-[var(--cy-surface)] border border-slate-200"
               >
                 <span className="text-navy-800">{item.label}</span>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
@@ -341,7 +341,7 @@ export default function FloatingActions() {
         <div className="fixed inset-0 z-[65] flex flex-col justify-end" onClick={() => setAiOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
           <div
-            className="relative bg-white rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up flex flex-col"
+            className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up flex flex-col"
             style={{ maxHeight: '80dvh', minHeight: '55dvh' }}
             onClick={e => e.stopPropagation()}
           >
@@ -436,7 +436,7 @@ export default function FloatingActions() {
             )}
 
             {/* Input */}
-            <div className="px-4 py-3 border-t border-slate-100 flex gap-2 flex-shrink-0 bg-white">
+            <div className="px-4 py-3 border-t border-slate-100 flex gap-2 flex-shrink-0 bg-[var(--cy-surface)]">
               <input
                 ref={inputRef}
                 value={input}
@@ -463,7 +463,7 @@ export default function FloatingActions() {
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-6"
              onClick={() => setConfirmLogout(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          <div className="relative bg-white rounded-2xl p-6 w-full max-w-xs shadow-2xl animate-scale-in"
+          <div className="relative bg-[var(--cy-surface)] rounded-2xl p-6 w-full max-w-xs shadow-2xl animate-scale-in"
                onClick={e => e.stopPropagation()}>
             <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <LogOut size={22} className="text-red-500" />

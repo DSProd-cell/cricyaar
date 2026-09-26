@@ -43,7 +43,7 @@ export default function OpponentFinder() {
 
   return (
     <div className="min-h-dvh bg-navy-50 flex flex-col">
-      <div className="bg-white border-b border-navy-200 sticky top-0 z-10">
+      <div className="bg-[var(--cy-surface)] border-b border-navy-200 sticky top-0 z-10">
         <div className="flex items-center gap-3 px-4 py-3">
           <button onClick={() => navigate(-1)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-navy-100 text-navy-700">
             <ChevronLeft size={20} />
@@ -137,7 +137,7 @@ export default function OpponentFinder() {
       {/* Apply Modal */}
       {showApply && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4" onClick={() => setShowApply(null)}>
-          <div className="bg-white rounded-2xl w-full max-w-lg p-5 animate-slide-up" onClick={e => e.stopPropagation()}>
+          <div className="bg-[var(--cy-surface)] rounded-2xl w-full max-w-lg p-5 animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-navy-900">Apply to Play</h3>
               <button onClick={() => setShowApply(null)} className="w-8 h-8 rounded-xl bg-navy-100 flex items-center justify-center"><X size={16} /></button>
@@ -156,7 +156,7 @@ export default function OpponentFinder() {
       {/* Post Form Modal */}
       {showPostForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={() => setShowPostForm(false)}>
-          <div className="bg-white rounded-t-2xl w-full max-w-lg p-5 animate-slide-up max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-[var(--cy-surface)] rounded-t-2xl w-full max-w-lg p-5 animate-slide-up max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-navy-900">Post a Challenge</h3>
               <button onClick={() => setShowPostForm(false)} className="w-8 h-8 rounded-xl bg-navy-100 flex items-center justify-center"><X size={16} /></button>

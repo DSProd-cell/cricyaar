@@ -135,7 +135,7 @@ export default function GlobalFAB() {
         >
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <div
-            className="relative bg-white rounded-2xl p-6 w-full max-w-xs shadow-2xl animate-scale-in"
+            className="relative bg-[var(--cy-surface)] rounded-2xl p-6 w-full max-w-xs shadow-2xl animate-scale-in"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">

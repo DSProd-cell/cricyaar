@@ -29,7 +29,7 @@ export default function WhatIsNew() {
   }
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col">
+    <div className="min-h-dvh bg-[var(--cy-surface)] flex flex-col">
       {/* Header */}
       <div className="pt-10 px-6 pb-4 text-center">
         <div className="w-12 h-12 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-brand-500/25">
