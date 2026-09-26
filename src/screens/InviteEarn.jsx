@@ -5,6 +5,14 @@ import { useStore } from '../store/useStore'
 // ── Config ─────────────────────────────────────────────────────────────────
 const FRIEND_COUNT = 2
 
+// Pythagorean numerology: reduce name to single digit
+function numerologyNumber(name = '') {
+  const MAP = {A:1,B:2,C:3,D:4,E:5,F:6,G:7,H:8,I:9,J:1,K:2,L:3,M:4,N:5,O:6,P:7,Q:8,R:9,S:1,T:2,U:3,V:4,W:5,X:6,Y:7,Z:8}
+  let sum = name.toUpperCase().replace(/[^A-Z]/g,'').split('').reduce((a,c) => a + (MAP[c] || 0), 0)
+  while (sum > 9) sum = String(sum).split('').reduce((a, b) => a + Number(b), 0)
+  return sum || 7
+}
+
 function currentLevel(n) {
   if (n >= 15) return 4
   if (n >= 7)  return 3
@@ -270,15 +278,121 @@ function LevelCard({ lvl, onClick }) {
   )
 }
 
+// ── Step Animations ──────────────────────────────────────────────────────────
+function JerseyAnim({ num, accent }) {
+  return (
+    <svg width="130" height="140" viewBox="0 0 130 140" style={{ overflow:'visible', marginBottom:4 }}>
+      {/* glow */}
+      <ellipse cx="65" cy="120" rx="42" ry="10" fill="rgba(124,58,237,0.18)" />
+      {/* jersey body */}
+      <path d="M30 45 L14 75 L42 70 L42 122 L88 122 L88 70 L116 75 L100 45 Q82 30 65 24 Q48 30 30 45 Z"
+        fill={accent} style={{ animation:'jerseyGlow 2s ease-in-out infinite alternate' }} />
+      {/* sleeve shading */}
+      <path d="M30 45 L14 75 L28 72 L38 50 Z" fill="rgba(0,0,0,0.18)" />
+      <path d="M100 45 L116 75 L102 72 L92 50 Z" fill="rgba(0,0,0,0.18)" />
+      {/* collar */}
+      <path d="M46 33 Q65 44 84 33" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="3" strokeLinecap="round" />
+      {/* horizontal stripe */}
+      <path d="M42 78 L88 78" stroke="rgba(255,255,255,0.15)" strokeWidth="8" />
+      {/* number */}
+      <text x="65" y="102" textAnchor="middle" fontSize="38" fontWeight="900" fill="#FFD700"
+        style={{ animation:'numReveal 1.8s cubic-bezier(0.34,1.56,0.64,1) infinite alternate', fontFamily:'system-ui,sans-serif' }}>
+        {num}
+      </text>
+      {/* sparkles around number */}
+      {[[-28,-18],[28,-18],[0,-30],[34,6],[-34,6]].map(([dx,dy],i)=>(
+        <circle key={i} cx={65+dx} cy={82+dy} r="2.5" fill="#FFD700"
+          style={{ animation:`sparkleOp 2s ${i*0.38}s ease-in-out infinite` }} />
+      ))}
+    </svg>
+  )
+}
+
+function StumpsAnim({ accent }) {
+  return (
+    <svg width="130" height="110" viewBox="0 0 130 110" style={{ overflow:'visible', marginBottom:4 }}>
+      {/* ground */}
+      <line x1="10" y1="98" x2="120" y2="98" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+      {/* stumps */}
+      <g style={{ animation:'stumpsShakeS .25s ease-in-out 0.85s infinite alternate', transformOrigin:'65px 98px' }}>
+        <rect x="50" y="52" width="7" height="46" rx="2.5" fill="#c8a05a" />
+        <rect x="62" y="52" width="7" height="46" rx="2.5" fill="#c8a05a" />
+        <rect x="74" y="52" width="7" height="46" rx="2.5" fill="#c8a05a" />
+        <rect x="46" y="46" width="20" height="7" rx="2.5" fill="#e0c07a" />
+        <rect x="69" y="46" width="20" height="7" rx="2.5" fill="#e0c07a" />
+      </g>
+      {/* ball */}
+      <circle r="11" fill="#cc2200" stroke="#ff6655" strokeWidth="1"
+        style={{ animation:'ballStrikeS 1.6s ease-in infinite' }}>
+        <animateMotion dur="1.6s" repeatCount="indefinite" path="M18,68 Q40,62 62,65" />
+      </circle>
+      {/* seam on ball */}
+      <ellipse cx="0" cy="0" rx="6" ry="11" fill="none" stroke="#fff" strokeWidth="1" opacity=".35"
+        style={{ animation:'ballStrikeS 1.6s ease-in infinite' }}>
+        <animateMotion dur="1.6s" repeatCount="indefinite" path="M18,68 Q40,62 62,65" />
+      </ellipse>
+      {/* explosion sparks */}
+      <g style={{ animation:'explodeS 1.6s ease-out infinite', transformOrigin:'65px 56px' }}>
+        {[[-22,-26],[22,-26],[0,-36],[28,-10],[-28,-10],[14,-34],[-14,-34]].map(([dx,dy],i)=>(
+          <line key={i} x1="65" y1="56" x2={65+dx} y2={56+dy}
+            stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" />
+        ))}
+        <circle cx="65" cy="56" r="8" fill="rgba(255,215,0,0.2)" />
+      </g>
+    </svg>
+  )
+}
+
+function SixAnim({ accent }) {
+  return (
+    <svg width="130" height="110" viewBox="0 0 130 110" style={{ overflow:'visible', marginBottom:4 }}>
+      {/* ground line */}
+      <line x1="10" y1="100" x2="120" y2="100" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+      {/* arc trail */}
+      <path d="M18 92 Q55 10 112 30" fill="none" stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round"
+        strokeDasharray="140" strokeDashoffset="140"
+        style={{ animation:'trailDrawS 1.8s ease-in-out infinite' }} />
+      {/* SIX! text */}
+      <text x="112" y="26" textAnchor="middle" fontSize="15" fontWeight="900" fill="#FFD700"
+        opacity="0" style={{ animation:'sixPopS 1.8s ease-in-out infinite', fontFamily:'system-ui,sans-serif' }}>
+        SIX!
+      </text>
+      {/* stars on impact */}
+      {[[6,-8],[14,-4],[9,-16]].map(([dx,dy],i)=>(
+        <circle key={i} cx={112+dx} cy={26+dy} r="2" fill="#FFD700" opacity="0"
+          style={{ animation:`sixPopS 1.8s ${i*0.1}s ease-in-out infinite` }} />
+      ))}
+      {/* cricket ball */}
+      <g style={{ animation:'ballArcS 1.8s ease-in-out infinite' }}>
+        <circle r="10" fill="#cc2200" stroke="#ff6655" strokeWidth="1">
+          <animateMotion dur="1.8s" repeatCount="indefinite" path="M18,92 Q55,10 112,30" />
+        </circle>
+        <ellipse cx="0" cy="0" rx="5" ry="10" fill="none" stroke="#fff" strokeWidth="1" opacity=".35">
+          <animateMotion dur="1.8s" repeatCount="indefinite" path="M18,92 Q55,10 112,30" />
+        </ellipse>
+      </g>
+      {/* bat silhouette at start */}
+      <g style={{ animation:'batSwingS 1.8s ease-out infinite', transformOrigin:'14px 95px' }}>
+        <rect x="10" y="72" width="8" height="26" rx="3" fill="#c8860a" />
+        <rect x="8" y="60" width="12" height="14" rx="4" fill="#a06408" />
+      </g>
+    </svg>
+  )
+}
+
 // ── CRED-style Level Detail Sheet ───────────────────────────────────────────
-function LevelDetailSheet({ lvl, onClose, onShare }) {
+function LevelDetailSheet({ lvl, onClose, onShare, jerseyNum }) {
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [])
 
-  // accent color per level
   const accent = lvl.level===1 ? '#A78BFA' : lvl.level===2 ? '#60A5FA' : lvl.level===3 ? '#34D399' : '#C084FC'
+  const stepAnims = [
+    <JerseyAnim key="j" num={jerseyNum} accent={accent} />,
+    <StumpsAnim key="s" accent={accent} />,
+    <SixAnim    key="6" accent={accent} />,
+  ]
 
   return (
     <div
@@ -327,22 +441,13 @@ function LevelDetailSheet({ lvl, onClose, onShare }) {
           </span>
         </div>
 
-        {/* Isometric gift box */}
-        <div style={{ display:'flex', justifyContent:'center', padding:'20px 0 8px', position:'relative' }}>
-          {/* Spotlight glow */}
-          <div style={{
-            position:'absolute', top:0, left:'50%', transform:'translateX(-50%)',
-            width:200, height:200,
-            background:'radial-gradient(ellipse at center, rgba(255,215,0,0.08) 0%, transparent 70%)',
-            pointerEvents:'none',
-          }} />
-          <IsoCube accentColor="#FFD700" size={180} />
-        </div>
-
-        {/* Steps */}
-        <div style={{ padding:'8px 28px 24px' }}>
+        {/* Animated steps */}
+        <div style={{ padding:'20px 28px 24px' }}>
           {lvl.steps.map(({ label, text }, i) => (
-            <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginBottom: i < lvl.steps.length-1 ? 36 : 0 }}>
+            <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginBottom: i < lvl.steps.length-1 ? 44 : 0 }}>
+              {/* Cricket animation per step */}
+              <div style={{ marginBottom:8 }}>{stepAnims[i]}</div>
+
               {/* Step pill */}
               <div style={{
                 background:'#FFD700', color:'#000', fontSize:11, fontWeight:900,
@@ -444,6 +549,7 @@ export default function InviteEarn() {
   const [showBurst, setShowBurst]     = useState(false)
   const carouselRef = useRef(null)
 
+  const jerseyNum  = numerologyNumber(user?.name)
   const firstName  = (user?.name || '').split(' ')[0].toUpperCase().replace(/[^A-Z]/g,'').slice(0,5) || 'CY'
   const codeBase   = (user?.username || user?.id || 'CY').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4) || 'CYAR'
   const code       = firstName + codeBase
@@ -617,6 +723,7 @@ export default function InviteEarn() {
           lvl={detailLevel}
           onClose={() => setDetailLevel(null)}
           onShare={handleShare}
+          jerseyNum={jerseyNum}
         />
       )}
 
@@ -641,6 +748,50 @@ export default function InviteEarn() {
         @keyframes tickerScroll {
           0%   { transform:translateX(0); }
           100% { transform:translateX(-50%); }
+        }
+        @keyframes jerseyGlow {
+          from { filter:drop-shadow(0 0 6px rgba(124,58,237,0.5)); }
+          to   { filter:drop-shadow(0 0 18px rgba(167,139,250,0.9)); }
+        }
+        @keyframes numReveal {
+          from { opacity:0.3; transform:scale(0.7); }
+          to   { opacity:1;   transform:scale(1.08); }
+        }
+        @keyframes stumpsShakeS {
+          from { transform:rotate(-5deg); }
+          to   { transform:rotate(5deg); }
+        }
+        @keyframes ballStrikeS {
+          0%   { opacity:1; }
+          70%  { opacity:1; }
+          100% { opacity:0; }
+        }
+        @keyframes explodeS {
+          0%   { opacity:0; transform:scale(0); }
+          30%  { opacity:1; }
+          85%  { opacity:1; transform:scale(1.2); }
+          100% { opacity:0; transform:scale(1.5); }
+        }
+        @keyframes trailDrawS {
+          0%   { stroke-dashoffset:140; opacity:0; }
+          20%  { opacity:1; }
+          100% { stroke-dashoffset:0; opacity:1; }
+        }
+        @keyframes sixPopS {
+          0%,60%  { opacity:0; transform:scale(0.4); }
+          80%     { opacity:1; transform:scale(1.2); }
+          100%    { opacity:1; transform:scale(1); }
+        }
+        @keyframes ballArcS {
+          0%   { opacity:1; }
+          95%  { opacity:1; }
+          100% { opacity:0; }
+        }
+        @keyframes batSwingS {
+          0%   { transform:rotate(0deg); }
+          25%  { transform:rotate(-38deg); }
+          45%  { transform:rotate(12deg); }
+          100% { transform:rotate(0deg); }
         }
       `}</style>
     </div>
