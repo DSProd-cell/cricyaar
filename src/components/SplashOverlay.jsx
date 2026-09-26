@@ -173,7 +173,7 @@ export default function SplashOverlay() {
           style={{
             width: 84, height: 84,
             borderRadius: 22,
-            background: 'var(--cy-primary, #7C3AED)',
+            background: '#7C3AED',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginBottom: 16,
             animation: show(0) ? 'splashPulse 3s ease-in-out infinite' : 'none',
@@ -298,7 +298,7 @@ export default function SplashOverlay() {
               onClick={() => dismissTo('/')}
               style={{
                 width: '100%', padding: '16px', borderRadius: 16,
-                background: 'var(--cy-primary, #7C3AED)',
+                background: '#7C3AED',
                 color: '#fff', fontSize: 16, fontWeight: 700,
                 border: 'none', cursor: 'pointer',
                 boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
@@ -312,7 +312,7 @@ export default function SplashOverlay() {
                 onClick={() => dismissTo('/login?mode=signup')}
                 style={{
                   width: '100%', padding: '16px', borderRadius: 16,
-                  background: 'var(--cy-primary, #7C3AED)',
+                  background: '#7C3AED',
                   color: '#fff', fontSize: 16, fontWeight: 700,
                   border: 'none', cursor: 'pointer',
                   boxShadow: '0 4px 24px rgba(124,58,237,0.55)',

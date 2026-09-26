@@ -56,7 +56,7 @@ export default function ProSignupSheet() {
           {isPro ? (
             /* Already Pro — just confirm */
             <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'#F5F3FF' }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'var(--cy-subtle)' }}>
                 <CheckCircle size={28} className="text-brand-500" />
               </div>
               <h2 className="font-extrabold text-navy-900 text-xl mb-1">You're already Pro!</h2>
@@ -73,7 +73,7 @@ export default function ProSignupSheet() {
             <>
               {/* Crown + headline */}
               <div className="flex flex-col items-center text-center mb-5">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'#F5F3FF' }}>
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'var(--cy-subtle)' }}>
                   <Crown size={28} style={{ color:'#7C3AED' }} />
                 </div>
                 <h2 className="font-extrabold text-navy-900 text-xl">Want access to everything?</h2>
@@ -115,13 +115,13 @@ export default function ProSignupSheet() {
 
               <button
                 onClick={handleReferral}
-                className="w-full py-4 rounded-2xl font-bold flex flex-col items-center gap-0.5 active:scale-[0.98] transition-all border-2 border-purple-200 bg-purple-50"
+                className="w-full py-4 rounded-2xl font-bold flex flex-col items-center gap-0.5 active:scale-[0.98] transition-all border-2 border-[var(--cy-border)] bg-[var(--cy-subtle)]"
               >
-                <span className="flex items-center gap-2 text-base font-extrabold text-purple-700">
+                <span className="flex items-center gap-2 text-base font-extrabold text-brand-500">
                   <Gift size={17} />
                   Get Your Yaar Onboard
                 </span>
-                <span className="text-purple-500 text-xs font-medium">Refer a friend — Pro on us, free</span>
+                <span className="text-[var(--cy-muted)] text-xs font-medium">Refer a friend — Pro on us, free</span>
               </button>
             </>
           )}
