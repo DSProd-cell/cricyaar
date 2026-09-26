@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { Bell, ArrowLeft, Home, Gift } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { getRoleColor } from '../lib/roleColors'
 
 /**
  * Universal TopBar — CricYaar PRD v3
@@ -16,11 +17,18 @@ import { useStore } from '../store/useStore'
 export default function TopBar({ title, showBack, showHome, isHome }) {
   const navigate = useNavigate()
   const { notificationCount, user } = useStore()
-  const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
-  const isRoot = !showBack && !showHome
+  const isPro     = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
+  const isRoot    = !showBack && !showHome
+  const roleColor = getRoleColor(user?.role)
 
   return (
-    <header className="sticky top-0 z-20 bg-white border-b border-slate-100 h-[60px] px-4 flex items-center justify-between gap-2">
+    <header
+      className="sticky top-0 z-20 h-[60px] px-4 flex items-center justify-between gap-2"
+      style={{
+        background: '#fff',
+        borderBottom: `2px solid ${roleColor.primary}`,
+      }}
+    >
       {/* LEFT: back/home + logo + name/title */}
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {showBack && (
@@ -47,7 +55,10 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           className={`flex items-center gap-2 min-w-0 ${isHome ? 'cursor-default' : 'active:opacity-70 transition-opacity'}`}
           aria-label={isHome ? 'CricYaar' : 'Go to Home'}
         >
-          <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0"
+            style={{ background: roleColor.primary }}
+          >
             <span className="text-white font-black text-sm tracking-tight">CY</span>
           </div>
 

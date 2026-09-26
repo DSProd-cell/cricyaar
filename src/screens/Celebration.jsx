@@ -74,31 +74,32 @@ export default function Celebration() {
 
         {/* Headline */}
         <h1 className="text-white font-black text-2xl leading-snug mb-1">
-          You're officially in,<br />
+          Welcome to CricYaar Club,<br />
           <span className="text-emerald-300">{firstName}!</span>
         </h1>
-        <p className="text-white/60 text-sm mb-1">Welcome to CricYaar</p>
+        <p className="text-white/60 text-[11px] font-bold tracking-[0.18em] uppercase mb-1">
+          Your Game. Your Record. For Real.
+        </p>
 
         {/* Subtext */}
         <p className="text-white/75 text-sm leading-relaxed mt-3 mb-8">
-          Your cricket story might already be<br />
-          waiting — let's find your records.
+          You're now part of India's most trusted<br />
+          cricket community. Let's set you up.
         </p>
 
-        {/* Primary CTA */}
+        {/* CTA */}
         <button
-          onClick={() => navigate('/player-match')}
+          onClick={() => navigate('/city-select')}
           className="w-full py-4 bg-white text-[#166534] font-bold rounded-2xl text-[15px] shadow-2xl shadow-black/40 hover:bg-emerald-50 transition-colors mb-3"
         >
-          Find Me &amp; My Records →
+          Choose My City →
         </button>
 
-        {/* Secondary CTA */}
         <button
-          onClick={() => navigate('/role-onboard')}
+          onClick={() => navigate('/role-select')}
           className="w-full py-3.5 border border-white/25 text-white/80 font-medium rounded-2xl text-sm hover:bg-white/10 transition-colors"
         >
-          I'm New to Any Cricketing Tool — Start Fresh
+          Skip — Go to Role Selection
         </button>
       </div>
     </div>

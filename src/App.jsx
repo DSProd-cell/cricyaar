@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from './store/useStore'
 import { useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
@@ -8,7 +8,7 @@ import { registerPush } from './lib/push'
 import { closeTopOverlay } from './hooks/useBackButtonClose'
 
 // Components
-import Toast           from './components/Toast'
+import Toast            from './components/Toast'
 import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
@@ -18,8 +18,10 @@ import AIAssistant       from './components/AIAssistant'
 import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
-import USPScreen      from './screens/USPScreen'
+import LandingPage    from './screens/LandingPage'
 import Welcome        from './screens/Welcome'
+import ProfileMatch   from './screens/ProfileMatch'
+import CitySelect     from './screens/CitySelect'
 import Login          from './screens/Login'
 import OtpVerify      from './screens/OtpVerify'
 import ProfileSetup   from './screens/ProfileSetup'
@@ -67,7 +69,7 @@ import GroundOwnerDashboard from './screens/GroundOwnerDashboard'
 
 function AuthGuard({ children }) {
   const { user } = useStore()
-  if (!user) return <Navigate to="/usp" replace />
+  if (!user) return <Navigate to="/landing" replace />
   return children
 }
 
@@ -102,12 +104,12 @@ function WhatsNewGate({ children }) {
 
     // Restore user if Zustand lost it (e.g. hard refresh cleared memory)
     // but Supabase still has a valid session in localStorage.
+    // NOTE: We intentionally do NOT call logout() when there is no Supabase
+    // session — Zustand state persists across sessions and the 30-day
+    // cy_last_active check above is the only auto-logout gate.
     supabase.auth.getSession().then(({ data: { session } }) => {
       const storeUser = useStore.getState().user
-      if (!session && storeUser) {
-        // Supabase session expired — sign the user out cleanly
-        logout()
-      } else if (session && !storeUser) {
+      if (session && !storeUser) {
         // Have a valid Supabase session but no Zustand user — restore it
         supabase.from('profiles').select('*').eq('id', session.user.id).single()
           .then(({ data: profile }) => {
@@ -192,7 +194,36 @@ function WhatsNewGate({ children }) {
       {showProSheet && <ProSignupSheet />}
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
       <AIAssistant />
+      <FloatingSignOut />
     </>
+  )
+}
+
+function FloatingSignOut() {
+  const navigate  = useNavigate()
+  const { user, logout, addToast } = useStore()
+  if (!user) return null
+  const handleLogout = () => {
+    logout()
+    navigate('/landing')
+    addToast('Logged out successfully', 'info')
+  }
+  return (
+    <button
+      onClick={handleLogout}
+      className="fixed bottom-24 left-4 z-[60] flex items-center gap-1.5 px-3 py-2 rounded-full font-semibold text-xs shadow-lg backdrop-blur-sm transition-all active:scale-95 hover:opacity-90"
+      style={{
+        background: 'rgba(239,68,68,0.15)',
+        border: '1px solid rgba(239,68,68,0.3)',
+        color: '#ef4444',
+      }}
+      aria-label="Sign out"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Sign out
+    </button>
   )
 }
 
@@ -200,7 +231,11 @@ function AppShell({ children }) {
   const { pathname } = useLocation()
   const { user } = useStore()
 
-  const noShell = ['/welcome','/login','/otp','/setup','/role-warning','/role-select','/whats-new','/usp','/pro-payment','/celebration','/player-match','/role-onboard','/player-setup'].includes(pathname)
+  const noShell = [
+    '/welcome','/login','/otp','/setup','/role-warning','/role-select',
+    '/whats-new','/landing','/pro-payment','/celebration','/player-match',
+    '/role-onboard','/player-setup','/city-select','/profile-match',
+  ].includes(pathname)
     || pathname.startsWith('/score')
     || pathname.startsWith('/ground-booking')
     || pathname === '/aadhaar-verify'
@@ -228,17 +263,19 @@ export default function App() {
       <WhatsNewGate>
       <AppShell>
         <Routes>
-          {/* USP + auth */}
-          <Route path="/usp"     element={<USPScreen />} />
-          <Route path="/welcome" element={<Welcome />} />
-          <Route path="/login"   element={<Login />} />
-          <Route path="/otp"         element={<OtpVerify />} />
+          {/* Landing + auth */}
+          <Route path="/landing"       element={<LandingPage />} />
+          <Route path="/welcome"       element={<Welcome />} />
+          <Route path="/login"         element={<Login />} />
+          <Route path="/otp"           element={<OtpVerify />} />
           <Route path="/setup"         element={<ProfileSetup />} />
+          <Route path="/profile-match" element={<ProfileMatch />} />
           <Route path="/celebration"   element={<Celebration />} />
+          <Route path="/city-select"   element={<CitySelect />} />
           <Route path="/player-match"  element={<PlayerMatch />} />
           <Route path="/role-onboard"  element={<RoleOnboard />} />
           <Route path="/player-setup"  element={<PlayerSetup />} />
-          <Route path="/pro-payment" element={<AuthGuard><ProPayment /></AuthGuard>} />
+          <Route path="/pro-payment"   element={<AuthGuard><ProPayment /></AuthGuard>} />
 
           {/* Main app */}
           <Route path="/"               element={<AuthGuard><Home /></AuthGuard>} />
@@ -279,6 +316,8 @@ export default function App() {
           <Route path="/invite"              element={<AuthGuard><InviteEarn /></AuthGuard>} />
           <Route path="/ground-owner"        element={<AuthGuard><GroundOwnerDashboard /></AuthGuard>} />
 
+          {/* Legacy redirect */}
+          <Route path="/usp" element={<Navigate to="/landing" replace />} />
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
