@@ -11,8 +11,45 @@ export default function Welcome() {
     if (user) navigate('/', { replace: true })
   }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const FLOATERS = [
+    { icon: '🏏', x: '12%',  animDur: '6s',   animDelay: '0s',   size: 28, opacity: 0.18 },
+    { icon: '🏆', x: '78%',  animDur: '8s',   animDelay: '1.2s', size: 22, opacity: 0.14 },
+    { icon: '⭐', x: '30%',  animDur: '7s',   animDelay: '2.5s', size: 18, opacity: 0.20 },
+    { icon: '🎯', x: '62%',  animDur: '9s',   animDelay: '0.8s', size: 16, opacity: 0.15 },
+    { icon: '✨', x: '88%',  animDur: '5.5s', animDelay: '3.1s', size: 14, opacity: 0.22 },
+    { icon: '🏏', x: '50%',  animDur: '10s',  animDelay: '1.8s', size: 20, opacity: 0.10 },
+    { icon: '⭐', x: '8%',   animDur: '7.5s', animDelay: '4s',   size: 12, opacity: 0.18 },
+    { icon: '🏆', x: '42%',  animDur: '6.5s', animDelay: '2s',   size: 26, opacity: 0.10 },
+  ]
+
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Floating cricket icons */}
+      {FLOATERS.map((f, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            left: f.x,
+            bottom: '-40px',
+            fontSize: f.size,
+            opacity: f.opacity,
+            pointerEvents: 'none',
+            animation: `floatUp ${f.animDur} ${f.animDelay} ease-in-out infinite`,
+            userSelect: 'none',
+          }}
+        >
+          {f.icon}
+        </div>
+      ))}
+      <style>{`
+        @keyframes floatUp {
+          0%   { transform: translateY(0)    rotate(0deg);  opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
+        }
+      `}</style>
       {/* Logo area */}
       <div className="flex flex-col items-center mb-12 animate-fade-in">
         <div className="w-20 h-20 bg-brand-500 rounded-3xl flex items-center justify-center mb-5 shadow-xl shadow-brand-500/30">
@@ -48,3 +85,4 @@ export default function Welcome() {
     </div>
   )
 }
+

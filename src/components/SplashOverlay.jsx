@@ -86,7 +86,7 @@ export default function SplashOverlay() {
         zIndex: 9999,
         opacity: fading ? 0 : 1,
         transition: 'opacity 0.65s ease',
-        background: 'linear-gradient(160deg, #071420 0%, #0c1f10 55%, #0a1628 100%)',
+        background: 'linear-gradient(160deg, #0a0118 0%, #120520 55%, #07021a 100%)',
       }}
     >
       {/* ── Background animations ─────────────────────────────── */}
@@ -99,7 +99,7 @@ export default function SplashOverlay() {
           top: '50%', left: '50%',
           marginTop: -250, marginLeft: -250,
           borderRadius: '50%',
-          background: 'conic-gradient(from 0deg, transparent 60%, rgba(34,197,94,0.06) 75%, transparent 90%)',
+          background: 'conic-gradient(from 0deg, transparent 60%, rgba(124,58,237,0.10) 75%, transparent 90%)',
           animation: 'splashRotate 12s linear infinite',
         }}
       />
@@ -110,7 +110,7 @@ export default function SplashOverlay() {
           top: '50%', left: '50%',
           marginTop: -160, marginLeft: -160,
           borderRadius: '50%',
-          background: 'conic-gradient(from 180deg, transparent 60%, rgba(34,197,94,0.04) 75%, transparent 90%)',
+          background: 'conic-gradient(from 180deg, transparent 60%, rgba(167,139,250,0.07) 75%, transparent 90%)',
           animation: 'splashRotate 18s linear infinite reverse',
         }}
       />
@@ -130,7 +130,7 @@ export default function SplashOverlay() {
       {/* Center pitch glow */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 55% 38% at 50% 38%, rgba(34,197,94,0.08) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(ellipse 55% 38% at 50% 38%, rgba(124,58,237,0.12) 0%, transparent 70%)' }}
       />
 
       {/* Light sweep */}
@@ -143,7 +143,7 @@ export default function SplashOverlay() {
             position: 'absolute',
             top: 0, bottom: 0,
             left: 0, width: '45%',
-            background: 'linear-gradient(105deg, transparent 20%, rgba(34,197,94,0.05) 50%, transparent 80%)',
+            background: 'linear-gradient(105deg, transparent 20%, rgba(124,58,237,0.08) 50%, transparent 80%)',
             animation: 'splashSweep 9s ease-in-out infinite',
             animationDelay: '2s',
           }}
@@ -160,8 +160,8 @@ export default function SplashOverlay() {
             height: p.size,
             left: p.left,
             bottom: '-16px',
-            background: `radial-gradient(circle at 35% 35%, rgba(74,222,128,0.8), rgba(22,163,74,0.4))`,
-            boxShadow: '0 0 6px rgba(34,197,94,0.5)',
+            background: `radial-gradient(circle at 35% 35%, rgba(167,139,250,0.85), rgba(91,33,182,0.5))`,
+            boxShadow: '0 0 6px rgba(124,58,237,0.6)',
             animation: `splashFloat ${p.dur}s ease-in infinite`,
             animationDelay: `${p.delay}s`,
           }}
@@ -175,7 +175,7 @@ export default function SplashOverlay() {
           style={{
             width: 84, height: 84,
             borderRadius: 22,
-            background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+            background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginBottom: 16,
             animation: show(0) ? 'splashPulse 3s ease-in-out infinite' : 'none',
@@ -291,13 +291,13 @@ export default function SplashOverlay() {
             width: '100%',
             padding: '16px',
             borderRadius: 16,
-            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+            background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
             color: '#fff',
             fontSize: 16,
             fontWeight: 700,
             border: 'none',
             cursor: 'pointer',
-            boxShadow: '0 4px 24px rgba(34,197,94,0.45)',
+            boxShadow: '0 4px 24px rgba(124,58,237,0.55)',
             opacity: phase >= 1 ? 1 : 0,
             transform: phase >= 1 ? 'translateY(0)' : 'translateY(20px)',
             transition: 'opacity 0.55s ease 1.0s, transform 0.55s ease 1.0s',

@@ -230,7 +230,7 @@ export default function PlayerProfile() {
 
   return (
     <div className="min-h-dvh flex flex-col overflow-x-hidden bg-slate-50">
-      <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack={!isOwnProfile} />
+      <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack />
 
       {/* ── Hero Card ───────────────────────────────────────────────────── */}
       <div className="bg-white relative">

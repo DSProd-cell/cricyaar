@@ -318,9 +318,15 @@ export default function RoleSelect() {
               onClick={() => setChosen(role.id)}
               className="w-full text-left rounded-2xl p-4 transition-all duration-300 active:scale-[0.98]"
               style={{
-                background: isSelected ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.07)',
-                border: isSelected ? '2px solid rgba(255,255,255,0.7)' : '2px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(8px)',
+                background: isSelected
+                  ? `linear-gradient(135deg, #0d0018 0%, #120520 100%)`
+                  : 'rgba(0,0,0,0.35)',
+                borderLeft: `3px solid ${isSelected ? role.accentColor : 'rgba(255,255,255,0.12)'}`,
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                boxShadow: isSelected ? `0 0 24px ${role.accentColor}40, inset 0 0 24px rgba(0,0,0,0.4)` : 'none',
+                backdropFilter: 'blur(12px)',
               }}
             >
               <div className="flex items-start gap-3">
