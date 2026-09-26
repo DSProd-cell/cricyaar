@@ -406,7 +406,7 @@ function WicketModal({ onConfirm, onCancel, fielders }) {
 export default function Scoring() {
   const { matchId } = useParams()
   const navigate    = useNavigate()
-  const { scoring, recordBall, undoLastBall, addToast, user } = useStore()
+  const { scoring, recordBall, undoLastBall, addToast, user, triggerShare } = useStore()
   const [showWicket, setShowWicket]     = useState(false)
   const [showChangeBowler, setShowChangeBowler] = useState(false)
   const [setupDone, setSetupDone]       = useState(false)
@@ -601,7 +601,20 @@ export default function Scoring() {
         </button>
         <button
           className="flex items-center justify-center gap-1.5 py-3 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors touch-manipulation"
-          onClick={() => { if(confirm('End the innings?')) navigate('/my-cricket') }}
+          onClick={() => {
+            if (confirm('End the innings?')) {
+              triggerShare({
+                title: `${user?.name?.split(' ')[0] || 'Player'}'s Performance`,
+                matchName: match?.name || 'Cricket Match',
+                stats: [
+                  { label: 'Runs', value: String(scoring?.runs ?? 0) },
+                  { label: 'Wickets', value: String(scoring?.wkts ?? 0) },
+                  { label: 'Overs', value: String(scoring?.overs ?? 0) },
+                ],
+              })
+              navigate('/my-cricket')
+            }
+          }}
           aria-label="End innings"
         >
           End Innings
