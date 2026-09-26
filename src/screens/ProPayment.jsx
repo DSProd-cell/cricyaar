@@ -69,73 +69,24 @@ export default function ProPayment() {
   if (paid) {
     return (
       <div className="min-h-dvh bg-navy-900 flex flex-col items-center justify-center px-5">
-
-        {/* Success checkmark */}
         <div
           className="w-24 h-24 rounded-full flex items-center justify-center mb-5 shadow-lg"
           style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '2px solid #d97706' }}
         >
           <Check size={42} className="text-amber-600" strokeWidth={3} />
         </div>
-
         <h2 className="text-white font-extrabold text-2xl mb-1">You're Pro! 🎉</h2>
         <p className="text-amber-400 text-sm mb-8 text-center max-w-xs">
-          All features are unlocked. What would you like to do next?
+          All features unlocked. Welcome to CricYaar Pro!
         </p>
-
-        <div className="w-full max-w-sm space-y-3">
-
-          {/* ── Option 1: Continue same role ── */}
-          <button
-            onClick={handleContinueSameRole}
-            className="w-full rounded-2xl overflow-hidden text-left transition-all active:scale-[0.98]"
-            style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}
-          >
-            <div className="px-5 pt-4 pb-3">
-              {/* Role badge row */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.25)' }}>
-                  <RoleIcon size={20} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-extrabold text-base leading-tight">
-                    Continue as {roleMeta.label}
-                  </p>
-                  <p className="text-amber-100 text-xs">Pro features now unlocked for your role</p>
-                </div>
-                <ChevronRight size={18} className="text-amber-200 ml-auto flex-shrink-0" />
-              </div>
-
-              {/* Pro features for this role */}
-              <div className="border-t border-amber-600/40 pt-2.5 space-y-1.5">
-                {proFeatures.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <Check size={11} className="text-amber-200 flex-shrink-0" strokeWidth={2.5} />
-                    <span className="text-amber-100 text-xs">{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </button>
-
-          {/* ── Option 2: Change role ── */}
-          <button
-            onClick={handleChangeRole}
-            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-            style={{
-              background: 'rgba(255,255,255,0.07)',
-              border: '1.5px solid rgba(255,255,255,0.15)',
-            }}
-          >
-            <RefreshCw size={15} className="text-white/70" />
-            <span className="text-white font-semibold text-sm">I want to change my role</span>
-          </button>
-
-          <p className="text-center text-navy-600 text-xs pt-1">
-            You can change your role anytime from Settings — no OTP needed.
-          </p>
-        </div>
+        <button
+          onClick={handleContinueSameRole}
+          className="w-full max-w-sm py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff' }}
+        >
+          <Zap size={18} />
+          Enter the App
+        </button>
       </div>
     )
   }
@@ -259,13 +210,6 @@ export default function ProPayment() {
             <Shield size={11} />
             <span>Secured by Razorpay · 256-bit encryption</span>
           </div>
-
-          <button
-            onClick={() => navigate(-1)}
-            className="w-full py-3 text-navy-500 text-sm hover:text-navy-400 transition-colors"
-          >
-            Maybe later
-          </button>
         </div>
       </div>
 

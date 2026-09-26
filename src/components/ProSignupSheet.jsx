@@ -78,15 +78,15 @@ export default function ProSignupSheet() {
           >
             <span className="flex items-center gap-2 text-base font-extrabold">
               <Zap size={17} />
-              Upgrade to Pro — Unlock Everything
+              Start Pro — Just ₹1/month
             </span>
-            <span className="text-amber-100 text-xs font-medium opacity-90">₹99/month · UPI / Cards · Cancel anytime</span>
+            <span className="text-amber-100 text-xs font-medium opacity-90">UPI / Cards · Cancel anytime</span>
           </button>
           <button
             onClick={handleDismiss}
             className="w-full py-3 text-center text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
           >
-            Maybe later — stay on free
+            Continue with limited free access
           </button>
         </div>
       </div>
