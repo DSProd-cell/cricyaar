@@ -33,7 +33,7 @@ export default function CitySelect() {
         await supabase.from('profiles').update({ city: selected, role: defaultRole, onboarded: true }).eq('id', user.id)
       }
     } catch {}
-    navigate('/')
+    navigate('/ipl-pick', { state: { returnTo: '/' } })
   }
 
   return (
@@ -106,7 +106,7 @@ export default function CitySelect() {
             {saving ? 'Saving…' : 'Continue →'}
           </button>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/ipl-pick', { state: { returnTo: '/' } })}
             className="w-full py-3 text-slate-400 font-medium text-sm"
           >
             Skip for now

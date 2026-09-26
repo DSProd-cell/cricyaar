@@ -16,7 +16,7 @@ export default function ProfileMatch() {
   useEffect(() => {
     const name = user?.name
     if (!name || name.trim().length < 2) {
-      navigate('/celebration', { replace: true })
+      navigate('/city-select', { replace: true })
       return
     }
     const firstName = name.trim().split(' ')[0]
@@ -29,7 +29,7 @@ export default function ProfileMatch() {
       .then(({ data }) => {
         const matches = data || []
         if (matches.length === 0) {
-          navigate('/celebration', { replace: true })
+          navigate('/city-select', { replace: true })
         } else {
           setProfiles(matches)
           setLoading(false)
@@ -112,7 +112,7 @@ export default function ProfileMatch() {
           <div className="pt-2 space-y-3">
             {selected && (
               <button
-                onClick={() => navigate('/celebration')}
+                onClick={() => navigate('/city-select')}
                 className="w-full py-4 rounded-2xl font-bold text-white text-[15px] flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
                 style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` }}
               >
@@ -120,7 +120,7 @@ export default function ProfileMatch() {
               </button>
             )}
             <button
-              onClick={() => navigate('/celebration')}
+              onClick={() => navigate('/city-select')}
               className="w-full py-3.5 rounded-2xl font-semibold text-sm border-2 border-slate-200 text-navy-500 bg-[var(--cy-surface)] hover:bg-slate-50 transition-colors active:scale-[0.98]"
             >
               None of These Are Me — Start Fresh

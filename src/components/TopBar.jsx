@@ -63,7 +63,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
         >
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0"
-            style={{ background: roleColor.primary }}
+            style={{ background: '#7c3aed' }}
           >
             <span className="text-white font-black text-sm tracking-tight">CY</span>
           </div>
