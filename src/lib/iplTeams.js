@@ -1,0 +1,103 @@
+export const IPL_TEAMS = [
+  {
+    id: 'mi', name: 'Mumbai Indians', short: 'MI', emoji: '💙',
+    primary: '#004BA0', secondary: '#D4AF37', textOnPrimary: '#ffffff',
+    darkBg: '#000d1f', midBg: '#001a3d',
+    gradient: 'linear-gradient(160deg,#000d1f 0%,#001a3d 55%,#00102e 100%)',
+    glow: 'rgba(0,75,160,0.6)', secondaryGlow: 'rgba(212,175,55,0.5)',
+    tagline: 'Duniya Hila Denge Hum 🌊',
+    taglineSub: 'दुनिया हिला देंगे हम',
+  },
+  {
+    id: 'csk', name: 'Chennai Super Kings', short: 'CSK', emoji: '🦁',
+    primary: '#FFCC00', secondary: '#1A2F5F', textOnPrimary: '#1A2F5F',
+    darkBg: '#040b18', midBg: '#081428',
+    gradient: 'linear-gradient(160deg,#040b18 0%,#081428 55%,#030810 100%)',
+    glow: 'rgba(255,204,0,0.5)', secondaryGlow: 'rgba(26,47,95,0.6)',
+    tagline: 'Whistle Podu! 🎺',
+    taglineSub: 'விசில் போடு — Let the Whistle Blow',
+  },
+  {
+    id: 'rcb', name: 'Royal Challengers Bengaluru', short: 'RCB', emoji: '🔴',
+    primary: '#EC1C24', secondary: '#C8A84B', textOnPrimary: '#ffffff',
+    darkBg: '#100005', midBg: '#200008',
+    gradient: 'linear-gradient(160deg,#100005 0%,#200008 55%,#0a0003 100%)',
+    glow: 'rgba(236,28,36,0.6)', secondaryGlow: 'rgba(200,168,75,0.4)',
+    tagline: 'Ee Sala Cup Namde! 🏆',
+    taglineSub: 'ಈ ಸಲ ಕಪ್ ನಮ್ದೇ — This time the cup is ours',
+  },
+  {
+    id: 'kkr', name: 'Kolkata Knight Riders', short: 'KKR', emoji: '💜',
+    primary: '#3B2A7D', secondary: '#D4AF37', textOnPrimary: '#ffffff',
+    darkBg: '#0d0820', midBg: '#180f38',
+    gradient: 'linear-gradient(160deg,#0d0820 0%,#180f38 55%,#090618 100%)',
+    glow: 'rgba(59,42,125,0.7)', secondaryGlow: 'rgba(212,175,55,0.5)',
+    tagline: 'Korbo Lorbo Jeetbo! ⚔️',
+    taglineSub: 'করব লড়ব জিতব — Fight, Struggle, Win',
+  },
+  {
+    id: 'dc', name: 'Delhi Capitals', short: 'DC', emoji: '🔵',
+    primary: '#17479E', secondary: '#EF3340', textOnPrimary: '#ffffff',
+    darkBg: '#050d22', midBg: '#091830',
+    gradient: 'linear-gradient(160deg,#050d22 0%,#091830 55%,#030a18 100%)',
+    glow: 'rgba(23,71,158,0.6)', secondaryGlow: 'rgba(239,51,64,0.5)',
+    tagline: 'Roar Machaa! 🦁',
+    taglineSub: 'Capital Pe Aaya Re — The Capital Has Arrived',
+  },
+  {
+    id: 'rr', name: 'Rajasthan Royals', short: 'RR', emoji: '🩷',
+    primary: '#E91E8C', secondary: '#254AA5', textOnPrimary: '#ffffff',
+    darkBg: '#150510', midBg: '#25101e',
+    gradient: 'linear-gradient(160deg,#150510 0%,#25101e 55%,#0e030a 100%)',
+    glow: 'rgba(233,30,140,0.6)', secondaryGlow: 'rgba(37,74,165,0.5)',
+    tagline: 'Halla Bol! 💪',
+    taglineSub: 'हल्ला बोल — Make Some Noise',
+  },
+  {
+    id: 'srh', name: 'Sunrisers Hyderabad', short: 'SRH', emoji: '🔶',
+    primary: '#FF6600', secondary: '#1A1A1A', textOnPrimary: '#ffffff',
+    darkBg: '#120500', midBg: '#1e0900',
+    gradient: 'linear-gradient(160deg,#120500 0%,#1e0900 55%,#0a0300 100%)',
+    glow: 'rgba(255,102,0,0.6)', secondaryGlow: 'rgba(255,150,50,0.3)',
+    tagline: 'Rise Up, Orange Army! 🌅',
+    taglineSub: 'ఆరేంజ్ ఆర్మీ — Hyderabad Ka Josh',
+  },
+  {
+    id: 'pbks', name: 'Punjab Kings', short: 'PBKS', emoji: '❤️',
+    primary: '#D71920', secondary: '#A7A9AC', textOnPrimary: '#ffffff',
+    darkBg: '#100204', midBg: '#1e0408',
+    gradient: 'linear-gradient(160deg,#100204 0%,#1e0408 55%,#0a0203 100%)',
+    glow: 'rgba(215,25,32,0.6)', secondaryGlow: 'rgba(167,169,172,0.3)',
+    tagline: 'Sher Di Dhaad! 🦁',
+    taglineSub: 'ਸ਼ੇਰ ਦੀ ਧਾੜ — Roar of the Lion',
+  },
+  {
+    id: 'lsg', name: 'Lucknow Super Giants', short: 'LSG', emoji: '🩵',
+    primary: '#00A2E0', secondary: '#001A5E', textOnPrimary: '#ffffff',
+    darkBg: '#030d18', midBg: '#04162a',
+    gradient: 'linear-gradient(160deg,#030d18 0%,#04162a 55%,#020a12 100%)',
+    glow: 'rgba(0,162,224,0.5)', secondaryGlow: 'rgba(0,26,94,0.6)',
+    tagline: 'Sher Hai Hum! 🦁',
+    taglineSub: 'शेर हैं हम — We Are Lions',
+  },
+  {
+    id: 'gt', name: 'Gujarat Titans', short: 'GT', emoji: '🏆',
+    primary: '#1C3B5A', secondary: '#D4AF37', textOnPrimary: '#ffffff',
+    darkBg: '#050c14', midBg: '#0a1828',
+    gradient: 'linear-gradient(160deg,#050c14 0%,#0a1828 55%,#030810 100%)',
+    glow: 'rgba(28,59,90,0.7)', secondaryGlow: 'rgba(212,175,55,0.5)',
+    tagline: 'Aava Do! ⚡',
+    taglineSub: 'આવા દો — Bring It On',
+  },
+]
+
+export function getTeamById(id) {
+  return IPL_TEAMS.find(t => t.id === id) || null
+}
+
+export const DEFAULT_THEME = {
+  primary: '#7C3AED', secondary: '#C4B5FD', textOnPrimary: '#ffffff',
+  darkBg: '#0a0118', midBg: '#120520',
+  gradient: 'linear-gradient(160deg,#0a0118 0%,#120520 55%,#07021a 100%)',
+  glow: 'rgba(124,58,237,0.6)', secondaryGlow: 'rgba(196,181,253,0.3)',
+}

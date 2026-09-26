@@ -695,7 +695,7 @@ export default function InviteEarn() {
         <div style={{ display:'flex', alignItems:'center', gap:10, background:'rgba(255,255,255,0.04)', borderRadius:14, padding:'14px 16px', border:'1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ flex:1, minWidth:0 }}>
             <span style={{ display:'block', fontWeight:900, fontSize:20, color:'#fff', letterSpacing:'0.18em', lineHeight:1 }}>{code}</span>
-            <span style={{ fontSize:10, color:'rgba(255,255,255,0.3)', letterSpacing:'0.06em', marginTop:3, display:'block' }}>name + unique code</span>
+            <span style={{ fontSize:10, color:'rgba(255,255,255,0.3)', letterSpacing:'0.06em', marginTop:3, display:'block' }}>your referral code</span>
           </div>
           <button
             onClick={handleCopy}

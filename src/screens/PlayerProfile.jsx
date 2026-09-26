@@ -13,7 +13,7 @@ import {
   Edit, LogOut, RefreshCw, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
   Swords, ClipboardList, Scale, Megaphone, Building2, Star,
 } from 'lucide-react'
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 function realProfileShape(user) {
@@ -130,6 +130,40 @@ function roleStats(role, player) {
 }
 
 // ─── Logout confirm modal ────────────────────────────────────────────────────
+function IplTeamProfileRow({ roleColor }) {
+  const navigate = useNavigate()
+  const { iplTeam } = useStore()
+  const [teamData, setTeamData] = useState(null)
+  useEffect(() => {
+    if (iplTeam) {
+      import('../lib/iplTeams').then(m => setTeamData(m.getTeamById(iplTeam)))
+    } else {
+      setTeamData(null)
+    }
+  }, [iplTeam])
+  return (
+    <button
+      onClick={() => navigate('/ipl-pick')}
+      className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+      style={{ borderBottom: `1px solid ${roleColor.border}` }}
+    >
+      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{
+        background: teamData ? `linear-gradient(135deg,${teamData.darkBg},${teamData.midBg})` : '#f1f5f9',
+        border: teamData ? `1px solid ${teamData.primary}55` : 'none',
+      }}>
+        <span style={{ fontSize: 18, lineHeight:1 }}>{teamData ? teamData.emoji : '🏏'}</span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-navy-900 text-sm">Favourite IPL Team</p>
+        <p className="text-navy-400 text-xs mt-0.5">
+          {teamData ? <span style={{ color: teamData.primary, fontWeight:700 }}>{teamData.name}</span> : 'Not chosen yet — tap to see the Magic!'}
+        </p>
+      </div>
+      <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
+    </button>
+  )
+}
+
 function LogoutModal({ onCancel, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onCancel}>
@@ -470,6 +504,9 @@ export default function PlayerProfile() {
               </div>
               <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
             </button>
+
+            {/* Favourite IPL Team */}
+            <IplTeamProfileRow roleColor={roleColor} />
 
             {/* App Settings */}
             <button

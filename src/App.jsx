@@ -14,6 +14,7 @@ import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
 import SplashOverlay, { resetSplash } from './components/SplashOverlay'
+import IplThemeProvider from './components/IplThemeProvider'
 import AIAssistant       from './components/AIAssistant'
 import { ShareAchievementSheet } from './components/ShareAchievement'
 import InviteOnOpenSheet from './components/InviteOnOpenSheet'
@@ -66,6 +67,7 @@ import OpponentFinder      from './screens/OpponentFinder'
 import EarningsDashboard   from './screens/EarningsDashboard'
 import AadhaarVerification from './screens/AadhaarVerification'
 import InviteEarn          from './screens/InviteEarn'
+import IplTeamPicker       from './screens/IplTeamPicker'
 import GroundOwnerDashboard from './screens/GroundOwnerDashboard'
 
 function AuthGuard({ children }) {
@@ -209,7 +211,6 @@ function WhatsNewGate({ children }) {
       {showProSheet && <ProSignupSheet />}
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
       <AIAssistant />
-      <FloatingSignOut />
       <GlobalShareSheet />
       <InviteOnOpenSheet />
     </>
@@ -229,38 +230,6 @@ function GlobalShareSheet() {
   )
 }
 
-const PRE_LOGIN_PATHS = ['/welcome', '/login', '/otp', '/setup', '/profile-match', '/celebration', '/city-select', '/role-select', '/player-match', '/role-onboard', '/player-setup']
-
-function FloatingSignOut() {
-  const navigate  = useNavigate()
-  const { pathname } = useLocation()
-  const { user, logout, addToast } = useStore()
-  if (!user || PRE_LOGIN_PATHS.includes(pathname)) return null
-  const handleSignOut = () => {
-    logout()
-    resetSplash()
-    navigate('/welcome')
-    addToast('Signed out successfully', 'info')
-  }
-  return (
-    <button
-      onClick={handleSignOut}
-      className="fixed bottom-24 left-4 z-[60] flex items-center gap-1.5 px-3 py-2 rounded-full font-semibold text-xs shadow-lg backdrop-blur-sm transition-all active:scale-95 hover:opacity-90"
-      style={{
-        background: 'rgba(239,68,68,0.15)',
-        border: '1px solid rgba(239,68,68,0.3)',
-        color: '#ef4444',
-      }}
-      aria-label="Sign Out"
-    >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-      Sign Out
-    </button>
-  )
-}
-
 function AppShell({ children }) {
   const { pathname } = useLocation()
   const { user } = useStore()
@@ -268,7 +237,7 @@ function AppShell({ children }) {
   const noShell = [
     '/welcome','/login','/otp','/setup','/role-warning','/role-select',
     '/whats-new','/pro-payment','/celebration','/player-match',
-    '/role-onboard','/player-setup','/city-select','/profile-match',
+    '/role-onboard','/player-setup','/city-select','/profile-match','/ipl-pick',
   ].includes(pathname)
     || pathname.startsWith('/score')
     || pathname.startsWith('/ground-booking')
@@ -292,6 +261,7 @@ function AppShell({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <IplThemeProvider>
       <Toast />
       <SplashOverlay />
       <div className="mobile-border-left" aria-hidden="true" />
@@ -352,6 +322,9 @@ export default function App() {
           <Route path="/invite"              element={<AuthGuard><InviteEarn /></AuthGuard>} />
           <Route path="/ground-owner"        element={<AuthGuard><GroundOwnerDashboard /></AuthGuard>} />
 
+          {/* IPL Team Picker */}
+          <Route path="/ipl-pick" element={<IplTeamPicker />} />
+
           {/* Legacy redirect */}
           <Route path="/usp" element={<Navigate to="/welcome" replace />} />
           {/* Fallback */}
@@ -359,6 +332,7 @@ export default function App() {
         </Routes>
       </AppShell>
       </WhatsNewGate>
+      </IplThemeProvider>
     </BrowserRouter>
   )
 }

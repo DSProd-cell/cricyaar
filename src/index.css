@@ -4,6 +4,15 @@
 @tailwind utilities;
 
 :root {
+  /* IPL team theme tokens — updated at runtime by IplThemeProvider */
+  --cy-primary:   #7C3AED;
+  --cy-secondary: #C4B5FD;
+  --cy-bg-start:  #0a0118;
+  --cy-bg-mid:    #120520;
+  --cy-glow:      rgba(124,58,237,0.6);
+  --cy-glow2:     rgba(196,181,253,0.3);
+  --cy-gradient:  linear-gradient(160deg,#0a0118 0%,#120520 55%,#07021a 100%);
+
   --cy-bg: #f8fafc;
   --cy-surface: #ffffff;
   --cy-text: #0f172a;
@@ -139,12 +148,12 @@
     100% { background-position: 0% 0%;   }
   }
   @keyframes neonPulse {
-    0%,100% { opacity: 0.85; box-shadow: 2px 0 8px #7C3AED, 2px 0 20px rgba(124,58,237,0.5), 2px 0 40px rgba(124,58,237,0.2); }
-    50%      { opacity: 1;    box-shadow: 2px 0 14px #A78BFA, 2px 0 30px rgba(167,139,250,0.7), 2px 0 60px rgba(124,58,237,0.35); }
+    0%,100% { opacity: 0.85; box-shadow: 2px 0 8px var(--cy-primary,#7C3AED), 2px 0 20px var(--cy-glow,rgba(124,58,237,0.5)), 2px 0 40px var(--cy-glow,rgba(124,58,237,0.2)); }
+    50%      { opacity: 1;    box-shadow: 2px 0 14px var(--cy-secondary,#A78BFA), 2px 0 30px var(--cy-glow,rgba(167,139,250,0.7)), 2px 0 60px var(--cy-glow,rgba(124,58,237,0.35)); }
   }
   @keyframes neonPulseR {
-    0%,100% { opacity: 0.85; box-shadow: -2px 0 8px #7C3AED, -2px 0 20px rgba(124,58,237,0.5), -2px 0 40px rgba(124,58,237,0.2); }
-    50%      { opacity: 1;    box-shadow: -2px 0 14px #A78BFA, -2px 0 30px rgba(167,139,250,0.7), -2px 0 60px rgba(124,58,237,0.35); }
+    0%,100% { opacity: 0.85; box-shadow: -2px 0 8px var(--cy-primary,#7C3AED), -2px 0 20px var(--cy-glow,rgba(124,58,237,0.5)), -2px 0 40px var(--cy-glow,rgba(124,58,237,0.2)); }
+    50%      { opacity: 1;    box-shadow: -2px 0 14px var(--cy-secondary,#A78BFA), -2px 0 30px var(--cy-glow,rgba(167,139,250,0.7)), -2px 0 60px var(--cy-glow,rgba(124,58,237,0.35)); }
   }
   .mobile-border-left,
   .mobile-border-right {
@@ -154,7 +163,7 @@
     width: 3px;
     pointer-events: none;
     z-index: 99998;
-    background: linear-gradient(180deg, #C4B5FD 0%, #7C3AED 30%, #5B21B6 60%, #7C3AED 80%, #C4B5FD 100%);
+    background: linear-gradient(180deg, var(--cy-secondary,#C4B5FD) 0%, var(--cy-primary,#7C3AED) 30%, var(--cy-bg-mid,#5B21B6) 60%, var(--cy-primary,#7C3AED) 80%, var(--cy-secondary,#C4B5FD) 100%);
     background-size: 100% 200%;
     animation: borderShift 4s ease-in-out infinite;
   }

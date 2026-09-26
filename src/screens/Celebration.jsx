@@ -93,19 +93,19 @@ export default function Celebration() {
 
         {/* CTA */}
         <button
-          onClick={() => navigate('/city-select')}
-          style={{ width:'100%', padding:'16px', background:'linear-gradient(135deg,#7C3AED,#5B21B6)', color:'#fff', fontWeight:900, borderRadius:16, fontSize:15, border:'none', cursor:'pointer', boxShadow:'0 4px 24px rgba(124,58,237,0.55)', marginBottom:12, transition:'transform 0.1s', }}
+          onClick={() => navigate('/ipl-pick')}
+          style={{ width:'100%', padding:'16px', background:'linear-gradient(135deg,var(--cy-primary,#7C3AED),var(--cy-bg-mid,#5B21B6))', color:'#fff', fontWeight:900, borderRadius:16, fontSize:15, border:'none', cursor:'pointer', boxShadow:'0 4px 24px var(--cy-glow,rgba(124,58,237,0.55))', marginBottom:12, transition:'transform 0.1s', }}
           onMouseDown={e=>e.currentTarget.style.transform='scale(0.98)'}
           onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
         >
-          🏙️ Pick My City — Let's Go!
+          🏏 Choose Your IPL Team — See the Magic!
         </button>
 
         <button
-          onClick={() => navigate('/role-select')}
+          onClick={() => navigate('/city-select')}
           style={{ width:'100%', padding:'14px', background:'transparent', border:'1px solid rgba(196,181,253,0.2)', color:'rgba(255,255,255,0.6)', fontWeight:500, borderRadius:16, fontSize:14, cursor:'pointer' }}
         >
-          Skip to Role Selection →
+          Skip — Pick My City →
         </button>
       </div>
     </div>

@@ -10,6 +10,8 @@ export const useStore = create(
       isAuthenticated: false,
       pendingPhone: null,
       pendingSignup: null,     // { firstName, lastName, cricketName } collected at login
+      iplTeam: null,           // selected IPL team id (persisted)
+      setIplTeam: (teamId) => set({ iplTeam: teamId }),
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
@@ -313,6 +315,7 @@ export const useStore = create(
         teamJoinRequests:          state.teamJoinRequests,
         freeAgentRequests:         state.freeAgentRequests,
         umpireTournamentRequests:  state.umpireTournamentRequests,
+        iplTeam:                   state.iplTeam,
         aiQueryCount:              state.aiQueryCount,
         aiQueryResetDate:          state.aiQueryResetDate,
         proIntent:                 state.proIntent,
