@@ -135,7 +135,7 @@ export default function OtpVerify() {
       })
       localStorage.setItem('whats_new_seen_version', 'v3')
       if (isNewUser) {
-        navigate('/celebration')
+        navigate('/profile-match')
       } else if (proIntent) {
         addToast('Phone verified! Complete your Pro setup.', 'success')
         navigate('/pro-payment')
