@@ -412,7 +412,7 @@ export default function PlayerProfile() {
             </button>
           )}
           <button
-            onClick={() => addToast('Send Money coming soon!', 'info')}
+            onClick={() => navigate('/send-money')}
             className={`${canCollect ? 'flex-1' : 'w-full'} flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] hover:opacity-90`}
             style={{ background: roleColor.light, color: roleColor.primary, border: `1.5px solid ${roleColor.border}` }}
           >

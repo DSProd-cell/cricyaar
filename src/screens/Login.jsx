@@ -76,11 +76,11 @@ export default function Login() {
 
       {/* Logo */}
       <div className="mb-7 flex flex-col items-center animate-fade-in">
-        <div className="w-16 h-16 bg-brand-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-brand-500/25">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-lg" style={{ background: '#7C3AED', boxShadow: '0 4px 12px #7C3AED40' }}>
           <span className="text-white font-black text-2xl">CY</span>
         </div>
         <h1 className="text-3xl font-extrabold text-navy-900 tracking-tight">CricYaar</h1>
-        <p className="text-brand-500 mt-1 text-[10px] font-extrabold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
+        <p className="mt-1 text-[10px] font-extrabold tracking-[0.2em] uppercase" style={{ color: '#7C3AED' }}>Your Game. Your Record. For Real.</p>
       </div>
 
       {/* Toggle tabs */}
