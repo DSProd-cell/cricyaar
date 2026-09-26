@@ -8,16 +8,6 @@ const PLAY_POSITIONS = ['Batsman', 'Bowler', 'Wicketkeeper', 'All-rounder']
 
 const ROLES = [
   {
-    id: 'fan',
-    label: 'Fan',
-    Icon: Megaphone,
-    tagline: 'Follow cricket. Free forever.',
-    gradient: 'linear-gradient(145deg, #334155 0%, #0f172a 100%)',
-    accentColor: '#64748b',
-    features: ['Watch live scores in your city', 'View match results & scorecards', 'Explore grounds & teams'],
-    desc: 'Follow live scores and match results.',
-  },
-  {
     id: 'player',
     label: 'Player',
     Icon: Swords,
@@ -94,8 +84,9 @@ export default function RoleSelect() {
 
   const handleConfirm = () => {
     if (!chosen || isSameRole) return
-    // Player role → show sub-questions first
-    if (chosen === 'player' && step === 1) {
+    // Player role → show sub-questions only if not already set up as player
+    const alreadySetup = user?.playerType || (user?.playPositions?.length > 0)
+    if (chosen === 'player' && step === 1 && !alreadySetup) {
       setStep(2)
       return
     }
@@ -104,6 +95,9 @@ export default function RoleSelect() {
 
   const handlePlayerConfirm = () => {
     if (!playerType || playPositions.length === 0) return
+    // Persist player setup to user so we don't ask again
+    const { setUser: _setUser } = useStore.getState()
+    if (user) _setUser({ ...user, playerType, playPositions, inTeam, teamName })
     doConfirm()
   }
 

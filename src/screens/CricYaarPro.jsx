@@ -86,7 +86,7 @@ export default function CricYaarPro() {
                 <p className="text-navy-400 text-xs mt-0.5">
                   {isCancelled
                     ? 'Access until April 20, 2024 · Not renewing'
-                    : 'Renews on April 20, 2024 · ₹99/month'}
+                    : 'Renews on April 20, 2024 · ₹1/month'}
                 </p>
               </div>
             </div>
@@ -112,9 +112,9 @@ export default function CricYaarPro() {
         ) : (
           <div className="card animate-slide-up">
             <div className="text-center mb-5">
-              <span className="text-4xl font-extrabold text-navy-900 tabular-nums">₹99</span>
+              <span className="text-4xl font-extrabold text-navy-900 tabular-nums">₹1</span>
               <span className="text-navy-400 text-sm"> / month</span>
-              <p className="text-navy-400 text-xs mt-1">Cancel anytime · No lock-in</p>
+              <p className="text-navy-400 text-xs mt-1">Cancel anytime · No lock-in · Auto-renews</p>
             </div>
             <button
               className="w-full py-4 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 transition-opacity hover:opacity-90 active:opacity-80"
@@ -134,7 +134,7 @@ export default function CricYaarPro() {
               ) : (
                 <>
                   <Crown size={17} className="fill-white text-white" />
-                  Subscribe to Pro — ₹99/month
+                  Subscribe to Pro — ₹1/month
                 </>
               )}
             </button>

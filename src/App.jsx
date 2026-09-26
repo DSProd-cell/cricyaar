@@ -14,6 +14,7 @@ import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
 import SplashOverlay     from './components/SplashOverlay'
+import AIAssistant       from './components/AIAssistant'
 import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
@@ -190,8 +191,7 @@ function WhatsNewGate({ children }) {
       {children}
       {showProSheet && <ProSignupSheet />}
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
-      {/* FloatingActions (AI guide + quick actions) is parked for a future
-          release — not wired to real functionality yet, so it's not shown. */}
+      <AIAssistant />
     </>
   )
 }

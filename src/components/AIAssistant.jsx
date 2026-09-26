@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 
 // ── Pages where chat should NOT appear ──────────────────────────────────────
-const SKIP_PATHS = ['/welcome', '/login', '/otp', '/usp']
+const SKIP_PATHS = ['/welcome', '/login', '/otp', '/usp', '/role-onboard', '/player-setup', '/celebration', '/player-match']
 
 // ── Context labels for current page ─────────────────────────────────────────
 const PAGE_CONTEXT = {
@@ -34,9 +34,9 @@ const INTENTS = [
     actions: [{ label: 'Open Settings', path: '/settings' }]
   },
   {
-    match: ['pro', 'upgrade', 'premium', 'subscription', 'paid plan', 'unlock', 'become pro', '₹99', 'how to pay', 'how to subscribe'],
-    answer: "To **upgrade to Pro** (₹99/month):\n\n1️⃣ Tap **Upgrade to Pro** below\n2️⃣ Choose your payment — UPI, Card, or Net Banking via Razorpay\n3️⃣ Complete payment → Pro activates instantly!\n\n✅ Unlocks: Live scoring, squad management, tournaments, ground booking, AI Ground Assistant & more.",
-    actions: [{ label: 'Upgrade to Pro — ₹99/mo', path: '/pro-payment' }]
+    match: ['pro', 'upgrade', 'premium', 'subscription', 'paid plan', 'unlock', 'become pro', '₹1', 'how to pay', 'how to subscribe'],
+    answer: "To **upgrade to Pro** (just ₹1/month):\n\n1️⃣ Tap **Upgrade to Pro** below\n2️⃣ Choose your payment — UPI, Card, or Net Banking via Razorpay\n3️⃣ Toggle **Auto-renew** on or off\n4️⃣ Complete payment → Pro activates instantly!\n\n✅ Unlocks: Live scoring, squad management, tournaments, ground booking, AI Ground Assistant & more.",
+    actions: [{ label: 'Upgrade to Pro — ₹1/mo', path: '/pro-payment' }]
   },
   {
     match: ['create team', 'new team', 'make a team', 'start a team'],
@@ -145,7 +145,7 @@ const INTENTS = [
   },
   {
     match: ['what can i do', 'features', 'what is cricyaar', 'how does it work', 'get started', 'help me'],
-    answer: "Welcome to **CricYaar** 🏏 Here's what you can do:\n\n🆓 **Free (Fan):** Watch live scores, browse grounds & teams\n\n👑 **Pro (₹99/mo):**\n• Score matches ball-by-ball\n• Create & manage teams\n• Join & run tournaments\n• Book grounds via Razorpay\n• AI Ground Assistant\n\nWhat would you like to do first?",
+    answer: "Welcome to **CricYaar** 🏏 Here's what you can do:\n\n🆓 **Free (Fan):** Watch live scores, browse grounds & teams\n\n👑 **Pro (₹1/mo):**\n• Score matches ball-by-ball\n• Create & manage teams\n• Join & run tournaments\n• Book grounds via Razorpay\n• AI Ground Assistant\n\nWhat would you like to do first?",
     actions: [
       { label: 'Upgrade to Pro', path: '/pro-payment' },
       { label: 'Browse Grounds', path: '/grounds' },
@@ -304,9 +304,22 @@ export default function AIAssistant() {
   const [ticketId, setTicketId]               = useState(null)
   const [ticketSubmitted, setTicketSubmitted] = useState(false)
   const [supportMsgIndex, setSupportMsgIndex] = useState(null)
+  const roleGreeting = (() => {
+    const role = user?.role || 'fan'
+    const name = user?.name ? `, ${user.name.split(' ')[0]}` : ''
+    const tips = {
+      player:       `As a **Player**, I can help you join tournaments, track stats, score matches, and find teams.`,
+      organiser:    `As an **Organiser**, I can help you create tournaments, manage teams, assign umpires, and collect fees.`,
+      umpire:       `As an **Umpire**, I can help you get match assignments, set charges, and track earnings.`,
+      ground_owner: `As a **Ground Owner**, I can help you list your ground, manage bookings, and receive payments.`,
+      fan:          `I can help you watch live scores, explore teams & grounds, and upgrade to Pro.`,
+    }
+    return `Hi${name}! 👋 I'm **DS**, your CricYaar AI guide.\n\n${tips[role] || tips.fan}\n\nTap a question below or ask me anything!`
+  })()
+
   const [messages, setMessages]               = useState([{
     from: 'bot',
-    text: `Hi! 👋 I'm your **CricYaar Guide**. I can help you navigate the app, answer questions, and raise support tickets.\n\nTap a suggestion below or type your question!`,
+    text: roleGreeting,
     actions: []
   }])
   const messagesEndRef = useRef(null)
@@ -383,29 +396,37 @@ export default function AIAssistant() {
     }, 400)
   }
 
-  const SUGGESTIONS = [
-    'How to change my role?',
-    'How to upgrade to Pro?',
-    'How to create a team?',
-    'How to book a ground?',
-    'How to score a match?',
-    'Contact support',
-  ]
+  // Role-aware suggestions
+  const SUGGESTIONS = (() => {
+    const role = user?.role || 'fan'
+    const base = ['Contact support']
+    const byRole = {
+      player:       ['How do I join a tournament?', 'How to track my stats?', 'How to score a match?', 'How to find a team?'],
+      organiser:    ['How to create a tournament?', 'How to manage team registrations?', 'How to assign umpires?', 'How to collect entry fees?'],
+      umpire:       ['How to get match assignments?', 'How to set my charges?', 'How to view earnings?', 'How do I get verified?'],
+      ground_owner: ['How to list my ground?', 'How to manage bookings?', 'How to receive payments?', 'How do I set slot availability?'],
+      fan:          ['How to watch live scores?', 'How to upgrade to Pro?', 'How to follow a player?', 'How to book a ground?'],
+    }
+    return [...(byRole[role] || byRole.fan), ...base]
+  })()
 
   return (
     <>
-      {/* ── Floating trigger ── */}
+      {/* ── DS Floating trigger ── */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-[72px] right-4 z-[58] w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95"
+          className="fixed bottom-[82px] right-4 z-[58] flex items-center gap-1.5 pl-2 pr-3 h-10 rounded-full shadow-lg transition-all active:scale-95"
           style={{
             background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
+            boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
           }}
-          aria-label="Open CricYaar Guide"
+          aria-label="Ask DS — CricYaar AI Guide"
         >
-          <Sparkles size={20} className="text-white" />
+          <div className="w-6 h-6 rounded-full bg-white/25 flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-black text-[10px] tracking-tight">DS</span>
+          </div>
+          <span className="text-white font-bold text-xs">Ask DS</span>
         </button>
       )}
 
