@@ -80,11 +80,21 @@ function WhatsNewGate({ children }) {
   const { pathname } = useLocation()
 
   // Auto-mark whats-new as seen so it never blocks the landing page / home screen.
-  // The /whats-new route still exists and can be linked from Settings.
   useEffect(() => {
     if (!localStorage.getItem('whats_new_seen_version')) {
       localStorage.setItem('whats_new_seen_version', 'v3')
     }
+  }, [])
+
+  // Clock-based theme: 6am–7pm = light, 7pm–6am = dark
+  useEffect(() => {
+    const applyTheme = () => {
+      const h = new Date().getHours()
+      document.documentElement.setAttribute('data-theme', h >= 6 && h < 19 ? 'light' : 'dark')
+    }
+    applyTheme()
+    const interval = setInterval(applyTheme, 60 * 60 * 1000)
+    return () => clearInterval(interval)
   }, [])
 
   // ── 30-day session persistence ─────────────────────────────────────────────

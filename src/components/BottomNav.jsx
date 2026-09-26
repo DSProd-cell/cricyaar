@@ -1,9 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { Home, Search, User, Activity, Inbox, Landmark, Trophy } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getRoleColor } from '../lib/roleColors'
 
-// Role-specific 4th nav item — cricket-themed icons
 const ROLE_FOURTH = {
   player:       { label: 'Tournaments', icon: Trophy,   path: '/open-tournaments'  },
   captain:      { label: 'Tournaments', icon: Trophy,   path: '/open-tournaments'  },
@@ -22,22 +22,52 @@ export default function BottomNav() {
   const isPro  = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
   const roleColor = getRoleColor(role)
 
-  const roleItem = ROLE_FOURTH[role] || null
+  const [isDark, setIsDark] = useState(
+    document.documentElement.getAttribute('data-theme') === 'dark'
+  )
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.getAttribute('data-theme') === 'dark')
+    })
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
 
+  const roleItem = ROLE_FOURTH[role] || null
   const baseItems = [
     { label: 'Home',   icon: Home,   path: '/'        },
     { label: 'Search', icon: Search, path: '/grounds' },
   ]
   const tail = [{ label: 'Profile', icon: User, path: '/profile' }]
-  const allItems = roleItem
-    ? [...baseItems, roleItem, ...tail]
-    : [...baseItems, ...tail]
+  const allItems = roleItem ? [...baseItems, roleItem, ...tail] : [...baseItems, ...tail]
 
   return (
     <nav className="bottom-nav">
       {allItems.map(({ label, icon: Icon, path, badge }) => {
         const active     = pathname === path || (path !== '/' && pathname.startsWith(path))
         const badgeCount = badge === 'inbox' ? organiserInboxUnread : 0
+
+        // Crystal icon bubble styles
+        const activeGradient = isDark
+          ? `linear-gradient(160deg, ${roleColor.primary}30 0%, ${roleColor.primary}10 100%)`
+          : `linear-gradient(160deg, ${roleColor.primary}28 0%, ${roleColor.primary}0f 100%)`
+        const inactiveGradient = isDark
+          ? 'linear-gradient(160deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%)'
+          : 'linear-gradient(160deg, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.50) 100%)'
+
+        const activeShadow = isDark
+          ? `inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.25), 0 4px 12px ${roleColor.primary}35`
+          : `inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(0,0,0,0.06), 0 3px 10px ${roleColor.primary}28`
+        const inactiveShadow = isDark
+          ? 'inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.25)'
+          : 'inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(0,0,0,0.04)'
+
+        const activeBorder = isDark
+          ? `1px solid ${roleColor.primary}35`
+          : `1px solid ${roleColor.primary}28`
+        const inactiveBorder = isDark
+          ? '1px solid rgba(255,255,255,0.10)'
+          : '1px solid rgba(200,210,230,0.60)'
 
         return (
           <button
@@ -46,35 +76,28 @@ export default function BottomNav() {
             onClick={() => navigate(path)}
             aria-label={label}
           >
-            {/* Glass icon bubble */}
+            {/* Crystal icon bubble */}
             <div
-              className="relative flex items-center justify-center rounded-[10px] transition-all duration-200"
+              className="relative flex items-center justify-center transition-all duration-200"
               style={{
-                width: 36,
-                height: 36,
-                background: active
-                  ? `${roleColor.primary}22`
-                  : 'rgba(120,120,128,0.10)',
-                boxShadow: active
-                  ? `inset 0 1px 2px rgba(255,255,255,0.5), 0 2px 8px ${roleColor.primary}25`
-                  : 'inset 0 1px 1px rgba(255,255,255,0.6)',
-                border: active
-                  ? `1px solid ${roleColor.primary}30`
-                  : '1px solid rgba(255,255,255,0.5)',
+                width: 38,
+                height: 38,
+                borderRadius: 11,
+                background: active ? activeGradient : inactiveGradient,
+                boxShadow: active ? activeShadow : inactiveShadow,
+                border: active ? activeBorder : inactiveBorder,
               }}
             >
               <Icon
                 size={18}
                 strokeWidth={active ? 2.5 : 1.8}
-                style={{ color: active ? roleColor.primary : '#94a3b8' }}
+                style={{ color: active ? roleColor.primary : isDark ? 'rgba(255,255,255,0.45)' : '#94a3b8' }}
               />
-              {/* Badge */}
               {badgeCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold border border-white">
                   {badgeCount}
                 </span>
               )}
-              {/* Pro crown */}
               {label === 'Profile' && isPro && (
                 <span className="absolute -top-1.5 -right-1.5 text-[10px] leading-none select-none" aria-label="Pro">👑</span>
               )}
@@ -85,7 +108,7 @@ export default function BottomNav() {
               style={{
                 fontSize: 9,
                 fontWeight: active ? 700 : 500,
-                color: active ? roleColor.primary : '#94a3b8',
+                color: active ? roleColor.primary : isDark ? 'rgba(255,255,255,0.38)' : '#94a3b8',
                 letterSpacing: '0.03em',
               }}
             >

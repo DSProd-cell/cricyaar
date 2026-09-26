@@ -98,7 +98,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           aria-label="Refer & Earn"
         >
           <Gift size={17} strokeWidth={2} />
-          <span className="text-[11px] font-semibold">Refer & Earn</span>
+          <span className="text-[11px] font-semibold">Refer &amp; Earn</span>
         </button>
         <button
           onClick={() => navigate('/notifications')}
