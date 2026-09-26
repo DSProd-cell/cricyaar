@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   ChevronLeft, MessageCircle, Phone, CheckCircle,
-  IndianRupee, Send, AlertTriangle, AlertCircle,
+  IndianRupee, Send, AlertTriangle, AlertCircle, ShieldCheck, ShieldOff,
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import UpiPayment from '../lib/upiPayment'
@@ -94,6 +94,23 @@ export default function SendMoney() {
   const purposeObj = PURPOSES.find(p => p.id === purpose) || PURPOSES[0]
   const amt = parseFloat(amount) || 0
   const phoneDigits = recipientPhone.replace(/\D/g, '')
+
+  // Recipient KYC status: null | 'checking' | 'verified' | 'unverified'
+  const [recipientKycStatus, setRecipientKycStatus] = useState(null)
+
+  useEffect(() => {
+    if (phoneDigits.length === 10 && /^[6-9]/.test(phoneDigits)) {
+      setRecipientKycStatus('checking')
+      const t = setTimeout(() => {
+        // Mock: last digit even = verified on CricYaar
+        const last = parseInt(phoneDigits.slice(-1), 10)
+        setRecipientKycStatus(last % 2 === 0 ? 'verified' : 'unverified')
+      }, 700)
+      return () => clearTimeout(t)
+    } else {
+      setRecipientKycStatus(null)
+    }
+  }, [phoneDigits]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Live errors (only display when field is touched)
   const nameErr  = validateName(recipientName)
@@ -287,8 +304,27 @@ export default function SendMoney() {
                   )}
                 </div>
                 {touched.phone && <FieldError msg={phoneErr} />}
-                {!touched.phone && (
+                {!touched.phone && !recipientKycStatus && (
                   <p className="text-navy-400 text-[11px] mt-1">10-digit Indian mobile number (starts with 6–9)</p>
+                )}
+                {recipientKycStatus === 'checking' && (
+                  <p className="text-navy-400 text-[11px] mt-1.5 flex items-center gap-1.5">
+                    <span className="w-3 h-3 border border-navy-300 border-t-navy-500 rounded-full animate-spin inline-block flex-shrink-0" />
+                    Checking recipient KYC status…
+                  </p>
+                )}
+                {recipientKycStatus === 'verified' && (
+                  <p className="text-green-600 text-[11px] mt-1.5 flex items-center gap-1.5">
+                    <ShieldCheck size={12} className="flex-shrink-0" /> KYC Verified on CricYaar
+                  </p>
+                )}
+                {recipientKycStatus === 'unverified' && (
+                  <div className="mt-2 flex items-start gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200">
+                    <ShieldOff size={13} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-amber-800 text-xs leading-relaxed">
+                      <strong>KYC not verified</strong> — this recipient hasn't completed identity verification on CricYaar.
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -455,6 +491,22 @@ export default function SendMoney() {
                 </div>
               )}
             </div>
+
+            {/* Risk Alert — recipient KYC unverified */}
+            {recipientKycStatus === 'unverified' && (
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-50 border-2 border-red-300">
+                <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle size={20} className="text-red-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-red-800 font-extrabold text-sm mb-1">⚠️ Risk Alert</p>
+                  <p className="text-red-700 text-xs leading-relaxed">
+                    <strong>{recipientName.split(' ')[0]}</strong> hasn't completed KYC verification on CricYaar. Payments to unverified users carry higher risk — confirm you personally know this person before transferring.
+                  </p>
+                  <p className="text-red-500 text-[10px] mt-1.5 font-semibold">You can still proceed, but verify details carefully.</p>
+                </div>
+              </div>
+            )}
 
             {/* Contact gate */}
             <div className="card p-5 space-y-4">
