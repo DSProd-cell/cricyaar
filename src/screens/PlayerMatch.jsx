@@ -63,6 +63,17 @@ function PlayerCard({ player, onSelect, selected }) {
           <Stat label="Avg" value={player.batting_avg ? Number(player.batting_avg).toFixed(1) : null} />
         </div>
       )}
+
+      {/* Teams from legacy data */}
+      {player.teams && Array.isArray(player.teams) && player.teams.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {player.teams.map((t, i) => (
+            <span key={i} className="text-[11px] bg-brand-50 text-brand-600 font-semibold px-2 py-0.5 rounded-full border border-brand-100">
+              {typeof t === 'string' ? t : t.name}
+            </span>
+          ))}
+        </div>
+      )}
     </button>
   )
 }
@@ -127,6 +138,7 @@ export default function PlayerMatch() {
     }
     await supabase.from('profiles').update(updates).eq('id', user?.id)
 
+    // Import career stats
     await supabase.from('player_stats').upsert({
       user_id: user?.id,
       matches: selected.matches_played || 0,
@@ -135,6 +147,17 @@ export default function PlayerMatch() {
       batting_avg: selected.batting_avg || 0,
       bowling_avg: selected.bowling_avg || 0,
     }, { onConflict: 'user_id' }).then(() => {})
+
+    // Auto-join teams from legacy data (teams stored as JSON array in legacy record)
+    if (selected.teams && Array.isArray(selected.teams) && selected.teams.length > 0) {
+      const teamInserts = selected.teams.map(t => ({
+        user_id: user?.id,
+        team_id: t.id || t,
+        role: selected.role || 'player',
+        source: 'legacy_import',
+      }))
+      await supabase.from('team_members').upsert(teamInserts, { onConflict: 'user_id,team_id' }).then(() => {})
+    }
 
     setUser({ ...user, name: selected.name || user?.name, city: selected.city || user?.city })
     setImporting(false)

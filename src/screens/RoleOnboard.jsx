@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
-import { Check, Megaphone, Swords, ClipboardList, Scale, Building2, MapPin, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Check, Megaphone, Swords, ClipboardList, Scale, Building2, MapPin, ArrowLeft, ArrowRight, Shield } from 'lucide-react'
 
 const ROLES = [
   {
@@ -67,7 +67,15 @@ const ROLES = [
   },
 ]
 
-const CITIES = ['Bengaluru', 'Mumbai', 'Delhi', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Other']
+const CITIES = [
+  { name: 'Bengaluru', status: 'live' },
+  { name: 'Mumbai',    status: 'soon' },
+  { name: 'Delhi',     status: 'soon' },
+  { name: 'Pune',      status: 'soon' },
+  { name: 'Chennai',   status: 'soon' },
+  { name: 'Hyderabad', status: 'soon' },
+  { name: 'Other',     status: 'other' },
+]
 
 export default function RoleOnboard() {
   const navigate = useNavigate()
@@ -81,6 +89,7 @@ export default function RoleOnboard() {
   const [selectedRole, setSelectedRole] = useState(preRole || '')
   const [city, setCity] = useState('')
   const [customCity, setCustomCity] = useState('')
+  const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const roleData = ROLES.find(r => r.id === selectedRole)
@@ -92,6 +101,7 @@ export default function RoleOnboard() {
 
   const handleFinish = async () => {
     const finalCity = city === 'Other' ? customCity.trim() : city
+    // city is stored as the city name string, objects in CITIES are just for rendering
     if (!finalCity) return
     setLoading(true)
 
@@ -114,7 +124,12 @@ export default function RoleOnboard() {
     localStorage.setItem('cricyaar_last_role', selectedRole)
     localStorage.setItem('whats_new_seen_version', 'v3')
     addToast(`Welcome to CricYaar! Let's get started.`, 'success')
-    navigate('/')
+    // Players go to profile setup; everyone else goes home
+    if (selectedRole === 'player') {
+      navigate('/player-setup')
+    } else {
+      navigate('/')
+    }
   }
 
   return (
@@ -237,21 +252,37 @@ export default function RoleOnboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
-            {CITIES.filter(c => c !== 'Other').map(c => (
-              <button
-                key={c}
-                onClick={() => setCity(c)}
-                className="py-3 rounded-xl text-sm font-medium border-2 transition-all"
-                style={{
-                  borderColor: city === c ? (roleData?.color || '#16a34a') : '#e2e8f0',
-                  background: city === c ? (roleData?.bg || '#f0fdf4') : 'white',
-                  color: city === c ? (roleData?.color || '#16a34a') : '#475569',
-                  fontWeight: city === c ? 700 : 500,
-                }}
-              >
-                {c}
-              </button>
-            ))}
+            {CITIES.filter(c => c.status !== 'other').map(c => {
+              const isSelected = city === c.name
+              const isLive = c.status === 'live'
+              const isSoon = c.status === 'soon'
+              return (
+                <button
+                  key={c.name}
+                  onClick={() => setCity(c.name)}
+                  className="relative py-3 px-3 rounded-xl text-sm border-2 transition-all text-left"
+                  style={{
+                    borderColor: isSelected ? (roleData?.color || '#16a34a') : isLive ? '#bbf7d0' : '#e2e8f0',
+                    background: isSelected ? (roleData?.bg || '#f0fdf4') : isLive ? '#f0fdf4' : '#fafafa',
+                    color: isSelected ? (roleData?.color || '#16a34a') : isSoon ? '#94a3b8' : '#374151',
+                    fontWeight: isSelected ? 700 : 500,
+                  }}
+                >
+                  <span className="block leading-tight">{c.name}</span>
+                  {isLive && (
+                    <span className="inline-flex items-center gap-0.5 mt-1 text-[9px] font-bold text-green-600 bg-green-100 rounded-full px-1.5 py-0.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                      LIVE NOW
+                    </span>
+                  )}
+                  {isSoon && (
+                    <span className="inline-flex items-center gap-0.5 mt-1 text-[9px] font-semibold text-slate-400 bg-slate-100 rounded-full px-1.5 py-0.5">
+                      Soon
+                    </span>
+                  )}
+                </button>
+              )
+            })}
             <button
               onClick={() => setCity('Other')}
               className="py-3 rounded-xl text-sm font-medium border-2 transition-all col-span-2"
@@ -277,15 +308,35 @@ export default function RoleOnboard() {
           )}
 
           <div className="mt-auto">
+            {/* Consent */}
+            <button
+              onClick={() => setConsent(v => !v)}
+              className="flex items-start gap-3 w-full text-left mb-4"
+            >
+              <div className={`w-5 h-5 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all mt-0.5 ${
+                consent ? 'bg-brand-500 border-brand-500' : 'border-slate-300'
+              }`}>
+                {consent && <Check size={11} color="white" strokeWidth={3} />}
+              </div>
+              <p className="text-[11.5px] text-navy-500 leading-relaxed">
+                <span className="flex items-center gap-1 mb-0.5">
+                  <Shield size={11} className="text-brand-500 flex-shrink-0" />
+                  <span className="font-semibold text-navy-700 text-xs">One quick thing</span>
+                </span>
+                I agree to CricYaar's Privacy Policy and consent to sharing my cricket profile
+                with teams, organisers, and the cricket community for legitimate cricket use.
+              </p>
+            </button>
+
             <button
               className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition-all"
               style={{
-                background: (city && (city !== 'Other' || customCity.trim())) ? (roleData?.color || '#16a34a') : '#e2e8f0',
-                color: (city && (city !== 'Other' || customCity.trim())) ? 'white' : '#94a3b8',
-                boxShadow: (city && (city !== 'Other' || customCity.trim())) ? `0 6px 20px ${roleData?.color}44` : 'none',
+                background: (city && (city !== 'Other' || customCity.trim()) && consent) ? (roleData?.color || '#16a34a') : '#e2e8f0',
+                color: (city && (city !== 'Other' || customCity.trim()) && consent) ? 'white' : '#94a3b8',
+                boxShadow: (city && (city !== 'Other' || customCity.trim()) && consent) ? `0 6px 20px ${roleData?.color}44` : 'none',
               }}
               onClick={handleFinish}
-              disabled={!city || (city === 'Other' && !customCity.trim()) || loading}
+              disabled={!city || (city === 'Other' && !customCity.trim()) || !consent || loading}
               aria-busy={loading}
             >
               {loading ? (

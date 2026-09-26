@@ -1,16 +1,18 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Search, User, Settings, Eye, Inbox, MapPin, Trophy } from 'lucide-react'
+import { Home, Search, User, Eye, Inbox, MapPin, Trophy } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { getRoleColor } from '../lib/roleColors'
 
-// Role-specific 4th nav item
+// Role-specific 4th nav item.
+// Settings removed from here — it lives inside the Profile page now.
 const ROLE_FOURTH = {
-  player:       { label:'Settings',    icon:Settings, path:'/settings'         },
-  captain:      { label:'Tournaments', icon:Trophy,   path:'/open-tournaments'  },
-  umpire:       { label:'Matches',     icon:Eye,      path:'/browse-matches'    },
-  organiser:    { label:'Inbox',       icon:Inbox,    path:'/organiser-inbox', badge:'inbox' },
-  admin:        { label:'Teams',       icon:Trophy,   path:'/teams'             },
-  ground_owner: { label:'My Ground',   icon:MapPin,   path:'/ground-owner'      },
-  fan:          { label:'Settings',    icon:Settings, path:'/settings'          },
+  player:       { label:'Tournaments', icon:Trophy, path:'/open-tournaments'  },
+  captain:      { label:'Tournaments', icon:Trophy, path:'/open-tournaments'  },
+  umpire:       { label:'Matches',     icon:Eye,    path:'/browse-matches'     },
+  organiser:    { label:'Inbox',       icon:Inbox,  path:'/organiser-inbox', badge:'inbox' },
+  admin:        { label:'Matches',     icon:Eye,    path:'/browse-matches'     },
+  ground_owner: { label:'My Ground',   icon:MapPin, path:'/ground-owner'       },
+  fan:          { label:'Live',        icon:Eye,    path:'/browse-matches'     },
 }
 
 export default function BottomNav() {
@@ -20,15 +22,16 @@ export default function BottomNav() {
   const role  = user?.role || 'fan'
   const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
 
+  // Role accent color for active items
+  const roleColor = getRoleColor(role)
+
   const roleItem = ROLE_FOURTH[role] || null
 
   const baseItems = [
     { label:'Home',   icon:Home,   path:'/'        },
     { label:'Search', icon:Search, path:'/grounds' },
   ]
-
   const tail = [{ label:'Profile', icon:User, path:'/profile' }]
-
   const allItems = roleItem
     ? [...baseItems, roleItem, ...tail]
     : [...baseItems, ...tail]
@@ -44,9 +47,14 @@ export default function BottomNav() {
             className={`bottom-nav-item ${active ? 'active' : ''}`}
             onClick={() => navigate(path)}
             aria-label={label}
+            style={active ? { color: roleColor.primary } : undefined}
           >
             <div className="relative">
-              <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+              <Icon
+                size={22}
+                strokeWidth={active ? 2.5 : 2}
+                style={active ? { color: roleColor.primary } : undefined}
+              />
               {badgeCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
                   {badgeCount}
@@ -56,7 +64,7 @@ export default function BottomNav() {
                 <span className="absolute -top-1.5 -right-1.5 text-[10px] leading-none select-none" aria-label="Pro">👑</span>
               )}
             </div>
-            <span>{label}</span>
+            <span style={active ? { color: roleColor.primary } : undefined}>{label}</span>
           </button>
         )
       })}

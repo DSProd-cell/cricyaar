@@ -27,8 +27,8 @@ export default function Login() {
     if (isSignup) {
       if (!firstName.trim() || firstName.trim().length < 2) e.firstName = 'Enter your first name.'
       if (!lastName.trim()) e.lastName = 'Enter your last name.'
-      if (!cricketName.trim() || cricketName.trim().length < 3) e.cricketName = 'Min. 3 characters.'
-      if (!/^[a-z0-9_.]+$/.test(cricketName)) e.cricketName = 'Letters, numbers, _ and . only.'
+      if (cricketName.trim() && cricketName.trim().length < 3) e.cricketName = 'Min. 3 characters.'
+      if (cricketName.trim() && !/^[a-z0-9_.]+$/.test(cricketName)) e.cricketName = 'Letters, numbers, _ and . only.'
     }
     const cleaned = phone.replace(/\D/g, '')
     if (code === '+91' && cleaned.length !== 10) e.phone = 'Enter a valid 10-digit number.'
@@ -80,7 +80,7 @@ export default function Login() {
           <span className="text-white font-black text-2xl">CY</span>
         </div>
         <h1 className="text-3xl font-extrabold text-navy-900 tracking-tight">CricYaar</h1>
-        <p className="text-navy-500 mt-1 font-medium">Cricket. Organised.</p>
+        <p className="text-brand-500 mt-1 text-[10px] font-bold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
       </div>
 
       {/* Toggle tabs */}
@@ -141,7 +141,8 @@ export default function Login() {
               {/* Cricket Name */}
               <div className="mb-4">
                 <label className="block text-sm font-semibold text-navy-700 mb-1">
-                  Your Cricket Name <span className="text-red-500">*</span>
+                  Your Cricket Name{' '}
+                  <span className="text-navy-400 font-normal text-xs">(optional — set it later too)</span>
                 </label>
                 <p className="text-xs text-navy-400 mb-1.5">How scoreboards and teammates will know you</p>
                 <div className="relative">

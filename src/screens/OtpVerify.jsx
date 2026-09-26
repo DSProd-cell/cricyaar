@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase, toE164 } from '../lib/supabase'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
+import PageHeader from '../components/PageHeader'
 
 export default function OtpVerify() {
   const navigate = useNavigate()
@@ -152,14 +153,11 @@ export default function OtpVerify() {
   const lockMinutes = lockEnd ? Math.ceil((lockEnd - Date.now()) / 60000) : 0
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm animate-slide-up">
-        {/* Back */}
-        <button onClick={() => navigate('/login')} className="flex items-center gap-2 text-navy-500 hover:text-navy-900 mb-6 transition-colors">
-          <ArrowLeft size={18} />
-          <span className="text-sm font-medium">Back</span>
-        </button>
+    <div className="min-h-dvh bg-gradient-to-br from-brand-50 via-white to-slate-50 flex flex-col">
+      <PageHeader backTo="/login" showTagline />
 
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm animate-slide-up">
         <div className="bg-white rounded-2xl shadow-card p-6">
           <h2 className="font-bold text-navy-900 text-xl mb-1">Enter OTP</h2>
           <p className="text-navy-500 text-sm mb-6">
@@ -225,6 +223,7 @@ export default function OtpVerify() {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
