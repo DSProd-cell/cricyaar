@@ -13,6 +13,7 @@ import Sidebar         from './components/Sidebar'
 import BottomNav       from './components/BottomNav'
 import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
+import SplashOverlay     from './components/SplashOverlay'
 import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
@@ -224,6 +225,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toast />
+      <SplashOverlay />
       <WhatsNewGate>
       <AppShell>
         <Routes>
