@@ -243,7 +243,7 @@ function LevelCard({ lvl, onClick }) {
       {/* Card body */}
       <div style={{ background:lvl.bg, padding:'44px 20px 36px', width:'100%', boxSizing:'border-box' }}>
         {locked ? (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', minHeight:120 }}>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', height:128 }}>
             <svg width="26" height="32" viewBox="0 0 32 38" fill="none" style={{ marginBottom:10, opacity:0.65 }}>
               <rect x="4" y="18" width="24" height="18" rx="4" fill="white" fillOpacity="0.6"/>
               <path d="M9 18V13a7 7 0 0 1 14 0v5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"/>
@@ -258,11 +258,11 @@ function LevelCard({ lvl, onClick }) {
             </p>
           </div>
         ) : (
-          <div style={{ textAlign:'center', minHeight:120 }}>
-            <div style={{ fontSize:36, marginBottom:8 }}>🎉</div>
-            <p style={{ color:'#FFD700', fontSize:12, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:6 }}>Unlocked!</p>
-            <p style={{ color:'#fff', fontSize:26, fontWeight:900, lineHeight:1.2, marginBottom:6 }}>{lvl.earn}</p>
-            <p style={{ color:'rgba(255,255,255,0.5)', fontSize:13, lineHeight:1.4 }}>{lvl.activeSub}</p>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', height:128 }}>
+            <div style={{ fontSize:32, lineHeight:1, marginBottom:6 }}>🎉</div>
+            <p style={{ color:'#FFD700', fontSize:11, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:5 }}>Unlocked!</p>
+            <p style={{ color:'#fff', fontSize:24, fontWeight:900, lineHeight:1.2, marginBottom:5 }}>{lvl.earn}</p>
+            <p style={{ color:'rgba(255,255,255,0.5)', fontSize:12, lineHeight:1.4 }}>{lvl.activeSub}</p>
           </div>
         )}
       </div>
