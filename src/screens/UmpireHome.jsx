@@ -1653,24 +1653,15 @@ export default function UmpireHome({ activeRole, setActiveRole }) {
           umpireTournamentRequests, addUmpireTournamentRequest, withdrawUmpireTournamentRequest,
         } = useStore()
 
-  const [activeTab, setActiveTab] = useState('assignments')
-
-  const upcomingCount   = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming').length
-  const pendingRequests = (umpireRequests?.length || 0) + (umpireTournamentRequests?.length || 0)
-  const unseenUpdates   = UMPIRE_MY_REQUESTS.filter(r => !r.seen && r.status !== 'pending').length
-
-  const TABS = [
-    { key:'assignments', label:'My Assignments',  badge: upcomingCount   > 0 ? upcomingCount   : null },
-    { key:'stats',       label:'My Stats',         badge: null },
-    { key:'matches',     label:'Ongoing Matches',  badge: null },
-    { key:'requests',    label:'My Requests',      badge: unseenUpdates   > 0 ? unseenUpdates   : null, badgeColor:'bg-red-500' },
-  ]
+  const upcomingCount = UMPIRE_PROFILE.assignments.filter(a => a.status === 'upcoming').length
+  const unseenUpdates = UMPIRE_MY_REQUESTS.filter(r => !r.seen && r.status !== 'pending').length
+  const liveCount     = MATCHES.filter(m => m.status === 'live').length
 
   return (
     <div className="min-h-dvh flex flex-col bg-slate-50">
       <TopBar isHome />
 
-      <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-44">
+      <main className="flex-1 px-4 py-5 max-w-2xl mx-auto w-full pb-44">
 
         {/* Greeting */}
         <div className="mb-4 animate-fade-in">
@@ -1684,76 +1675,129 @@ export default function UmpireHome({ activeRole, setActiveRole }) {
           <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
         )}
 
-        {/* Tab bar — scrollable on small screens */}
-        <div className="flex gap-1 bg-slate-200 p-1 rounded-2xl mb-4 animate-fade-in overflow-x-auto no-scrollbar">
-          {TABS.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                activeTab === tab.key
-                  ? 'bg-[var(--cy-surface)] text-navy-900 shadow-sm'
-                  : 'text-navy-500 hover:text-navy-700'
-              }`}
-            >
-              {tab.label}
-              {tab.badge != null && (
-                <span className={`min-w-[16px] h-4 rounded-full text-white text-[9px] font-bold inline-flex items-center justify-center px-1 ${tab.badgeColor || 'bg-amber-500'}`}>
-                  {tab.badge}
-                </span>
-              )}
-            </button>
-          ))}
+        {/* Stats box — orange */}
+        <div
+          className="w-full mb-5 rounded-2xl p-4 animate-slide-up"
+          style={{ background: 'linear-gradient(135deg, #7c2d12 0%, #ea580c 100%)' }}
+        >
+          <p className="text-orange-100 text-xs font-bold uppercase tracking-wide mb-3">My Umpire Stats</p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Rating',   val: `${UMPIRE_PROFILE.rating}⭐` },
+              { label: 'Matches',  val: UMPIRE_PROFILE.matchesUmpired },
+              { label: 'Upcoming', val: upcomingCount },
+            ].map(s => (
+              <div key={s.label} className="bg-white/15 rounded-xl px-2 py-2.5 text-center">
+                <p className="text-white font-extrabold text-xl tabular-nums">{s.val}</p>
+                <p className="text-orange-100 text-[9px] font-medium">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Tab content */}
-        {activeTab === 'assignments' && <MyAssignments navigate={navigate} addToast={addToast} />}
-        {activeTab === 'stats'       && <MyStats />}
-        {activeTab === 'matches'     && (
-          <OngoingMatches
-            user={user}
-            addToast={addToast}
-            umpireRequests={umpireRequests}
-            addUmpireRequest={addUmpireRequest}
-            withdrawUmpireRequest={withdrawUmpireRequest}
-            umpireTournamentRequests={umpireTournamentRequests}
-            addUmpireTournamentRequest={addUmpireTournamentRequest}
-            withdrawUmpireTournamentRequest={withdrawUmpireTournamentRequest}
-          />
-        )}
-        {activeTab === 'requests' && (
-          <MyRequests
-            umpireRequests={umpireRequests}
-            umpireTournamentRequests={umpireTournamentRequests}
-            addToast={addToast}
-          />
-        )}
+        {/* Dashboard */}
+        <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider mb-3">Your Dashboard</h3>
+        <div className="grid grid-cols-2 gap-3 mb-5 animate-slide-up">
 
-        {/* Payments quick-access — always visible */}
-        <div className="mt-5 space-y-3">
-          <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider">Payments</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => navigate('/receive-money', { state: { purpose: 'umpire_fee' } })}
-              className="home-block text-left relative active:scale-[0.97] transition-transform"
-            >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
-                <Wallet size={18} style={{ color: '#16a34a' }} />
-              </div>
-              <p className="font-bold text-navy-900 text-sm">Request Fee</p>
-              <p className="text-navy-500 text-[11px] mt-0.5">Share UPI via WhatsApp</p>
-            </button>
-            <button
-              onClick={() => navigate('/send-money', { state: { purpose: 'umpire_fee' } })}
-              className="home-block text-left relative active:scale-[0.97] transition-transform"
-            >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
-                <Send size={18} style={{ color: '#ca8a04' }} />
-              </div>
-              <p className="font-bold text-navy-900 text-sm">Pay an Umpire</p>
-              <p className="text-navy-500 text-[11px] mt-0.5">After confirming via call</p>
-            </button>
-          </div>
+          <button
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+            onClick={() => navigate('/umpire-profile')}
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2"
+              style={{ background: 'rgba(249,115,22,0.15)' }}>
+              <Calendar size={20} style={{ color: '#f97316' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">My Assignments</p>
+            {upcomingCount > 0 && (
+              <span className="inline-flex items-center mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316' }}>
+                {upcomingCount} upcoming
+              </span>
+            )}
+            <p className="text-navy-500 text-[11px] mt-1 leading-tight">View your match schedule</p>
+            <ChevronRight size={13} className="absolute top-4 right-3 text-navy-300" />
+          </button>
+
+          <button
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+            onClick={() => navigate('/umpire-profile')}
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2"
+              style={{ background: 'rgba(249,115,22,0.15)' }}>
+              <Star size={20} style={{ color: '#f97316' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">My Stats</p>
+            <span className="inline-flex items-center mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+              style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316' }}>
+              ⭐ {UMPIRE_PROFILE.rating} rating
+            </span>
+            <p className="text-navy-500 text-[11px] mt-1 leading-tight">{UMPIRE_PROFILE.matchesUmpired} matches umpired</p>
+            <ChevronRight size={13} className="absolute top-4 right-3 text-navy-300" />
+          </button>
+
+          <button
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+            onClick={() => navigate('/my-cricket')}
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2"
+              style={{ background: 'rgba(249,115,22,0.15)' }}>
+              <Activity size={20} style={{ color: '#f97316' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">Live Matches</p>
+            {liveCount > 0 && (
+              <span className="inline-flex items-center mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(249,115,22,0.15)', color: '#f97316' }}>
+                {liveCount} live now
+              </span>
+            )}
+            <p className="text-navy-500 text-[11px] mt-1 leading-tight">Browse & apply to umpire</p>
+            <ChevronRight size={13} className="absolute top-4 right-3 text-navy-300" />
+          </button>
+
+          <button
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+            onClick={() => navigate('/umpire-profile')}
+          >
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-2"
+              style={{ background: unseenUpdates > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(249,115,22,0.15)' }}>
+              <CheckCircle size={20} style={{ color: unseenUpdates > 0 ? '#ef4444' : '#f97316' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm leading-tight">My Requests</p>
+            {unseenUpdates > 0 && (
+              <span className="inline-flex items-center mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444' }}>
+                {unseenUpdates} new update{unseenUpdates > 1 ? 's' : ''}
+              </span>
+            )}
+            <p className="text-navy-500 text-[11px] mt-1 leading-tight">Track your applications</p>
+            <ChevronRight size={13} className="absolute top-4 right-3 text-navy-300" />
+          </button>
+
+        </div>
+
+        {/* Payments */}
+        <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider mb-3">Payments</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => navigate('/receive-money', { state: { purpose: 'umpire_fee' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(34,197,94,0.15)' }}>
+              <Wallet size={18} style={{ color: '#16a34a' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Request Fee</p>
+            <p className="text-navy-500 text-[11px] mt-0.5">Share UPI via WhatsApp</p>
+          </button>
+          <button
+            onClick={() => navigate('/send-money', { state: { purpose: 'umpire_fee' } })}
+            className="home-block text-left relative active:scale-[0.97] transition-transform"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2" style={{ background: 'rgba(234,179,8,0.15)' }}>
+              <Send size={18} style={{ color: '#ca8a04' }} />
+            </div>
+            <p className="font-bold text-navy-900 text-sm">Pay an Umpire</p>
+            <p className="text-navy-500 text-[11px] mt-0.5">After confirming via call</p>
+          </button>
         </div>
 
       </main>
