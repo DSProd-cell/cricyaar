@@ -19,7 +19,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 function realProfileShape(user) {
   return {
     id: user?.id,
-    name: user?.name || 'Player',
+    name: user?.username || user?.name || 'Cricketer',
     username: user?.username || '',
     city: user?.city || '',
     bio: user?.bio || '',
@@ -138,11 +138,11 @@ function LogoutModal({ onCancel, onConfirm }) {
         <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
           <LogOut size={20} className="text-red-600" />
         </div>
-        <h3 className="font-bold text-navy-900 text-lg mb-1">Log out?</h3>
-        <p className="text-navy-500 text-sm mb-5">You'll need to verify your phone number again to log back in.</p>
+        <h3 className="font-bold text-navy-900 text-lg mb-1">Sign Out?</h3>
+        <p className="text-navy-500 text-sm mb-5">You'll need to verify your phone number again to sign back in.</p>
         <div className="flex gap-3">
           <button className="btn-secondary flex-1" onClick={onCancel}>Cancel</button>
-          <button className="btn-danger flex-1" onClick={onConfirm}>Log out</button>
+          <button className="btn-danger flex-1" onClick={onConfirm}>Sign Out</button>
         </div>
       </div>
     </div>
@@ -167,7 +167,7 @@ export default function PlayerProfile() {
 
   const [tab, setTab]             = useState('Overview')
   const [showEdit, setShowEdit]   = useState(false)
-  const [showLogout, setShowLogout] = useState(false)
+  const [showSignOut, setShowSignOut] = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
   const photoRef = useRef(null)
 
@@ -205,11 +205,12 @@ export default function PlayerProfile() {
     }
   }
 
-  const handleLogout = () => {
+  const handleSignOut = () => {
     if (user?.role) localStorage.setItem('cricyaar_last_role', user.role)
     logout()
-    resetSplash()                     // ensure splash re-shows on next load
-    window.location.href = '/'        // full reload → splash → /usp → login
+    resetSplash()
+    navigate('/landing?from=signout')
+    addToast('Signed out successfully', 'info')
   }
 
   const playerTeams  = TEAMS.filter(t => t.squad.includes(player.id))
@@ -486,13 +487,13 @@ export default function PlayerProfile() {
             </button>
           </div>
 
-          {/* Logout */}
+          {/* Sign Out */}
           <button
-            onClick={() => setShowLogout(true)}
+            onClick={() => setShowSignOut(true)}
             className="mt-3 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm text-red-600 bg-red-50 border border-red-100 hover:bg-red-100 transition-colors active:scale-[0.97]"
           >
             <LogOut size={16} />
-            Log out
+            Sign Out
           </button>
         </div>
       )}
@@ -708,11 +709,11 @@ export default function PlayerProfile() {
         />
       )}
 
-      {/* Logout Confirm */}
-      {showLogout && (
+      {/* Sign Out Confirm */}
+      {showSignOut && (
         <LogoutModal
-          onCancel={() => setShowLogout(false)}
-          onConfirm={handleLogout}
+          onCancel={() => setShowSignOut(false)}
+          onConfirm={handleSignOut}
         />
       )}
     </div>

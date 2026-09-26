@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase, toE164 } from '../lib/supabase'
 import { LEGAL_URL } from '../lib/constants'
-import { Phone, ChevronDown, ArrowLeft, User, AtSign } from 'lucide-react'
+import { Phone, ArrowLeft, User, AtSign } from 'lucide-react'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -16,7 +16,7 @@ export default function Login() {
   const [lastName, setLastName]   = useState('')
   const [cricketName, setCricketName] = useState('')
   const [phone, setPhone]   = useState('')
-  const [code, setCode]     = useState('+91')
+  const code = '+91'
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
@@ -178,19 +178,8 @@ export default function Login() {
         <div>
           <label className="block text-sm font-semibold text-navy-700 mb-1.5">Mobile Number <span className="text-red-500">*</span></label>
           <div className="flex gap-2">
-            <div className="relative flex-shrink-0">
-              <select
-                value={code}
-                onChange={e => setCode(e.target.value)}
-                className="h-12 pl-3 pr-8 border-[1.5px] border-slate-200 rounded-xl bg-slate-50 text-sm font-medium text-navy-900 outline-none appearance-none focus:border-brand-500 transition-colors"
-                aria-label="Country code"
-              >
-                <option value="+91">🇮🇳 +91</option>
-                <option value="+1">🇺🇸 +1</option>
-                <option value="+44">🇬🇧 +44</option>
-                <option value="+61">🇦🇺 +61</option>
-              </select>
-              <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <div className="h-12 px-3 border-[1.5px] border-slate-200 rounded-xl bg-slate-50 flex items-center flex-shrink-0">
+              <span className="text-sm font-semibold text-navy-900">🇮🇳 +91</span>
             </div>
             <div className="relative flex-1">
               <input

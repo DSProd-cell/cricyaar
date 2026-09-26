@@ -209,7 +209,7 @@ export default function Home() {
         {/* Greeting */}
         <div className="mb-5 animate-fade-in">
           <h2 className="text-2xl font-extrabold text-navy-900">
-            Hey, {user?.name?.split(' ')[0] || 'Cricketer'} 👋
+            Hey, {user?.username || user?.name?.split(' ')[0] || 'Cricketer'} 👋
           </h2>
           <p className="text-navy-500 text-sm mt-0.5">Ready to play?</p>
         </div>
