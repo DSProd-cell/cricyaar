@@ -451,7 +451,6 @@ export default function FanHome() {
   const [activeTab, setActiveTab]     = useState('matches')  // 'matches' | 'tournaments'
   const [selectedMatch, setSelectedMatch]       = useState(null)
   const [selectedTournament, setSelectedTournament] = useState(null)
-  const [locked, setLocked]           = useState(false)
   const [realLiveMatches, setRealLiveMatches] = useState([])
 
   useEffect(() => { fetchLiveMatches().then(setRealLiveMatches).catch(() => {}) }, [])
@@ -680,31 +679,6 @@ export default function FanHome() {
           </>
         )}
 
-        {/* ── OTHER ROLE FEATURES (both tabs) ── */}
-        <div className="animate-slide-up">
-          <div className="flex items-center gap-2 mb-3">
-            <Lock size={12} className="text-navy-400" />
-            <p className="text-navy-400 text-xs font-bold uppercase tracking-wider">Other Role Features</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {LOCKED_BLOCKS.map(({ icon: Icon, title, sub }) => (
-              <button
-                key={title}
-                onClick={() => setLocked(true)}
-                className="home-block text-left relative active:scale-[0.97] transition-transform"
-              >
-                <div className="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center mb-2">
-                  <Icon size={20} className="text-navy-500" />
-                </div>
-                <p className="font-bold text-navy-800 text-sm leading-tight">{title}</p>
-                <p className="text-navy-400 text-[11px] mt-1">{sub}</p>
-                <div className="absolute top-3 right-3 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shadow-sm">
-                  <Lock size={9} className="text-white" strokeWidth={2.5} />
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
 
       </main>
 
@@ -740,28 +714,6 @@ export default function FanHome() {
         <ProGatePopup tournament={selectedTournament} onClose={() => setSelectedTournament(null)} />
       )}
 
-      {/* Role change popup */}
-      {locked && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setLocked(false)}>
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-md px-6 pt-5 pb-10 animate-slide-up" onClick={e => e.stopPropagation()}>
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
-            <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Lock size={22} className="text-navy-500" />
-            </div>
-            <h3 className="font-bold text-navy-900 text-lg text-center mb-2">Feature Locked</h3>
-            <p className="text-navy-500 text-sm text-center leading-relaxed mb-6">
-              Please change the role to access these features.
-            </p>
-            <div className="flex gap-3">
-              <button className="btn-secondary flex-1 py-3" onClick={() => setLocked(false)}>Cancel</button>
-              <button className="btn-primary flex-1 py-3" onClick={() => { setLocked(false); navigate('/role-select') }}>
-                Change Role
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   )
