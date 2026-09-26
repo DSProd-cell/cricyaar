@@ -52,10 +52,10 @@ export default function Sidebar() {
   const isPro     = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
   const roleColor = getRoleColor(role)
 
-  const handleLogout = () => {
+  const handleSignOut = () => {
     logout()
-    navigate('/landing')
-    addToast('Logged out successfully', 'info')
+    navigate('/landing?from=signout')
+    addToast('Signed out successfully', 'info')
   }
 
   const roleExtras = ROLE_EXTRA[role] || []
@@ -189,10 +189,10 @@ export default function Sidebar() {
         <button
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all hover:bg-white/10"
           style={{ color: 'rgba(248,113,113,0.85)' }}
-          onClick={handleLogout}
+          onClick={handleSignOut}
         >
           <LogOut size={18} />
-          <span className="text-sm font-medium">Log out</span>
+          <span className="text-sm font-medium">Sign Out</span>
         </button>
       </div>
     </aside>

@@ -185,6 +185,12 @@ export const useStore = create(
       showProSheet: false,
       setShowProSheet: (val) => set({ showProSheet: val }),
 
+      // ── Share Achievement sheet ────────────────────────────────────────────────
+      showShareSheet: false,
+      shareData: null, // { title, stats, matchName, tournamentName }
+      triggerShare: (data) => set({ showShareSheet: true, shareData: data }),
+      dismissShare: () => set({ showShareSheet: false, shareData: null }),
+
       // ── v3: Team join requests (player side) ──────────────────────────────────
       teamJoinRequests: [],
       addTeamJoinRequest: (teamId, teamName, message) => set(s => ({

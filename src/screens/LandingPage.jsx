@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
 const STATS = [
@@ -10,19 +10,22 @@ const STATS = [
 ]
 
 export default function LandingPage() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const location  = useLocation()
   const { user }  = useStore()
   const [visible, setVisible] = useState(false)
+  // ?from=signout means we just logged out — don't redirect to app
+  const fromSignout = new URLSearchParams(location.search).get('from') === 'signout'
 
   useEffect(() => {
-    if (user) {
+    if (user && !fromSignout) {
       navigate('/', { replace: true })
       return
     }
     const t1 = setTimeout(() => setVisible(true), 120)
-    const t2 = setTimeout(() => navigate('/welcome'), 2800)
+    const t2 = setTimeout(() => navigate('/welcome', { replace: true }), 2800)
     return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [user]) // eslint-disable-line
+  }, []) // eslint-disable-line
 
   return (
     <div className="min-h-dvh bg-[#09111f] flex flex-col items-center justify-center px-6 relative overflow-hidden select-none">

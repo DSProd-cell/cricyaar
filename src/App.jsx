@@ -15,6 +15,7 @@ import ProSignupSheet    from './components/ProSignupSheet'
 import RoleWelcomeModal  from './components/RoleWelcomeModal'
 import SplashOverlay     from './components/SplashOverlay'
 import AIAssistant       from './components/AIAssistant'
+import { ShareAchievementSheet } from './components/ShareAchievement'
 import { supabase }    from './lib/supabase'
 
 // Screens — auth / onboarding
@@ -74,7 +75,7 @@ function AuthGuard({ children }) {
 }
 
 function WhatsNewGate({ children }) {
-  const { user, showProSheet, showRoleModal } = useStore()
+  const { user, showProSheet, showRoleModal, showShareSheet, shareData, dismissShare } = useStore()
   const { pathname } = useLocation()
 
   // Auto-mark whats-new as seen so it never blocks the landing page / home screen.
@@ -195,7 +196,21 @@ function WhatsNewGate({ children }) {
       {showRoleModal && pathname !== '/whats-new' && <RoleWelcomeModal />}
       <AIAssistant />
       <FloatingSignOut />
+      <GlobalShareSheet />
     </>
+  )
+}
+
+function GlobalShareSheet() {
+  const { showShareSheet, shareData, dismissShare } = useStore()
+  if (!showShareSheet || !shareData) return null
+  return (
+    <div className="fixed inset-0 z-[80] flex flex-col justify-end" onClick={dismissShare}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative" onClick={e => e.stopPropagation()}>
+        <ShareAchievementSheet {...shareData} onClose={dismissShare} />
+      </div>
+    </div>
   )
 }
 
@@ -203,26 +218,26 @@ function FloatingSignOut() {
   const navigate  = useNavigate()
   const { user, logout, addToast } = useStore()
   if (!user) return null
-  const handleLogout = () => {
+  const handleSignOut = () => {
     logout()
-    navigate('/landing')
-    addToast('Logged out successfully', 'info')
+    navigate('/landing?from=signout')
+    addToast('Signed out successfully', 'info')
   }
   return (
     <button
-      onClick={handleLogout}
+      onClick={handleSignOut}
       className="fixed bottom-24 left-4 z-[60] flex items-center gap-1.5 px-3 py-2 rounded-full font-semibold text-xs shadow-lg backdrop-blur-sm transition-all active:scale-95 hover:opacity-90"
       style={{
         background: 'rgba(239,68,68,0.15)',
         border: '1px solid rgba(239,68,68,0.3)',
         color: '#ef4444',
       }}
-      aria-label="Sign out"
+      aria-label="Sign Out"
     >
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
       </svg>
-      Sign out
+      Sign Out
     </button>
   )
 }
