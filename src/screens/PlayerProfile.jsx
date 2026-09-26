@@ -230,17 +230,43 @@ export default function PlayerProfile() {
       <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack={!isOwnProfile} />
 
       {/* ── Hero Card ───────────────────────────────────────────────────── */}
-      <div className="bg-white px-4 pt-5 pb-5 relative">
-        {/* Role color accent strip at top */}
-        <div className="absolute top-0 left-0 right-0 h-1 rounded-b-none" style={{ background: roleColor.primary }} />
+      <div className="bg-white relative">
+        {/* Gradient Banner */}
+        <div
+          className="relative h-[110px]"
+          style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` }}
+        >
+          {/* Subtle dot texture */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.13) 1px, transparent 1px)',
+              backgroundSize: '18px 18px',
+            }}
+          />
+          {/* Edit button top-right */}
+          {isOwnProfile && (
+            <button
+              onClick={() => setShowEdit(true)}
+              className="absolute top-3 right-4 w-9 h-9 flex items-center justify-center rounded-xl bg-white/20 border border-white/25 hover:bg-white/30 transition-colors backdrop-blur-sm"
+              aria-label="Edit profile"
+            >
+              <Edit size={16} className="text-white" />
+            </button>
+          )}
+        </div>
 
-        <div className="flex items-start gap-4 mt-2">
-          {/* Avatar */}
-          <div className="relative flex-shrink-0">
+        {/* Profile info */}
+        <div className="px-4 pb-5">
+          {/* Avatar overlapping banner */}
+          <div className="relative" style={{ marginTop: -44 }}>
             <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
             <div
-              className="w-18 h-18 w-[72px] h-[72px] rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl overflow-hidden shadow-sm"
-              style={{ background: roleColor.primary }}
+              className="w-[80px] h-[80px] rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl overflow-hidden"
+              style={{
+                background: roleColor.primary,
+                boxShadow: `0 0 0 3px white, 0 4px 16px ${roleColor.primary}55`,
+              }}
             >
               {photoUploading
                 ? <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -252,7 +278,8 @@ export default function PlayerProfile() {
             {isOwnProfile && (
               <button
                 onClick={() => photoRef.current?.click()}
-                className="absolute -bottom-1 -right-1 w-6 h-6 bg-navy-900 rounded-full flex items-center justify-center border-2 border-white hover:bg-navy-700 transition-colors"
+                className="absolute -bottom-1 left-[60px] w-6 h-6 rounded-full flex items-center justify-center border-2 border-white hover:opacity-90 transition-opacity"
+                style={{ background: roleColor.primary }}
                 aria-label="Change profile photo"
               >
                 <Camera size={11} className="text-white" />
@@ -261,65 +288,64 @@ export default function PlayerProfile() {
           </div>
 
           {/* Name / username / role tag */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h1 className="font-extrabold text-navy-900 text-xl leading-tight truncate">{player.name}</h1>
-                <p className="text-navy-500 text-sm mt-0.5">@{player.username}</p>
-              </div>
-              {isOwnProfile && (
-                <button
-                  onClick={() => setShowEdit(true)}
-                  className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 flex-shrink-0 hover:bg-slate-100 transition-colors"
-                >
-                  <Edit size={15} className="text-navy-500" />
-                </button>
-              )}
-            </div>
+          <div className="mt-3">
+            <h1 className="font-extrabold text-navy-900 text-xl leading-tight">{player.name}</h1>
+            {player.username && <p className="text-navy-400 text-sm mt-0.5">@{player.username}</p>}
 
-            {/* Single role status tag */}
-            <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
-              style={{ background: roleColor.light, color: roleColor.primary, border: `1.5px solid ${roleColor.border}` }}>
-              <span>{getRoleColor(role) && roleColor.emoji || '🏏'}</span>
-              <span>{roleColor.label || role}</span>
+            <div
+              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+              style={{ background: roleColor.light, color: roleColor.primary, border: `1.5px solid ${roleColor.border}` }}
+            >
+              <span>{roleColor.emoji}</span>
+              <span>{roleColor.label}</span>
               <span className="w-1.5 h-1.5 rounded-full ml-0.5 bg-current opacity-70" />
               <span className="opacity-80">Active</span>
             </div>
 
-            {/* City / phone */}
-            {(player.city || user?.phone) && (
+            {(player.city || (user?.phone && isOwnProfile)) && (
               <p className="text-navy-400 text-xs mt-1.5 flex items-center gap-1">
                 {player.city && <><MapPin size={10} className="flex-shrink-0" />{player.city}</>}
-                {player.city && user?.phone && <span className="mx-1">·</span>}
+                {player.city && user?.phone && isOwnProfile && <span className="mx-1">·</span>}
                 {user?.phone && isOwnProfile && <span>{user.phone}</span>}
               </p>
             )}
           </div>
-        </div>
 
-        {/* Teams pills */}
-        {playerTeams.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {playerTeams.map(t => (
-              <button key={t.id} onClick={() => navigate(`/teams/${t.id}`)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors">
-                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
-                {t.name}
-              </button>
-            ))}
-          </div>
-        )}
+          {/* Teams pills */}
+          {playerTeams.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {playerTeams.map(t => (
+                <button key={t.id} onClick={() => navigate(`/teams/${t.id}`)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white hover:opacity-80 transition-opacity"
+                  style={{ border: `1px solid ${roleColor.border}`, color: roleColor.primary }}
+                >
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Quick Stats ─────────────────────────────────────────────────── */}
-      <div className="mx-4 mt-3 bg-white rounded-2xl border border-slate-100 overflow-hidden">
-        <div className="grid grid-cols-4 divide-x divide-slate-100">
-          {quickStats.map(s => (
-            <div key={s.label} className="py-3 text-center">
-              <p className="font-extrabold text-navy-900 text-lg tabular-nums leading-none">{s.val}</p>
-              <p className="text-navy-400 text-[10px] mt-1 uppercase tracking-wide">{s.label}</p>
-            </div>
-          ))}
+      <div className="mx-4 mt-3">
+        <p className="text-[10px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: roleColor.primary }}>
+          Quick Stats
+        </p>
+        <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+          <div className="grid grid-cols-4">
+            {quickStats.map((s, i) => (
+              <div
+                key={s.label}
+                className="py-4 text-center"
+                style={i < 3 ? { borderRight: `1px solid ${roleColor.border}` } : undefined}
+              >
+                <p className="font-extrabold text-lg tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                <p className="text-navy-400 text-[10px] mt-1.5 uppercase tracking-wide leading-tight px-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -330,7 +356,7 @@ export default function PlayerProfile() {
             <button
               onClick={() => navigate('/earnings')}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.97]"
-              style={{ background: roleColor.primary, boxShadow: `0 4px 12px ${roleColor.primary}33` }}
+              style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})`, boxShadow: `0 4px 12px ${roleColor.primary}33` }}
             >
               <Wallet size={16} />
               Collect Money
@@ -338,7 +364,8 @@ export default function PlayerProfile() {
           )}
           <button
             onClick={() => addToast('Send Money coming soon!', 'info')}
-            className={`${canCollect ? 'flex-1' : 'w-full'} flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm border border-slate-200 bg-white text-navy-700 transition-all active:scale-[0.97] hover:border-slate-300`}
+            className={`${canCollect ? 'flex-1' : 'w-full'} flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] hover:opacity-90`}
+            style={{ background: roleColor.light, color: roleColor.primary, border: `1.5px solid ${roleColor.border}` }}
           >
             <ArrowUpRight size={16} />
             Send Money
@@ -348,23 +375,27 @@ export default function PlayerProfile() {
 
       {/* ── Account Management ───────────────────────────────────────────── */}
       {isOwnProfile && (
-        <div className="mx-4 mt-3">
-          <div className="bg-white rounded-2xl border border-slate-100 divide-y divide-slate-50 overflow-hidden">
+        <div className="mx-4 mt-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest mb-2 px-1" style={{ color: roleColor.primary }}>
+            Account
+          </p>
+          <div className="bg-white rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}` }}>
 
             {/* Aadhaar — gated to organiser/umpire/ground_owner */}
             {needsAadhaar && (
               <button
                 onClick={() => navigate('/aadhaar-verify')}
                 className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+                style={{ borderBottom: `1px solid ${roleColor.border}` }}
               >
-                <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
-                  <ShieldCheck size={17} className="text-teal-600" />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+                  <ShieldCheck size={17} style={{ color: roleColor.primary }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-navy-900 text-sm">Aadhaar Verification</p>
                   <p className="text-navy-400 text-xs mt-0.5">Required to collect payments</p>
                 </div>
-                <ChevronRight size={16} className="text-navy-300 flex-shrink-0" />
+                <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
               </button>
             )}
 
@@ -372,6 +403,7 @@ export default function PlayerProfile() {
             <button
               onClick={() => navigate('/pro')}
               className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+              style={{ borderBottom: `1px solid ${roleColor.border}` }}
             >
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fef3c7' }}>
                 <Crown size={17} className="text-amber-500 fill-amber-300" />
@@ -397,9 +429,10 @@ export default function PlayerProfile() {
             <button
               onClick={handleChangeRole}
               className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+              style={{ borderBottom: `1px solid ${roleColor.border}` }}
             >
-              <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
-                <RefreshCw size={17} className="text-navy-600" />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+                <RefreshCw size={17} style={{ color: roleColor.primary }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-navy-900 text-sm">Change Role</p>
@@ -412,6 +445,7 @@ export default function PlayerProfile() {
             <button
               onClick={() => navigate('/invite')}
               className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+              style={{ borderBottom: `1px solid ${roleColor.border}` }}
             >
               <div className="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
                 <Gift size={17} className="text-green-600" />
@@ -420,7 +454,7 @@ export default function PlayerProfile() {
                 <p className="font-semibold text-navy-900 text-sm">Invite & Earn</p>
                 <p className="text-navy-400 text-xs mt-0.5">Refer friends · earn free Pro months</p>
               </div>
-              <ChevronRight size={16} className="text-navy-300 flex-shrink-0" />
+              <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
             </button>
 
             {/* App Settings */}
@@ -428,14 +462,14 @@ export default function PlayerProfile() {
               onClick={() => navigate('/settings')}
               className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
             >
-              <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
-                <Settings size={17} className="text-navy-600" />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+                <Settings size={17} style={{ color: roleColor.primary }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-navy-900 text-sm">App Settings</p>
                 <p className="text-navy-400 text-xs mt-0.5">Notifications, language, privacy</p>
               </div>
-              <ChevronRight size={16} className="text-navy-300 flex-shrink-0" />
+              <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
             </button>
           </div>
 
