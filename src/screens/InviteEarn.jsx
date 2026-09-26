@@ -84,31 +84,6 @@ function GiftBox() {
   )
 }
 
-// ── Money Stack Illustration ────────────────────────────────────────────────
-function MoneyStack() {
-  return (
-    <div style={{ position: 'relative', width: 90, height: 70, animation: 'giftFloat 3s 0.5s ease-in-out infinite' }}>
-      {[3, 2, 1, 0].map(i => (
-        <div key={i} style={{
-          position: 'absolute',
-          bottom: i * 6,
-          left: i * 3,
-          width: 80 - i * 4,
-          height: 48,
-          background: i === 0 ? '#C084FC' : '#A855F7',
-          border: '1.5px solid rgba(255,255,255,0.2)',
-          borderRadius: 6,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          {i === 0 && <span style={{ color: '#fff', fontSize: 10, fontWeight: 900, textAlign: 'center', lineHeight: 1.2 }}>1 mo{'\n'}Pro</span>}
-        </div>
-      ))}
-    </div>
-  )
-}
-
 // ── Level Card ──────────────────────────────────────────────────────────────
 function LevelCard({ lvl }) {
   const locked = !lvl.reached
@@ -116,52 +91,58 @@ function LevelCard({ lvl }) {
 
   return (
     <div style={{
-      minWidth: 'calc(100% - 64px)',
+      width: '100%',
       flexShrink: 0,
       scrollSnapAlign: 'center',
-      borderRadius: 16,
+      borderRadius: 18,
       overflow: 'hidden',
       position: 'relative',
     }}>
-      {/* Yellow diagonal level badge */}
+      {/* Level badge */}
       <div style={{
         position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)',
         background: '#FFD700',
         padding: '5px 28px',
         clipPath: 'polygon(8px 0%, calc(100% - 8px) 0%, 100% 100%, 0% 100%)',
         zIndex: 2,
+        whiteSpace: 'nowrap',
       }}>
         <span style={{ fontSize: 11, fontWeight: 900, color: '#000', letterSpacing: '0.12em' }}>LEVEL {lvl.level}</span>
       </div>
 
       {/* Card body */}
-      <div style={{ background: lvl.bg, padding: '40px 24px 28px', minHeight: 200 }}>
+      <div style={{ background: lvl.bg, padding: '44px 20px 28px', minHeight: 180, boxSizing: 'border-box', width: '100%' }}>
         {locked ? (
-          <div className="flex flex-col items-center justify-center text-center" style={{ minHeight: 140 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', minHeight: 110 }}>
             {/* Lock icon */}
-            <svg width="32" height="38" viewBox="0 0 32 38" fill="none" style={{ marginBottom: 12, opacity: 0.8 }}>
+            <svg width="28" height="34" viewBox="0 0 32 38" fill="none" style={{ marginBottom: 10, opacity: 0.7 }}>
               <rect x="4" y="18" width="24" height="18" rx="4" fill="white" fillOpacity="0.6"/>
               <path d="M9 18V13a7 7 0 0 1 14 0v5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"/>
               <circle cx="16" cy="27" r="2.5" fill="rgba(0,0,0,0.4)"/>
             </svg>
-            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: 17, fontWeight: 700, lineHeight: 1.4, marginBottom: 8 }}>
-              earn assured {lvl.earn} on every referral
+            <p style={{ color: 'rgba(255,255,255,0.95)', fontSize: 22, fontWeight: 800, lineHeight: 1.25, marginBottom: 8 }}>
+              {lvl.earn}
             </p>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
-              complete {needed} referral{needed !== 1 ? 's' : ''} to unlock level
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, lineHeight: 1.4 }}>
+              refer {lvl.friendsNeeded} friend{lvl.friendsNeeded > 1 ? 's' : ''} to unlock
+              {needed > 0 && ` · ${needed} more to go`}
             </p>
           </div>
         ) : (
-          <div className="flex items-center justify-between gap-3">
-            <div style={{ flex: 1 }}>
-              <p style={{ color: '#fff', fontSize: 18, fontWeight: 800, lineHeight: 1.35, marginBottom: 6 }}>
-                {lvl.activeLabel || `earn assured ${lvl.earn} on every referral`}
-              </p>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-                {lvl.activeSub || `${lvl.earn} cashback per Pro referral`}
-              </p>
+          <div style={{ textAlign: 'center' }}>
+            {/* Unlocked crown */}
+            <div style={{ marginBottom: 12 }}>
+              <span style={{ fontSize: 32 }}>🎉</span>
             </div>
-            {lvl.level === 1 && <MoneyStack />}
+            <p style={{ color: '#FFD700', fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+              Unlocked!
+            </p>
+            <p style={{ color: '#fff', fontSize: 24, fontWeight: 900, lineHeight: 1.2, marginBottom: 6 }}>
+              {lvl.earn}
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 1.4 }}>
+              {lvl.activeSub || 'for every friend who goes Pro'}
+            </p>
           </div>
         )}
       </div>
@@ -294,9 +275,11 @@ export default function InviteEarn() {
   const [copied, setCopied] = useState(false)
   const carouselRef = useRef(null)
 
-  const code = user?.username?.toUpperCase().slice(0, 6) || 'CY21'
+  const firstName = (user?.name || '').split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5) || 'CY'
+  const codeBase  = (user?.username || user?.id || 'CY').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) || Math.random().toString(36).slice(2,6).toUpperCase()
+  const code = firstName + codeBase
   const referralLink = `https://cricyaar.app/join?ref=${code}`
-  const initials = (user?.name || 'CY').slice(0, 2).toUpperCase()
+  const initials = firstName.slice(0, 2)
 
   // Sync active card to scroll position
   useEffect(() => {
@@ -370,13 +353,13 @@ export default function InviteEarn() {
           scrollSnapType: 'x mandatory',
           scrollBehavior: 'smooth',
           gap: 12,
-          padding: '20px 32px 16px',
+          padding: '20px 16px 16px',
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
         }}
       >
         {LEVELS.map(lvl => (
-          <div key={lvl.level} data-card style={{ minWidth: 'calc(100% - 64px)', scrollSnapAlign: 'center', flexShrink: 0 }}>
+          <div key={lvl.level} data-card style={{ minWidth: '100%', scrollSnapAlign: 'center', flexShrink: 0 }}>
             <LevelCard lvl={lvl} />
           </div>
         ))}
@@ -427,14 +410,18 @@ export default function InviteEarn() {
           your referral code
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.07)' }}>
-          <span style={{ flex: 1, fontWeight: 900, fontSize: 22, color: '#fff', letterSpacing: '0.2em' }}>{code}</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', fontWeight: 900, fontSize: 20, color: '#fff', letterSpacing: '0.18em', lineHeight: 1 }}>{code}</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.06em', marginTop: 3, display: 'block' }}>name + unique code</span>
+          </div>
           <button
             onClick={handleCopy}
             style={{
+              flexShrink: 0,
               padding: '8px 18px', borderRadius: 10, fontWeight: 700, fontSize: 13,
-              background: copied ? '#4ade80' : 'rgba(74,222,128,0.1)',
-              color: copied ? '#000' : '#4ade80',
-              border: `1px solid ${copied ? '#4ade80' : 'rgba(74,222,128,0.3)'}`,
+              background: copied ? '#4ade80' : 'rgba(124,58,237,0.15)',
+              color: copied ? '#000' : '#C4B5FD',
+              border: `1px solid ${copied ? '#4ade80' : 'rgba(124,58,237,0.35)'}`,
               cursor: 'pointer', transition: 'all 0.15s',
             }}
           >
