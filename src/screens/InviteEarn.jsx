@@ -48,12 +48,17 @@ export default function InviteEarn() {
         {/* Hero */}
         <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a2f 100%)' }}>
           <div className="p-5">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-2">
               <Gift size={20} className="text-amber-400" />
-              <h2 className="text-white font-extrabold text-lg">Invite Friends, Earn Free Months</h2>
+              <h2 className="text-white font-extrabold text-lg">Refer & Earn</h2>
+            </div>
+            <div className="bg-amber-400/20 border border-amber-400/30 rounded-xl px-4 py-3 mb-3">
+              <p className="text-amber-300 font-extrabold text-base leading-tight">
+                Refer a friend → Get next month Pro FREE 🎁
+              </p>
             </div>
             <p className="text-navy-300 text-sm mb-4 leading-relaxed">
-              When your friend upgrades to Pro using your code, you both win — they get ₹49 first month, you get 1 free month (stackable).
+              When your friend upgrades to Pro using your code, you both win — they get their first Pro month free, and your next month is on us (stackable).
             </p>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4 mb-4">
               <p className="text-navy-300 text-xs mb-1">Your Referral Code</p>
@@ -78,7 +83,7 @@ export default function InviteEarn() {
           <div className="space-y-3">
             {[
               { label: 'Friends joined CricYaar', value: '3', color: 'text-navy-900' },
-              { label: 'Upgraded to Pro (₹49 deal)', value: '2', color: 'text-amber-600' },
+              { label: 'Upgraded to Pro (1st month free)', value: '2', color: 'text-amber-600' },
               { label: 'Free months earned', value: '2', color: 'text-brand-600' },
             ].map((s, i) => (
               <div key={i} className="flex items-center justify-between">
@@ -102,8 +107,8 @@ export default function InviteEarn() {
             {[
               { step: '1', title: 'Share your code', desc: 'Send your referral link via WhatsApp' },
               { step: '2', title: 'Friend signs up', desc: 'They join CricYaar using your link' },
-              { step: '3', title: 'They upgrade to Pro', desc: 'They get first month at ₹49 (50% off)' },
-              { step: '4', title: 'You earn a free month', desc: '1 free month added to your account — stacks!' },
+              { step: '3', title: 'They upgrade to Pro', desc: 'Their first Pro month is FREE with your code' },
+              { step: '4', title: 'You get next month FREE', desc: 'Your next Pro month is on us — stacks indefinitely!' },
             ].map((s, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-black flex-shrink-0">{s.step}</div>

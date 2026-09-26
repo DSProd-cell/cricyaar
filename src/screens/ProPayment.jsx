@@ -37,8 +37,9 @@ const ROLE_PRO_FEATURES = {
 export default function ProPayment() {
   const navigate = useNavigate()
   const { user, setSubscription, setProIntent, setShowRoleModal, addToast } = useStore()
-  const [loading, setLoading] = useState(false)
-  const [paid, setPaid]       = useState(false)
+  const [loading, setLoading]     = useState(false)
+  const [paid, setPaid]           = useState(false)
+  const [autoRenew, setAutoRenew] = useState(true)
 
   const currentRole   = user?.role || 'fan'
   const roleMeta      = ROLE_META[currentRole] || ROLE_META.fan
@@ -184,9 +185,27 @@ export default function ProPayment() {
               <p className="text-amber-700 text-xs mt-0.5">Billed monthly · Cancel anytime</p>
             </div>
             <div className="text-right">
-              <span className="text-amber-400 font-extrabold text-3xl tabular-nums">₹99</span>
+              <span className="text-amber-400 font-extrabold text-3xl tabular-nums">₹1</span>
               <span className="text-amber-600 text-sm">/mo</span>
             </div>
+          </div>
+
+          {/* Auto-renew toggle */}
+          <div className="flex items-center justify-between bg-amber-900/30 rounded-xl px-4 py-3 mb-2 relative">
+            <div>
+              <p className="text-amber-100 text-sm font-semibold">Auto-renew</p>
+              <p className="text-amber-600 text-xs mt-0.5">{autoRenew ? 'Renews automatically each month' : 'One-time — renew manually'}</p>
+            </div>
+            <button
+              onClick={() => setAutoRenew(r => !r)}
+              className="relative w-11 h-6 rounded-full transition-colors flex-shrink-0"
+              style={{ background: autoRenew ? '#d97706' : 'rgba(255,255,255,0.15)' }}
+            >
+              <span
+                className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"
+                style={{ transform: autoRenew ? 'translateX(20px)' : 'translateX(0)' }}
+              />
+            </button>
           </div>
 
           {/* Features */}
@@ -231,7 +250,7 @@ export default function ProPayment() {
             ) : (
               <>
                 <Zap size={18} />
-                Pay ₹99 · Start Pro
+                Pay ₹1 · Start Pro
               </>
             )}
           </button>

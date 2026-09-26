@@ -7,6 +7,7 @@ import { uploadAvatar } from '../lib/uploads'
 import TopBar from '../components/TopBar'
 import { getRoleColor, CAN_COLLECT, NEEDS_AADHAAR } from '../lib/roleColors'
 import { resetSplash } from '../components/SplashOverlay'
+import ShareAchievement from '../components/ShareAchievement'
 import {
   BarChart2, Activity, Users, Trophy, X, MapPin, Check, ChevronRight, Camera,
   Edit, LogOut, RefreshCw, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
@@ -348,6 +349,17 @@ export default function PlayerProfile() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* ── Share Achievement ────────────────────────────────────────────── */}
+      <div className="mx-4 mt-3 flex items-center justify-between">
+        <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: roleColor.primary }}>
+          Share Performance
+        </p>
+        <ShareAchievement
+          title={`${roleColor.label} Performance · ${player.name}`}
+          stats={quickStats.map(s => ({ label: s.label, value: String(s.val) }))}
+        />
       </div>
 
       {/* ── Financial Actions ────────────────────────────────────────────── */}
