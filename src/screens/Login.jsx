@@ -80,7 +80,7 @@ export default function Login() {
           <span className="text-white font-black text-2xl">CY</span>
         </div>
         <h1 className="text-3xl font-extrabold text-navy-900 tracking-tight">CricYaar</h1>
-        <p className="text-brand-500 mt-1 text-[10px] font-bold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
+        <p className="text-brand-500 mt-1 text-[10px] font-extrabold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
       </div>
 
       {/* Toggle tabs */}

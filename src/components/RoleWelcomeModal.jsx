@@ -192,20 +192,14 @@ export default function RoleWelcomeModal() {
             <>
               <button
                 onClick={handleUpgradePro}
-                className="w-full py-3.5 rounded-2xl font-bold text-white text-sm mb-3 flex flex-col items-center gap-0.5 transition-all active:scale-[0.98]"
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+                className="w-full py-3.5 rounded-2xl font-bold text-white text-sm flex flex-col items-center gap-0.5 transition-all active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #7C3AED, #5B21B6)' }}
               >
                 <span className="flex items-center gap-2 font-extrabold">
                   <Zap size={15} />
                   Upgrade to Pro — Unlock Everything
                 </span>
-                <span className="text-amber-100 text-[11px] font-medium opacity-90">₹99/month · Cancel anytime</span>
-              </button>
-              <button
-                onClick={handleClose}
-                className="w-full py-3 text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
-              >
-                Continue — Browse Freely
+                <span className="text-purple-200 text-[11px] font-medium opacity-90">₹1/month · Cancel anytime</span>
               </button>
             </>
           )}

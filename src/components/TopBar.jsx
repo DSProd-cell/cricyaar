@@ -70,7 +70,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
               <p className="font-bold text-navy-900 text-sm truncate leading-tight">{title}</p>
             ) : (
               isRoot && (
-                <p className="text-brand-500 text-[8px] font-bold tracking-[0.15em] uppercase leading-none">
+                <p className="text-brand-500 text-[8px] font-extrabold tracking-[0.15em] uppercase leading-none">
                   Your Game. Your Record.
                 </p>
               )

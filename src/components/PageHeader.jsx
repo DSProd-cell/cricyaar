@@ -44,7 +44,7 @@ export default function PageHeader({
           <p className="font-bold text-navy-900 text-sm truncate">{title}</p>
         )}
         {showTagline && (
-          <p className="text-brand-500 text-[10px] font-bold tracking-[0.18em] uppercase">
+          <p className="text-brand-500 text-[10px] font-extrabold tracking-[0.18em] uppercase">
             Your Game. Your Record. For Real.
           </p>
         )}

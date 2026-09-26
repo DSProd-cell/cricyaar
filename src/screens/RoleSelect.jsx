@@ -12,8 +12,8 @@ const ROLES = [
     label: 'Player',
     Icon: Swords,
     tagline: 'Play. Track. Grow.',
-    gradient: 'linear-gradient(145deg, #c2410c 0%, #9a3412 100%)',
-    accentColor: '#ea580c',
+    gradient: 'linear-gradient(145deg, #5B21B6 0%, #3B0764 100%)',
+    accentColor: '#7C3AED',
     features: ['Read live scorecards for any match', 'Join teams & tournaments', 'Find & book grounds'],
     desc: 'Track stats, join teams, play in matches.',
   },
@@ -82,9 +82,19 @@ export default function RoleSelect() {
       await supabase.from('profiles').update({ onboarded: true, role: chosen }).eq('id', userId)
     }
     setLoading(false)
-    setShowRoleModal(true)
     setProIntent(false)
     setOtpMode('login')
+    const currentUser = useStore.getState().user
+    const userIsPro = currentUser?.subscription === 'pro_active' || currentUser?.subscription === 'pro_cancelled'
+    // Fan role: show the "you're a fan" warning modal
+    // Pro user changing role: show the "welcome, full access" modal
+    // Free user choosing non-fan role: skip intermediate modal, go straight to Pro signup sheet
+    if (chosen === 'fan' || userIsPro) {
+      setShowRoleModal(true)
+    } else {
+      const { setShowProSheet } = useStore.getState()
+      setShowProSheet(true)
+    }
     navigate('/')
   }
 

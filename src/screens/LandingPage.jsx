@@ -64,8 +64,8 @@ export default function LandingPage() {
         </h1>
 
         <p
-          className="font-bold text-[10px] tracking-[0.28em] uppercase mb-10"
-          style={{ color: '#22c55e' }}
+          className="font-extrabold text-[10px] tracking-[0.28em] uppercase mb-10"
+          style={{ color: '#7C3AED' }}
         >
           Your Game. Your Record. For Real.
         </p>

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
-import { Crown, Check, X, Zap } from 'lucide-react'
+import { Crown, Check, X, Zap, CheckCircle } from 'lucide-react'
 
 const PERKS = [
   'Create & join tournaments',
@@ -13,7 +13,8 @@ const PERKS = [
 
 export default function ProSignupSheet() {
   const navigate = useNavigate()
-  const { setShowProSheet, setProIntent, addToast } = useStore()
+  const { setShowProSheet, setProIntent, addToast, user } = useStore()
+  const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
 
   const handleSubscribe = () => {
     setShowProSheet(false)
@@ -47,47 +48,61 @@ export default function ProSignupSheet() {
         </button>
 
         <div className="px-5 pt-2 pb-8">
-          {/* Crown + headline */}
-          <div className="flex flex-col items-center text-center mb-5">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'#fef3c7' }}>
-              <Crown size={28} className="text-amber-500 fill-amber-400" />
+          {isPro ? (
+            /* Already Pro — just confirm */
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'#F5F3FF' }}>
+                <CheckCircle size={28} className="text-brand-500" />
+              </div>
+              <h2 className="font-extrabold text-navy-900 text-xl mb-1">You're already Pro!</h2>
+              <p className="text-navy-500 text-sm mb-5">All features are unlocked. Enjoy the full CricYaar experience.</p>
+              <button
+                onClick={handleDismiss}
+                className="w-full py-4 rounded-2xl font-extrabold text-white active:scale-[0.98] transition-all"
+                style={{ background:'linear-gradient(135deg,#7C3AED,#5B21B6)' }}
+              >
+                Continue →
+              </button>
             </div>
-            <h2 className="font-extrabold text-navy-900 text-xl">Want access to everything?</h2>
-            <p className="text-navy-500 text-sm mt-1">You're on the free plan. Upgrade to Pro and unlock the full CricYaar experience.</p>
-          </div>
+          ) : (
+            <>
+              {/* Crown + headline */}
+              <div className="flex flex-col items-center text-center mb-5">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3" style={{ background:'#F5F3FF' }}>
+                  <Crown size={28} style={{ color:'#7C3AED' }} />
+                </div>
+                <h2 className="font-extrabold text-navy-900 text-xl">Want access to everything?</h2>
+                <p className="text-navy-500 text-sm mt-1">Upgrade to Pro and unlock the full CricYaar experience.</p>
+              </div>
 
-          {/* Perks */}
-          <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-5">
-            <ul className="space-y-2.5">
-              {PERKS.map((p, i) => (
-                <li key={i} className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background:'#f59e0b' }}>
-                    <Check size={11} className="text-white" strokeWidth={3} />
-                  </div>
-                  <span className="text-navy-800 text-sm font-medium">{p}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+              {/* Perks */}
+              <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mb-5">
+                <ul className="space-y-2.5">
+                  {PERKS.map((p, i) => (
+                    <li key={i} className="flex items-center gap-2.5">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background:'#7C3AED' }}>
+                        <Check size={11} className="text-white" strokeWidth={3} />
+                      </div>
+                      <span className="text-navy-800 text-sm font-medium">{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* CTAs */}
-          <button
-            onClick={handleSubscribe}
-            className="w-full py-4 rounded-2xl font-bold text-white mb-3 flex flex-col items-center gap-0.5 active:scale-[0.98] transition-all"
-            style={{ background:'linear-gradient(135deg, #f59e0b, #d97706)' }}
-          >
-            <span className="flex items-center gap-2 text-base font-extrabold">
-              <Zap size={17} />
-              Start Pro — Just ₹1/month
-            </span>
-            <span className="text-amber-100 text-xs font-medium opacity-90">UPI / Cards · Cancel anytime</span>
-          </button>
-          <button
-            onClick={handleDismiss}
-            className="w-full py-3 text-center text-navy-400 text-sm font-medium hover:text-navy-600 transition-colors"
-          >
-            Continue with limited free access
-          </button>
+              {/* CTAs */}
+              <button
+                onClick={handleSubscribe}
+                className="w-full py-4 rounded-2xl font-bold text-white flex flex-col items-center gap-0.5 active:scale-[0.98] transition-all"
+                style={{ background:'linear-gradient(135deg,#7C3AED,#5B21B6)' }}
+              >
+                <span className="flex items-center gap-2 text-base font-extrabold">
+                  <Zap size={17} />
+                  Start Pro — Just ₹1/month
+                </span>
+                <span className="text-purple-200 text-xs font-medium opacity-90">UPI / Cards · Cancel anytime</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

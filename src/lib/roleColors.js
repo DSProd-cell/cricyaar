@@ -7,11 +7,11 @@ export const ROLE_COLORS = {
     navActiveBg: 'rgba(100,116,139,0.15)',
   },
   player: {
-    primary: '#ea580c', light: '#fff7ed', border: '#fed7aa',
+    primary: '#7C3AED', light: '#F5F3FF', border: '#C4B5FD',
     emoji: '🏏', label: 'Player',
-    gradientFrom: '#c2410c', gradientTo: '#fb923c',
-    shellBg: '#3b1504', shellBgLight: '#7c2d12',
-    navActiveBg: 'rgba(234,88,12,0.15)',
+    gradientFrom: '#5B21B6', gradientTo: '#A78BFA',
+    shellBg: '#1e1030', shellBgLight: '#3b1f6b',
+    navActiveBg: 'rgba(124,58,237,0.15)',
   },
   organiser: {
     primary: '#1a5c38', light: '#f0fdf4', border: '#bbf7d0',

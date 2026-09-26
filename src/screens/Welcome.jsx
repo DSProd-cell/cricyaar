@@ -19,7 +19,7 @@ export default function Welcome() {
           <span className="text-white font-black text-3xl tracking-tight">CY</span>
         </div>
         <h1 className="text-4xl font-extrabold text-navy-900 tracking-tight">CricYaar</h1>
-        <p className="text-brand-500 mt-2 text-[11px] font-bold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
+        <p className="text-brand-500 mt-2 text-[11px] font-extrabold tracking-[0.2em] uppercase">Your Game. Your Record. For Real.</p>
       </div>
 
       {/* Action buttons */}
