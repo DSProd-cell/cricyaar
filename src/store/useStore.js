@@ -53,9 +53,12 @@ export const useStore = create(
       setShowRoleModal: (v) => set({ showRoleModal: v }),
 
       // ── v2: Subscription ─────────────────────────────────────────────────────
-      setSubscription: (status) => set(s => ({
-        user: s.user ? { ...s.user, subscription: status, proRenewalDate: status === 'pro_active' ? '2024-04-20' : s.user?.proRenewalDate } : s.user,
-      })),
+      setSubscription: (status) => set(s => {
+        const renewalDate = status === 'pro_active'
+          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          : s.user?.proRenewalDate
+        return { user: s.user ? { ...s.user, subscription: status, proRenewalDate: renewalDate } : s.user }
+      }),
 
       // ── v2: Umpire requests ──────────────────────────────────────────────────
       umpireRequests: [],

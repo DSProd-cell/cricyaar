@@ -85,7 +85,9 @@ export default function RoleSelect() {
     setProIntent(false)
     setOtpMode('login')
     const currentUser = useStore.getState().user
-    const userIsPro = currentUser?.subscription === 'pro_active' || currentUser?.subscription === 'pro_cancelled'
+    const renewal = currentUser?.proRenewalDate || null
+    const userIsPro = currentUser?.subscription === 'pro_active' ||
+      (currentUser?.subscription === 'pro_cancelled' && renewal && new Date(renewal) > new Date())
     // Fan role: show the "you're a fan" warning modal
     // Pro user changing role: show the "welcome, full access" modal
     // Free user choosing non-fan role: skip intermediate modal, go straight to Pro signup sheet

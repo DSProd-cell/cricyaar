@@ -29,7 +29,9 @@ export default function RoleWelcomeModal() {
 
   const role     = user?.role || 'fan'
   const isFan    = role === 'fan'
-  const isPro    = user?.subscription === 'pro_active'
+  const renewal  = user?.proRenewalDate || null
+  const isPro    = user?.subscription === 'pro_active' ||
+    (user?.subscription === 'pro_cancelled' && renewal && new Date(renewal) > new Date())
   const meta     = ROLE_META[role] || ROLE_META.fan
   const RoleIcon = ROLE_ICONS[role] || Megaphone
   const perks    = ROLE_READ_ONLY_PERKS[role] || []

@@ -52,7 +52,9 @@ function PlayerRow({ player, onRemove, onChangeRole, isPro, isLocked }) {
 export default function CreateTeamSheet({ onClose }) {
   const navigate = useNavigate()
   const { user, addToast, setShowProSheet } = useStore()
-  const isPro = user?.subscription === 'pro_active'
+  const renewal = user?.proRenewalDate || null
+  const isPro = user?.subscription === 'pro_active' ||
+    (user?.subscription === 'pro_cancelled' && renewal && new Date(renewal) > new Date())
 
   // Form state
   const [teamName, setTeamName]   = useState('')

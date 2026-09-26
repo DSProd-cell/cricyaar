@@ -151,7 +151,10 @@ export default function OtpVerify() {
       // Every free login lands here — offer Pro (pay ₹1/month, or get it free
       // via referral) without blocking access. Already-Pro users and anyone
       // already headed to /pro-payment don't need the nudge.
-      const isPro = profile?.subscription === 'pro_active' || profile?.subscription === 'pro_cancelled'
+      const renewal = profile?.pro_renewal_date || null
+      const withinValidity = renewal ? new Date(renewal) > new Date() : false
+      const isPro = profile?.subscription === 'pro_active' ||
+        (profile?.subscription === 'pro_cancelled' && withinValidity)
       if (!isPro && !proIntent) {
         useStore.getState().setShowProSheet(true)
       }
