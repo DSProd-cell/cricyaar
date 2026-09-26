@@ -89,7 +89,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           className="flex items-center gap-1.5 h-8 rounded-full flex-shrink-0 active:scale-95 transition-all"
           style={{
             padding: '0 12px',
-            background: 'linear-gradient(135deg,#7C3AED,#5B21B6)',
+            background: 'linear-gradient(135deg,var(--cy-primary),var(--cy-bg-mid))',
             boxShadow: '0 2px 10px rgba(124,58,237,0.4)',
           }}
           aria-label="Refer &amp; Earn"

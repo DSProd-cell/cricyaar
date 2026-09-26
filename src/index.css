@@ -12,6 +12,7 @@
   --cy-glow:      rgba(124,58,237,0.6);
   --cy-glow2:     rgba(196,181,253,0.3);
   --cy-gradient:  linear-gradient(160deg,#0a0118 0%,#120520 55%,#07021a 100%);
+  --cy-on-primary: #ffffff;
 
   --cy-bg: #f8fafc;
   --cy-surface: #ffffff;
@@ -322,8 +323,8 @@
   /* ── Buttons ── */
   .btn-primary {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: #7C3AED;
-    color: #fff;
+    background: var(--cy-primary);
+    color: var(--cy-on-primary);
     font-weight: 600;
     font-size: 15px;
     border-radius: 12px;
@@ -335,7 +336,7 @@
     -webkit-tap-highlight-color: transparent;
     min-height: 48px;
   }
-  .btn-primary:hover { background: #5B21B6; box-shadow: 0 4px 12px rgb(124 58 237 / 0.3); }
+  .btn-primary:hover { background: var(--cy-bg-mid); box-shadow: 0 4px 12px rgb(124 58 237 / 0.3); }
   .btn-primary:active { transform: scale(0.97); }
   .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
 

@@ -185,7 +185,7 @@ function GroundCard({ ground, onClick }) {
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function GroundSearch() {
   const navigate   = useNavigate()
-  const { user }   = useStore()
+  const { user, lastKnownCoords, setLastKnownCoords } = useStore()
   const isGroundOwner = user?.role === 'ground_owner'
 
   const [search,      setSearch]      = useState('')
@@ -195,7 +195,9 @@ export default function GroundSearch() {
   const [grounds,      setGrounds]      = useState([])
   const [loading,      setLoading]      = useState(true)
   const [loadError,    setLoadError]    = useState('')
-  const [myCoords,     setMyCoords]     = useState(null)
+  // Show the last saved location immediately (Zomato-style) instead of
+  // starting with no location every time this screen opens.
+  const [myCoords,     setMyCoords]     = useState(lastKnownCoords)
   const [locating,     setLocating]     = useState(false)
 
   const handleNearMe = async () => {
@@ -205,7 +207,19 @@ export default function GroundSearch() {
     setLocating(false)
     if (!c) return
     setMyCoords(c)
+    setLastKnownCoords(c)
   }
+
+  // Silently refresh location in the background on open — updates the map
+  // once a fresh fix lands, without blocking the (already-shown) last-known
+  // position or popping a loading spinner for it.
+  useEffect(() => {
+    let cancelled = false
+    getCurrentCoords().then(c => {
+      if (!cancelled && c) { setMyCoords(c); setLastKnownCoords(c) }
+    })
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let cancelled = false

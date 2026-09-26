@@ -185,6 +185,13 @@ export const useStore = create(
       groundFilters: { search: '', pitchType: 'All', floodlights: 'Any', city: '' },
       setGroundFilters: (f) => set(s => ({ groundFilters: { ...s.groundFilters, ...f } })),
 
+      // ── Last known device location (persisted) ────────────────────────────────
+      // Ground search shows this immediately on open — like Zomato — instead of
+      // starting with no location every time, while a fresh GPS fix refreshes
+      // it silently in the background.
+      lastKnownCoords: null,
+      setLastKnownCoords: (coords) => set({ lastKnownCoords: coords }),
+
       // ── Active team/tournament tab ────────────────────────────────────────────
       teamsTab: 'teams',
       setTeamsTab: (tab) => set({ teamsTab: tab }),
@@ -324,6 +331,7 @@ export const useStore = create(
         freeAgentRequests:         state.freeAgentRequests,
         umpireTournamentRequests:  state.umpireTournamentRequests,
         iplTeam:                   state.iplTeam,
+        lastKnownCoords:           state.lastKnownCoords,
         aiQueryCount:              state.aiQueryCount,
         aiQueryResetDate:          state.aiQueryResetDate,
         proIntent:                 state.proIntent,

@@ -16,6 +16,10 @@ export default function IplThemeProvider({ children }) {
     root.style.setProperty('--cy-glow',       t.glow)
     root.style.setProperty('--cy-glow2',      t.secondaryGlow)
     root.style.setProperty('--cy-gradient',   t.gradient)
+    // Per-team readable text color for anything filled with --cy-primary —
+    // most teams' primary is dark enough for white text, but e.g. CSK's
+    // bright yellow needs dark text instead.
+    root.style.setProperty('--cy-on-primary', t.textOnPrimary || '#ffffff')
   }, [iplTeam])
 
   return children

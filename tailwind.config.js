@@ -7,15 +7,22 @@ export default {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // 400-700 are redeclared against the IPL team CSS variables (set by
+        // IplThemeProvider) so choosing a team recolors buttons, active tabs,
+        // and icon accents everywhere — not just the mobile edge glow, which
+        // was the only thing actually reading --cy-primary before. 50/100/
+        // 200/300/800/900 (light tints, deep tints) stay fixed since they're
+        // used as subtle background fills where an exact team-color match
+        // matters far less than in a solid button or headline.
         brand: {
           50:  '#F5F3FF',
           100: '#EDE9FE',
           200: '#DDD6FE',
           300: '#C4B5FD',
-          400: '#A78BFA',
-          500: '#7C3AED',  // PRIMARY — Deep Grape
-          600: '#6D28D9',
-          700: '#5B21B6',
+          400: 'var(--cy-secondary)',
+          500: 'var(--cy-primary)',   // PRIMARY — was fixed Deep Grape, now IPL-team-aware
+          600: 'var(--cy-primary)',
+          700: 'var(--cy-bg-mid)',
           800: '#4C1D95',
           900: '#3B0764',
         },
