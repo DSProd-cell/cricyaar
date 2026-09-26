@@ -7,7 +7,8 @@ import IplCelebrationOverlay from '../components/IplCelebrationOverlay'
 export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const { setIplTeam } = useStore()
+  const { setIplTeam, iplTeam: currentTeamId } = useStore()
+  const currentTeam = IPL_TEAMS.find(t => t.id === currentTeamId) || null
   const [selected, setSelected] = useState(null)
   const [celebrating, setCelebrating] = useState(false)
 
@@ -49,13 +50,21 @@ export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
           </div>
         </div>
         <h1 style={{ color:'#fff', fontWeight:900, fontSize:26, margin:'0 0 8px', letterSpacing:'-0.02em' }}>
-          Choose Your Team 🏏
+          Your Favourite IPL Team 🏏
         </h1>
-        <p style={{ color:'#A78BFA', fontSize:14, margin:'0 0 4px' }}>
-          Choose and see the Magic ✨
-        </p>
+        {currentTeam ? (
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, marginBottom:4 }}>
+            <span style={{ fontSize:20 }}>{currentTeam.emoji}</span>
+            <span style={{ color: currentTeam.primary, fontWeight:800, fontSize:15 }}>{currentTeam.name}</span>
+            <span style={{ background:'rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.6)', fontSize:10, fontWeight:700, padding:'2px 8px', borderRadius:20, letterSpacing:'0.05em' }}>CURRENT</span>
+          </div>
+        ) : (
+          <p style={{ color:'#A78BFA', fontSize:14, margin:'0 0 4px' }}>
+            Pick a team — see the magic ✨
+          </p>
+        )}
         <p style={{ color:'rgba(255,255,255,0.4)', fontSize:12, margin:0 }}>
-          Optional — you can change it anytime from Profile
+          Optional · changes app theme · update anytime
         </p>
       </div>
 
@@ -65,27 +74,40 @@ export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
         gridTemplateColumns: 'repeat(2,1fr)',
         gap: 12, padding: '24px 16px 8px',
       }}>
-        {IPL_TEAMS.map(team => (
+        {IPL_TEAMS.map(team => {
+          const isCurrent = team.id === currentTeamId
+          return (
           <button
             key={team.id}
             onClick={() => handlePick(team)}
             style={{
               background: `linear-gradient(135deg,${team.darkBg},${team.midBg})`,
-              border: `1.5px solid ${team.primary}55`,
+              border: isCurrent ? `2px solid ${team.primary}` : `1.5px solid ${team.primary}55`,
               borderRadius: 16,
               padding: '16px 12px',
               cursor: 'pointer',
               textAlign: 'center',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
               transition: 'transform .15s, box-shadow .15s',
-              boxShadow: `0 2px 16px ${team.glow}30`,
+              boxShadow: isCurrent ? `0 4px 24px ${team.glow}60` : `0 2px 16px ${team.glow}30`,
+              position: 'relative',
               WebkitTapHighlightColor: 'transparent',
             }}
             onMouseDown={e => { e.currentTarget.style.transform='scale(0.96)'; e.currentTarget.style.boxShadow=`0 4px 24px ${team.glow}` }}
             onMouseUp={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow=`0 2px 16px ${team.glow}30` }}
             onTouchStart={e => { e.currentTarget.style.transform='scale(0.96)'; e.currentTarget.style.boxShadow=`0 4px 24px ${team.glow}` }}
-            onTouchEnd={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow=`0 2px 16px ${team.glow}30` }}
+            onTouchEnd={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow = isCurrent ? `0 4px 24px ${team.glow}60` : `0 2px 16px ${team.glow}30` }}
           >
+            {/* Current team checkmark badge */}
+            {isCurrent && (
+              <div style={{
+                position:'absolute', top:8, right:8,
+                width:20, height:20, borderRadius:'50%',
+                background: team.primary,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                fontSize:11, color:'#fff', fontWeight:900,
+              }}>✓</div>
+            )}
             {/* Color swatch bar */}
             <div style={{
               width: '100%', height: 4, borderRadius: 4,
@@ -105,16 +127,24 @@ export default function IplTeamPicker({ onDone, skipRoute = '/city-select' }) {
               "{team.tagline.replace(/[🌊🎺🏆⚔️🦁💪🌅❤️🩵⚡]/gu,'').trim()}"
             </span>
           </button>
-        ))}
+          )
+        })}
       </div>
 
       {/* Skip */}
       <div style={{ padding: '16px 20px 36px', textAlign: 'center' }}>
         <button
           onClick={handleSkip}
-          style={{ background:'transparent', border:'none', color:'rgba(255,255,255,0.35)', fontSize:13, cursor:'pointer', padding:'8px 20px' }}
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            border: '1.5px solid rgba(255,255,255,0.18)',
+            borderRadius: 14,
+            color: 'rgba(255,255,255,0.65)',
+            fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', padding: '12px 40px',
+          }}
         >
-          Skip for now →
+          {currentTeamId ? 'Keep Current Team →' : 'Skip for now →'}
         </button>
       </div>
 

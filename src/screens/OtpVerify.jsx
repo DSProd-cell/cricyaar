@@ -144,12 +144,8 @@ export default function OtpVerify() {
         navigate('/pro-payment')
       } else {
         addToast(`Welcome back! Signed in as ${restoredRole}.`, 'success')
-        // Show IPL team picker if user hasn't chosen a team yet (optional, skippable)
-        if (!iplTeam) {
-          navigate('/ipl-pick', { state: { returnTo: '/' } })
-        } else {
-          navigate('/')
-        }
+        // Always show IPL picker after login so user can add/change their team
+        navigate('/ipl-pick', { state: { returnTo: '/' } })
       }
 
       // Every free login lands here — offer Pro (pay ₹1/month, or get it free

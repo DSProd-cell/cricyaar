@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
@@ -6,6 +6,16 @@ import { useStore } from '../store/useStore'
 export function resetSplash() { useStore.getState().setShowSplash(true) }
 
 const TAGLINE = "India's First Fraud-Free Cricket Platform"
+
+const PLATFORM_STATS = [
+  { emoji: '🏏', label: 'Matches Live', value: 142   },
+  { emoji: '🏆', label: 'Tournaments',  value: 28    },
+  { emoji: '👤', label: 'Players',      value: 15420 },
+  { emoji: '⚖️', label: 'Umpires',      value: 892   },
+  { emoji: '🌐', label: 'Total Users',  value: 24680 },
+]
+
+function easeOut(t) { return 1 - Math.pow(1 - t, 3) }
 
 // Deterministic particles — no Math.random so no layout shift
 const PARTICLES = [
@@ -22,9 +32,12 @@ const PARTICLES = [
 
 export default function SplashOverlay() {
   const { user, showSplash, setShowSplash } = useStore()
-  const navigate = useNavigate()
-  const [fading, setFading] = useState(false)
-  const [ready, setReady]   = useState(false)
+  const navigate  = useNavigate()
+  const [fading, setFading]     = useState(false)
+  const [ready, setReady]       = useState(false)
+  const [showStats, setShowStats] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const rafRef = useRef(null)
 
   const dismissTo = (path) => {
     setFading(true)
@@ -32,11 +45,28 @@ export default function SplashOverlay() {
     setTimeout(() => { setShowSplash(false); setFading(false) }, 600)
   }
 
+  // Stats counter animation
+  useEffect(() => {
+    if (!showStats) return
+    const start = performance.now()
+    const dur   = 1800
+    const tick  = (now) => {
+      const p = Math.min((now - start) / dur, 1)
+      setProgress(easeOut(p))
+      if (p < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [showStats])
+
   useEffect(() => {
     if (!showSplash) return
     setReady(false)
-    const t = setTimeout(() => setReady(true), 500)
-    return () => clearTimeout(t)
+    setShowStats(false)
+    setProgress(0)
+    const t1 = setTimeout(() => setReady(true), 500)
+    const t2 = setTimeout(() => setShowStats(true), 2000)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [showSplash])
 
   if (!showSplash) return null
@@ -183,8 +213,44 @@ export default function SplashOverlay() {
         </p>
       </div>
 
-      {/* ── Bottom: CTA ── */}
+      {/* ── Bottom: stats + CTA ── */}
       <div className="px-5 pb-12 pt-2 flex flex-col gap-3 max-w-sm mx-auto w-full relative z-10">
+
+        {/* Live Platform stats */}
+        <div style={{
+          opacity: showStats ? 1 : 0,
+          transform: showStats ? 'translateY(0)' : 'translateY(24px)',
+          transition: 'opacity 0.55s ease, transform 0.55s ease',
+        }}>
+          <p style={{
+            color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.18em',
+            textAlign: 'center', marginBottom: 12,
+          }}>Live Platform</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {PLATFORM_STATS.map((s, i) => {
+              const raw = Math.floor(progress * s.value)
+              const display = raw >= 1000
+                ? (raw / 1000).toFixed(raw >= 10000 ? 0 : 1) + 'K+'
+                : raw + (s.value >= 100 ? '+' : '')
+              return (
+                <div key={s.label} className="flex flex-col items-center gap-1 py-3 rounded-2xl"
+                  style={{
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    opacity: progress > i * 0.14 ? 1 : 0,
+                    transform: progress > i * 0.14 ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(8px)',
+                    transition: 'opacity 0.4s ease, transform 0.4s ease',
+                  }}>
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>{s.emoji}</span>
+                  <span style={{ color: '#fff', fontWeight: 800, fontSize: 14, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{display}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.42)', fontSize: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'center', lineHeight: 1.3 }}>{s.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
         {/* CTAs */}
         <div
           style={{
