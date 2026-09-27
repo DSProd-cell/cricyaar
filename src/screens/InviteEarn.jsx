@@ -318,40 +318,47 @@ function LevelCard({ lvl, onClick }) {
         <span style={{ fontSize:11, fontWeight:900, color:'#000', letterSpacing:'0.12em' }}>LEVEL {lvl.level}</span>
       </div>
 
-      {/* Tap hint */}
-      <div style={{
-        position:'absolute', bottom:10, right:14, zIndex:2,
-        fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.35)', letterSpacing:'0.08em',
-        display:'flex', alignItems:'center', gap:4,
-      }}>
-        TAP TO LEARN MORE ›
-      </div>
-
       {/* Card body */}
-      <div style={{ background:lvl.bg, padding:'44px 20px 36px', width:'100%', boxSizing:'border-box' }}>
-        {locked ? (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', height:128 }}>
-            <svg width="26" height="32" viewBox="0 0 32 38" fill="none" style={{ marginBottom:10, opacity:0.65 }}>
-              <rect x="4" y="18" width="24" height="18" rx="4" fill="white" fillOpacity="0.6"/>
-              <path d="M9 18V13a7 7 0 0 1 14 0v5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"/>
-              <circle cx="16" cy="27" r="2.5" fill="rgba(0,0,0,0.4)"/>
-            </svg>
-            <p style={{ color:'rgba(255,255,255,0.95)', fontSize:22, fontWeight:900, lineHeight:1.25, marginBottom:8 }}>
-              {lvl.earn}
-            </p>
-            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:13, lineHeight:1.4 }}>
-              refer {lvl.friendsNeeded} friend{lvl.friendsNeeded>1?'s':''} to unlock
-              {needed>0 && ` · ${needed} more to go`}
-            </p>
-          </div>
-        ) : (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', height:128 }}>
-            <div style={{ fontSize:32, lineHeight:1, marginBottom:6 }}>🎉</div>
-            <p style={{ color:'#FFD700', fontSize:11, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:5 }}>Unlocked!</p>
-            <p style={{ color:'#fff', fontSize:24, fontWeight:900, lineHeight:1.2, marginBottom:5 }}>{lvl.earn}</p>
-            <p style={{ color:'rgba(255,255,255,0.5)', fontSize:12, lineHeight:1.4 }}>{lvl.activeSub}</p>
-          </div>
-        )}
+      <div style={{ background:lvl.bg, width:'100%', boxSizing:'border-box' }}>
+        <div style={{ padding:'44px 20px 20px' }}>
+          {locked ? (
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', height:128 }}>
+              <svg width="26" height="32" viewBox="0 0 32 38" fill="none" style={{ marginBottom:10, opacity:0.65 }}>
+                <rect x="4" y="18" width="24" height="18" rx="4" fill="white" fillOpacity="0.6"/>
+                <path d="M9 18V13a7 7 0 0 1 14 0v5" stroke="white" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.6"/>
+                <circle cx="16" cy="27" r="2.5" fill="rgba(0,0,0,0.4)"/>
+              </svg>
+              <p style={{ color:'rgba(255,255,255,0.95)', fontSize:22, fontWeight:900, lineHeight:1.25, marginBottom:8 }}>
+                {lvl.earn}
+              </p>
+              <p style={{ color:'rgba(255,255,255,0.45)', fontSize:13, lineHeight:1.4 }}>
+                refer {lvl.friendsNeeded} friend{lvl.friendsNeeded>1?'s':''} to unlock
+                {needed>0 && ` · ${needed} more to go`}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', height:128 }}>
+              <div style={{ fontSize:32, lineHeight:1, marginBottom:6 }}>🎉</div>
+              <p style={{ color:'#FFD700', fontSize:11, fontWeight:800, letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:5 }}>Unlocked!</p>
+              <p style={{ color:'#fff', fontSize:24, fontWeight:900, lineHeight:1.2, marginBottom:5 }}>{lvl.earn}</p>
+              <p style={{ color:'rgba(255,255,255,0.5)', fontSize:12, lineHeight:1.4 }}>{lvl.activeSub}</p>
+            </div>
+          )}
+        </div>
+        {/* Option B — frosted bottom bar */}
+        <div style={{
+          background: 'rgba(0,0,0,0.22)',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          padding: '9px 18px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{ color:'rgba(255,255,255,0.7)', fontSize:12, fontWeight:600, letterSpacing:'0.01em' }}>
+            How does this work?
+          </span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,215,0,0.85)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
       </div>
     </button>
   )

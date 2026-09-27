@@ -1,14 +1,30 @@
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
 import TopBar from '../components/TopBar'
 import { LEGAL_URL } from '../lib/constants'
-import { Bell, Globe, Shield, Info, Sparkles, Phone } from 'lucide-react'
-import { useState } from 'react'
+import { Bell, Globe, Shield, Info, Sparkles, Phone, ShieldCheck } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 export default function Settings() {
   const navigate = useNavigate()
-  const { user, addToast } = useStore()
+  const { user, setUser, addToast } = useStore()
   const [pushNotifs, setPushNotifs] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(user?.role === 'admin')
+
+  // Always fetch fresh role from Supabase so admin status is accurate
+  useEffect(() => {
+    if (!user?.id) return
+    supabase.from('profiles').select('role, kyc_status').eq('id', user.id).single()
+      .then(({ data }) => {
+        if (data) {
+          setIsAdmin(data.role === 'admin')
+          if (data.role !== user.role) {
+            setUser({ ...user, role: data.role, kycStatus: data.kyc_status || null, kycVerified: data.kyc_status === 'approved' })
+          }
+        }
+      })
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const ROWS = [
     {
@@ -81,6 +97,28 @@ export default function Settings() {
             )
           })}
         </div>
+
+        {isAdmin && (
+          <div className="mt-6">
+            <p className="text-xs font-semibold text-navy-400 uppercase tracking-wider mb-3 px-1">Admin</p>
+            <button
+              onClick={() => navigate('/admin/kyc')}
+              className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl hover:bg-purple-50 transition-colors text-left"
+              style={{ background: 'var(--cy-surface)', border: '1.5px solid #e9d5ff' }}
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#f3e8ff' }}>
+                <ShieldCheck size={18} className="text-purple-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy-900 text-sm">KYC Approvals</p>
+                <p className="text-navy-400 text-xs mt-0.5">Review pending KYC requests</p>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-300 flex-shrink-0">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         <button
           onClick={() => navigate('/whats-new')}

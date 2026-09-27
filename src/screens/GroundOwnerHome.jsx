@@ -9,6 +9,7 @@ import { uploadGroundPhoto } from '../lib/uploads'
 import { getCurrentCoords } from '../lib/geolocation'
 import TopBar from '../components/TopBar'
 import RoleStrip from '../components/RoleStrip'
+import RoleGateSheet from '../components/RoleGateSheet'
 import {
   MapPin, BarChart2, Send, ChevronRight, CheckCircle, Clock,
   Building2, Star, Trophy, Calendar, IndianRupee, Users,
@@ -533,6 +534,7 @@ export default function GroundOwnerHome({ activeRole, setActiveRole }) {
 
   const [sentOffers, setSentOffers] = useState([])
   const [showAddGround, setShowAddGround] = useState(false)
+  const [gateRole, setGateRole]     = useState(null)
   const [grounds, setGrounds] = useState([])
   const [groundsLoading, setGroundsLoading] = useState(true)
 
@@ -566,15 +568,26 @@ export default function GroundOwnerHome({ activeRole, setActiveRole }) {
 
         {/* Greeting */}
         <div className="mb-4 animate-fade-in">
-          <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
-            Hey, {user?.name?.split(' ')[0] || 'Ground Owner'} 👋
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <h2 className="text-2xl font-extrabold text-navy-900">
+              Hey, {user?.name?.split(' ')[0] || 'Ground Owner'} 👋
+            </h2>
+            {user?.subscription === 'pro_active' && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 20,
+                background: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                color: '#fff', boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+              }}>
+                👑 Pro Active
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Role strip */}
-        {activeRole && setActiveRole && (
-          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
-        )}
+        <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} onLockedTap={setGateRole} />
+        {gateRole && <RoleGateSheet role={gateRole} onClose={() => setGateRole(null)} />}
 
         {/* Verification banner (only if not verified) */}
         {!isVerified && (

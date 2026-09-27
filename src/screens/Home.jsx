@@ -164,8 +164,12 @@ export default function Home() {
   const { user } = useStore()
   const role = user?.role || 'fan'
 
+  // All 4 roles always visible — store which tab was last active
   const [activeRole, setActiveRole] = useState(() => {
-    return localStorage.getItem('cy_active_role') || (role !== 'fan' ? role : 'player')
+    const stored = localStorage.getItem('cy_active_role')
+    const ALL_KEYS = ['player', 'organiser', 'umpire', 'ground_owner']
+    if (stored && ALL_KEYS.includes(stored)) return stored
+    return 'player'
   })
   const handleSetActiveRole = (r) => {
     setActiveRole(r)

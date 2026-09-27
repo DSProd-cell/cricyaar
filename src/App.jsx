@@ -73,6 +73,7 @@ import SendMoney       from './screens/SendMoney'
 import ReceiveMoney    from './screens/ReceiveMoney'
 import FetchPastRecord from './screens/FetchPastRecord'
 import YareinWelcome   from './screens/YareinWelcome'
+import AdminKyc        from './screens/AdminKyc'
 
 function AuthGuard({ children }) {
   const { user } = useStore()
@@ -134,25 +135,31 @@ function WhatsNewGate({ children }) {
     // cy_last_active check above is the only auto-logout gate.
     supabase.auth.getSession().then(({ data: { session } }) => {
       const storeUser = useStore.getState().user
-      if (session && !storeUser) {
-        // Have a valid Supabase session but no Zustand user — restore it
+      if (session) {
         supabase.from('profiles').select('*').eq('id', session.user.id).single()
           .then(({ data: profile }) => {
-            if (profile) {
-              _setUser({
-                id: session.user.id,
-                phone: session.user.phone,
-                name: profile.name || '',
-                username: profile.username || '',
-                city: profile.city || '',
-                role: profile.role || 'fan',
-                roles: profile.roles || ['fan'],
-                isNew: !profile.onboarded,
-                avatar: profile.avatar_url || null,
-                subscription: profile.subscription || 'free',
-                kycVerified: profile.kyc_verified || false,
-                groundOwnerVerified: profile.ground_owner_verified || false,
-              })
+            if (!profile) return
+            const prevKycStatus = storeUser?.kycStatus
+            _setUser({
+              id: session.user.id,
+              phone: session.user.phone,
+              name: profile.name || '',
+              username: profile.username || '',
+              city: profile.city || '',
+              role: profile.role || 'fan',
+              roles: profile.roles?.length ? profile.roles : [profile.role || 'player'],
+              isNew: !profile.onboarded,
+              avatar: profile.avatar_url || null,
+              subscription: profile.subscription || 'free',
+              kycVerified: profile.kyc_status === 'approved',
+              kycStatus: profile.kyc_status || null,
+              kycApprovedAt: profile.kyc_approved_at || null,
+              groundOwnerVerified: profile.ground_owner_verified || false,
+              playerSetupDone: profile.player_setup_done || false,
+            })
+            // Notify user if KYC was just approved since last session
+            if (prevKycStatus === 'pending' && profile.kyc_status === 'approved') {
+              setTimeout(() => useStore.getState().addToast('🎉 KYC has been verified', 'success'), 1500)
             }
           })
       }
@@ -343,6 +350,9 @@ export default function App() {
           <Route path="/ipl-pick"          element={<IplTeamPicker />} />
           <Route path="/fetch-past-record" element={<AuthGuard><FetchPastRecord /></AuthGuard>} />
           <Route path="/yarein-welcome"    element={<AuthGuard><YareinWelcome /></AuthGuard>} />
+
+          {/* Admin */}
+          <Route path="/admin/kyc" element={<AuthGuard><AdminKyc /></AuthGuard>} />
 
           {/* Legacy redirect */}
           <Route path="/usp" element={<Navigate to="/welcome" replace />} />

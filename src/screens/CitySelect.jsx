@@ -17,7 +17,7 @@ const CITIES = [
 
 export default function CitySelect() {
   const navigate  = useNavigate()
-  const { user, setUser } = useStore()
+  const { user, setUser, addToast } = useStore()
   const roleColor = getRoleColor(user?.role)
   const [selected, setSelected] = useState('')
   const [saving,   setSaving]   = useState(false)
@@ -58,14 +58,17 @@ export default function CitySelect() {
             return (
               <button
                 key={city.name}
-                onClick={() => city.active && setSelected(city.name)}
-                disabled={!city.active}
+                onClick={() => {
+                  if (city.active) { setSelected(city.name) }
+                  else { addToast('Currently available in Bangalore only', 'info') }
+                }}
+                disabled={false}
                 className="relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
                 style={{
                   borderColor: isSel ? roleColor.primary : city.active ? '#e2e8f0' : '#f1f5f9',
                   background:  isSel ? roleColor.light   : city.active ? '#fff'    : '#f8fafc',
-                  opacity:     city.active ? 1 : 0.6,
-                  cursor:      city.active ? 'pointer' : 'not-allowed',
+                  opacity:     city.active ? 1 : 0.65,
+                  cursor:      'pointer',
                   transform:   isSel ? 'scale(1.03)' : 'scale(1)',
                 }}
               >

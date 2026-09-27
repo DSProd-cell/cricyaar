@@ -5,6 +5,7 @@ import { MATCHES, PLAYERS, TEAMS, TOURNAMENTS, teamById, playerById } from '../d
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
 import RoleStrip from '../components/RoleStrip'
+import RoleGateSheet from '../components/RoleGateSheet'
 import {
   Activity, MapPin, Trophy, Eye, BarChart2, Building2, Circle,
   ChevronRight, Lock, Users, Send, Crown, Wallet, IndianRupee
@@ -72,14 +73,23 @@ function RoleChangePopup({ onClose }) {
 
 export default function PlayerHome({ activeRole, setActiveRole }) {
   const navigate  = useNavigate()
-  const { user }  = useStore()
+  const { user, setShowProSheet }  = useStore()
   const [scoreMatch, setScoreMatch]   = useState(null)
+  const [gateRole, setGateRole]       = useState(null)
+
+  const isPro = user?.subscription === 'pro_active' ||
+    (user?.subscription === 'pro_cancelled' && user?.pro_renewal_date && new Date(user.pro_renewal_date) > new Date())
 
   const player     = PLAYERS.find(p => p.id === user?.id) || PLAYERS[0]
   const myTeams    = TEAMS.filter(t => t.squad?.includes(player?.id))
   const myTourneys = TOURNAMENTS.filter(tr => tr.approvedTeams?.some(tid => myTeams.map(t => t.id).includes(tid)))
   const liveMatch  = MATCHES.find(m => m.status === 'live')
   const upcomingMatch = MATCHES.find(m => m.status === 'upcoming')
+
+  const proTap = (path) => {
+    if (isPro) navigate(path)
+    else setShowProSheet(true)
+  }
 
   const t1 = teamById(liveMatch?.team1)
   const t2 = teamById(liveMatch?.team2)
@@ -94,14 +104,36 @@ export default function PlayerHome({ activeRole, setActiveRole }) {
 
         {/* Greeting */}
         <div className="mb-4 animate-fade-in">
-          <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
-            Hey, {user?.name?.split(' ')[0] || 'Player'} 👋
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <h2 className="text-2xl font-extrabold text-navy-900">
+              Hey, {user?.name?.split(' ')[0] || 'Player'} 👋
+            </h2>
+            {isPro && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                fontSize: 11, fontWeight: 800,
+                padding: '3px 10px', borderRadius: 20,
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                color: '#fff',
+                boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+                letterSpacing: '0.02em',
+              }}>
+                <Crown size={10} color="#fff" /> Pro Active
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Role strip */}
-        {activeRole && setActiveRole && (
-          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
+        {/* Role strip — all 4 tabs always visible */}
+        <RoleStrip
+          activeRole={activeRole}
+          setActiveRole={setActiveRole}
+          onLockedTap={(key) => setGateRole(key)}
+        />
+
+        {/* KYC + Pro gate sheet */}
+        {gateRole && (
+          <RoleGateSheet role={gateRole} onClose={() => setGateRole(null)} />
         )}
 
         {/* Hero — live banner (read-only scorecard) */}
@@ -131,56 +163,93 @@ export default function PlayerHome({ activeRole, setActiveRole }) {
           </button>
         )}
 
-        {/* Active blocks */}
-        <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider mb-3">Your Dashboard</h3>
+        {/* Dashboard — free: live score only; rest = Pro */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <h3 className="font-bold text-navy-700 text-xs uppercase tracking-wider">Your Dashboard</h3>
+          {!isPro && (
+            <button
+              onClick={() => setShowProSheet(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
+                background: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                color: '#fff', border: 'none', cursor: 'pointer',
+              }}
+            >
+              <Crown size={10} /> Upgrade to Pro
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-3 mb-5 animate-slide-up">
 
+          {/* Live Scores — free for everyone */}
           <ActiveBlock
             icon={Activity}
             color="#16a34a"
             bg="#dcfce730"
             title="Live Scores"
-            sub={
-              <div className="space-y-0.5">
-                <p className="text-navy-500 text-[11px]">{MATCHES.filter(m => m.status === 'live').length} live now</p>
-                <p className="text-green-600 text-[10px] font-semibold flex items-center gap-0.5"><Crown size={9} className="inline" /> Scorecard (Pro)</p>
-              </div>
-            }
+            sub={<p className="text-navy-500 text-[11px]">{MATCHES.filter(m => m.status === 'live').length} live now</p>}
             onClick={() => liveMatch ? setScoreMatch(liveMatch) : navigate('/my-cricket')}
           />
 
-          <ActiveBlock
-            icon={MapPin}
-            color="#d97706"
-            bg="#fef3c730"
-            title="Find a Ground"
-            sub={<p className="text-navy-500 text-[11px] leading-tight">Search, browse & book grounds nearby</p>}
-            onClick={() => navigate('/grounds')}
-          />
+          {/* Find Ground — Pro */}
+          {isPro ? (
+            <ActiveBlock
+              icon={MapPin}
+              color="#d97706"
+              bg="#fef3c730"
+              title="Find a Ground"
+              sub={<p className="text-navy-500 text-[11px] leading-tight">Browse & book grounds nearby</p>}
+              onClick={() => navigate('/grounds')}
+            />
+          ) : (
+            <LockedBlock
+              icon={MapPin}
+              title="Find a Ground"
+              sub="Pro required to browse & book"
+              onTap={() => setShowProSheet(true)}
+            />
+          )}
 
-          <ActiveBlock
-            icon={Users}
-            color="#7c3aed"
-            bg="#f3e8ff30"
-            title="My Teams"
-            badge={myTeams.length > 0 ? `${myTeams.length} team${myTeams.length > 1 ? 's' : ''}` : null}
-            sub={<p className="text-navy-500 text-[11px] leading-tight">Join or manage your squad</p>}
-            onClick={() => navigate('/teams')}
-          />
+          {/* My Teams — Pro */}
+          {isPro ? (
+            <ActiveBlock
+              icon={Users}
+              color="#7c3aed"
+              bg="#f3e8ff30"
+              title="My Teams"
+              badge={myTeams.length > 0 ? `${myTeams.length} team${myTeams.length > 1 ? 's' : ''}` : null}
+              sub={<p className="text-navy-500 text-[11px] leading-tight">Join or manage your squad</p>}
+              onClick={() => navigate('/teams')}
+            />
+          ) : (
+            <LockedBlock
+              icon={Users}
+              title="My Teams"
+              sub="Pro required to join teams"
+              onTap={() => setShowProSheet(true)}
+            />
+          )}
 
-          <ActiveBlock
-            icon={Trophy}
-            color="#2563eb"
-            bg="#dbeafe30"
-            title="Tournaments"
-            badge={myTourneys.length > 0 ? `${myTourneys.length} joined` : null}
-            sub={
-              <div className="space-y-0.5">
-                <p className="text-navy-500 text-[11px]">Join as player or captain</p>
-              </div>
-            }
-            onClick={() => navigate('/open-tournaments')}
-          />
+          {/* Tournaments — Pro */}
+          {isPro ? (
+            <ActiveBlock
+              icon={Trophy}
+              color="#2563eb"
+              bg="#dbeafe30"
+              title="Tournaments"
+              badge={myTourneys.length > 0 ? `${myTourneys.length} joined` : null}
+              sub={<p className="text-navy-500 text-[11px]">Join as player or captain</p>}
+              onClick={() => navigate('/open-tournaments')}
+            />
+          ) : (
+            <LockedBlock
+              icon={Trophy}
+              title="Tournaments"
+              sub="Pro required to participate"
+              onTap={() => setShowProSheet(true)}
+            />
+          )}
         </div>
 
         {/* Pay / Request row */}

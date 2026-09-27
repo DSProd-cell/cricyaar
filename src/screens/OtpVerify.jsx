@@ -103,10 +103,14 @@ export default function OtpVerify() {
       if (!user?.phone) {
         setUser({
           id: authUser.id, phone: authUser.phone, name: profile?.name || user?.name || '',
-          city: profile?.city || '', role: profile?.role || 'fan', roles: profile?.roles || ['fan'],
+          city: profile?.city || '', role: profile?.role || 'player',
+          roles: profile?.roles?.length ? profile.roles : [profile?.role || 'player'],
           isNew: !profile?.onboarded, avatar: profile?.avatar_url || null,
           lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
           upiId: profile?.upi_id || null,
+          kycStatus: profile?.kyc_status || null,
+          kycVerified: profile?.kyc_status === 'approved',
+          kycApprovedAt: profile?.kyc_approved_at || null,
         })
       }
       addToast('Account created! Welcome to CricYaar.', 'success')
@@ -128,15 +132,22 @@ export default function OtpVerify() {
         id: authUser.id, phone: authUser.phone,
         name: (isNewUser && pendingSignup) ? pendingSignup.fullName : (profile?.name || ''),
         username: (isNewUser && pendingSignup) ? pendingSignup.cricketName : (profile?.username || ''),
-        city: profile?.city || '', role: restoredRole, roles: profile?.roles || [restoredRole],
+        city: profile?.city || '', role: profile?.role || 'player',
+        roles: profile?.roles?.length ? profile.roles : [profile?.role || 'player'],
         isNew: isNewUser, avatar: profile?.avatar_url || null,
         lastRoleChangedAt: profile?.last_role_changed_at || null, subscription: profile?.subscription || 'free',
         upiId: profile?.upi_id || null,
+        kycStatus: profile?.kyc_status || null,
+        kycVerified: profile?.kyc_status === 'approved',
+        kycApprovedAt: profile?.kyc_approved_at || null,
+        playerSetupDone: profile?.player_setup_done || false,
       })
       localStorage.setItem('whats_new_seen_version', 'v3')
       // Reset referral popup so it fires after every login/signup
       sessionStorage.removeItem('cy_invite_popup_shown')
       if (isNewUser) {
+        // New users: profile setup → cricket style → IPL pick → home
+        // Skip RoleOnboard — everyone starts as Player, other roles unlocked via KYC+Pro
         navigate('/profile-match')
       } else if (proIntent) {
         addToast('Phone verified! Complete your Pro setup.', 'success')

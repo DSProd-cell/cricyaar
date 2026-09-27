@@ -5,6 +5,7 @@ import { MATCHES, TEAMS, TOURNAMENTS, teamById } from '../data/mock'
 import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
 import RoleStrip from '../components/RoleStrip'
+import RoleGateSheet from '../components/RoleGateSheet'
 import {
   BarChart2, Trophy, MapPin, Activity, Eye, Building2,
   Circle, ChevronRight, Lock, Users, Send, Crown, Check,
@@ -238,6 +239,7 @@ export default function OrganiserHome({ activeRole, setActiveRole }) {
   const { user } = useStore()
   const [showAddTeams, setShowAddTeams] = useState(false)
   const [scoreMatch, setScoreMatch]   = useState(null)
+  const [gateRole, setGateRole]       = useState(null)
 
   const isPro = user?.subscription === 'pro_active'
 
@@ -256,15 +258,26 @@ export default function OrganiserHome({ activeRole, setActiveRole }) {
 
         {/* Greeting */}
         <div className="mb-4 animate-fade-in">
-          <h2 className="text-2xl font-extrabold text-navy-900 mb-1">
-            Hey, {user?.name?.split(' ')[0] || 'Organiser'} 👋
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <h2 className="text-2xl font-extrabold text-navy-900">
+              Hey, {user?.name?.split(' ')[0] || 'Organiser'} 👋
+            </h2>
+            {isPro && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 20,
+                background: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                color: '#fff', boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+              }}>
+                👑 Pro Active
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Role strip */}
-        {activeRole && setActiveRole && (
-          <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} />
-        )}
+        <RoleStrip activeRole={activeRole} setActiveRole={setActiveRole} onLockedTap={setGateRole} />
+        {gateRole && <RoleGateSheet role={gateRole} onClose={() => setGateRole(null)} />}
 
         {/* Hero — stats bar */}
         <div

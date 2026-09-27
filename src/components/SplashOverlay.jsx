@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
 // Called by the sign-out handler to force the splash to show again.
@@ -33,6 +33,7 @@ const PARTICLES = [
 export default function SplashOverlay() {
   const { user, showSplash, setShowSplash } = useStore()
   const navigate  = useNavigate()
+  const location  = useLocation()
   const [fading, setFading]     = useState(false)
   const [ready, setReady]       = useState(false)
   const [showStats, setShowStats] = useState(false)
@@ -61,7 +62,10 @@ export default function SplashOverlay() {
 
   useEffect(() => {
     if (!showSplash) return
-    if (user) { dismissTo('/'); return }
+    // If user is already on a real app route, just dismiss the splash without redirecting
+    const authRoutes = ['/welcome', '/login', '/otp']
+    const isOnAuthRoute = authRoutes.includes(location.pathname)
+    if (user) { dismissTo(isOnAuthRoute ? '/' : null); return }
     setReady(false)
     setShowStats(false)
     setProgress(0)

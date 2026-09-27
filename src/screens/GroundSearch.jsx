@@ -200,24 +200,28 @@ export default function GroundSearch() {
   const [myCoords,     setMyCoords]     = useState(lastKnownCoords)
   const [locating,     setLocating]     = useState(false)
 
+  const [locDenied, setLocDenied] = useState(false)
+
   const handleNearMe = async () => {
     if (myCoords) { setMyCoords(null); return } // toggle off
     setLocating(true)
+    setLocDenied(false)
     const c = await getCurrentCoords()
     setLocating(false)
-    if (!c) return
+    if (!c) { setLocDenied(true); return }
     setMyCoords(c)
     setLastKnownCoords(c)
   }
 
-  // Silently refresh location in the background on open — updates the map
-  // once a fresh fix lands, without blocking the (already-shown) last-known
-  // position or popping a loading spinner for it.
+  // Auto-request location on open — if no saved coords, ask immediately
+  // so grounds are sorted by distance without requiring a manual tap.
   useEffect(() => {
     let cancelled = false
-    getCurrentCoords().then(c => {
+    const autoDetect = async () => {
+      const c = await getCurrentCoords()
       if (!cancelled && c) { setMyCoords(c); setLastKnownCoords(c) }
-    })
+    }
+    autoDetect()
     return () => { cancelled = true }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -362,8 +366,16 @@ export default function GroundSearch() {
       <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-28">
         <div className="flex items-center gap-1.5 text-brand-600 text-xs font-medium mb-3">
           <MapPin size={12} />
-          <span>Live in Bengaluru only — other cities coming soon</span>
+          <span>
+            {myCoords ? 'Sorted by your distance · Bengaluru' : 'Live in Bengaluru only — other cities coming soon'}
+          </span>
         </div>
+        {locDenied && (
+          <div className="mb-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-2 text-xs text-amber-700 font-medium">
+            <MapPin size={12} className="flex-shrink-0" />
+            <span>Location access denied. Enable it in Settings to sort by distance.</span>
+          </div>
+        )}
         {loading ? (
           <div className="text-center py-16 text-navy-400 text-sm">Loading grounds…</div>
         ) : loadError ? (

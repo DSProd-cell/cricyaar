@@ -4,9 +4,16 @@ import { Search, ArrowLeft, Radio, CheckCircle2, ChevronRight } from 'lucide-rea
 
 // Mock match records — in prod these come from Supabase
 const MOCK_RECORDS = [
-  { id: 1, name: 'Debasish Patro', role: 'Batsman', club: 'Eden Gardens Cricket Club', matches: 4, runs: 247, wickets: 0, mom: 2, lastMatch: 'Aug 12, 2024' },
-  { id: 2, name: 'Debasish Roy', role: 'All-rounder', club: 'Kolkata District League', matches: 2, runs: 88, wickets: 3, mom: 0, lastMatch: 'Jul 5, 2024' },
-  { id: 3, name: 'Debasish Singh', role: 'Umpire', club: 'Punjab Warriors T20', matches: 6, runs: 0, wickets: 0, mom: 0, lastMatch: 'Sep 1, 2024' },
+  { id: 1, name: 'Debasish Patro',    role: 'Batsman',     club: 'Eden Gardens Cricket Club',    matches: 4,  runs: 247, wickets: 0,  mom: 2, lastMatch: 'Aug 12, 2024' },
+  { id: 2, name: 'Debasish Roy',      role: 'All-rounder', club: 'Kolkata District League',       matches: 2,  runs: 88,  wickets: 3,  mom: 0, lastMatch: 'Jul 5, 2024'  },
+  { id: 3, name: 'Debasish Singh',    role: 'Umpire',      club: 'Punjab Warriors T20',           matches: 6,  runs: 0,   wickets: 0,  mom: 0, lastMatch: 'Sep 1, 2024'  },
+  // Swapnil
+  { id: 4, name: 'Swapnil Patil',     role: 'Batsman',     club: 'Bengaluru Strikers CC',         matches: 18, runs: 612, wickets: 4,  mom: 5, lastMatch: 'Sep 14, 2024' },
+  { id: 5, name: 'Swapnil Kulkarni',  role: 'All-rounder', club: 'Whitefield Warriors',           matches: 11, runs: 344, wickets: 12, mom: 3, lastMatch: 'Aug 28, 2024' },
+  { id: 6, name: 'Swapnil Deshmukh', role: 'Bowler',       club: 'Koramangala XI',                matches: 9,  runs: 41,  wickets: 19, mom: 2, lastMatch: 'Sep 3, 2024'  },
+  // Siddhant Maruti
+  { id: 7, name: 'Siddhant Maruti',   role: 'All-rounder', club: 'Indiranagar Cricket Club',      matches: 14, runs: 489, wickets: 21, mom: 4, lastMatch: 'Sep 20, 2024' },
+  { id: 8, name: 'Siddhant M.',       role: 'Batsman',     club: 'Bengaluru Premier League T20',  matches: 7,  runs: 276, wickets: 2,  mom: 1, lastMatch: 'Aug 18, 2024' },
 ]
 
 function ScannerFrame({ active }) {

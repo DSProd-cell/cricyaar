@@ -31,13 +31,13 @@ function realProfileShape(user) {
   }
 }
 
-const CITIES = ['Mumbai','Delhi','Bengaluru','Chennai','Hyderabad','Kolkata','Pune','Chandigarh','Rajkot','Other']
+const CITIES = ['Bengaluru']
 const PLAYER_TABS = ['Overview','Batting','Bowling','Fielding','Matches','My Teams']
 
 // ─── Edit Profile Sheet ──────────────────────────────────────────────────────
 function EditProfileSheet({ player, onClose, onSave }) {
   const [name, setName]     = useState(player.name)
-  const [city, setCity]     = useState(player.city)
+  const [city, setCity]     = useState('Bengaluru')
   const [bio, setBio]       = useState(player.bio || '')
   const [saving, setSaving] = useState(false)
 
@@ -59,9 +59,11 @@ function EditProfileSheet({ player, onClose, onSave }) {
           </div>
           <div>
             <label className="block text-sm font-bold text-navy-700 mb-1.5">City</label>
-            <select className="cm-select w-full" value={city} onChange={e => setCity(e.target.value)}>
-              {CITIES.map(c => <option key={c}>{c}</option>)}
-            </select>
+            <div className="cm-input flex items-center justify-between bg-slate-50 cursor-not-allowed select-none">
+              <span className="font-semibold text-navy-800">Bengaluru</span>
+              <span className="text-[10px] font-bold text-brand-600 bg-brand-50 border border-brand-200 rounded-full px-2 py-0.5 uppercase tracking-wide">Live</span>
+            </div>
+            <p className="text-navy-400 text-xs mt-1">Currently available in Bengaluru only.</p>
           </div>
           <div>
             <label className="block text-sm font-bold text-navy-700 mb-1.5">
@@ -303,23 +305,25 @@ export default function PlayerProfile() {
 
       {/* ── Hero Card ───────────────────────────────────────────────────── */}
       <div className="bg-[var(--cy-surface)] relative">
-        {/* Dark Banner */}
+        {/* Role-colored gradient banner */}
         <div
-          className="relative h-[110px]"
-          style={{ background: 'linear-gradient(135deg, #0d0b1e 0%, #1a1035 60%, #0f172a 100%)' }}
+          className="relative h-[130px] overflow-hidden"
+          style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom} 0%, ${roleColor.gradientTo} 100%)` }}
         >
           {/* Subtle grid texture */}
           <div
             className="absolute inset-0"
             style={{
               backgroundImage: [
-                'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,255,255,0.03) 20px)',
-                'repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255,255,255,0.03) 20px)',
+                'repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(255,255,255,0.05) 20px)',
+                'repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255,255,255,0.05) 20px)',
               ].join(', '),
             }}
           />
-          {/* Purple glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 50% 130%, rgba(124,58,237,0.18) 0%, transparent 70%)' }} />
+          {/* Radial glow bottom center */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 140%, rgba(255,255,255,0.18) 0%, transparent 70%)' }} />
+          {/* Large decorative emoji top-right */}
+          <div className="absolute -right-2 -top-2 text-[80px] opacity-10 select-none pointer-events-none leading-none">{roleColor.emoji}</div>
           {/* Edit button top-right */}
           {isOwnProfile && (
             <button
@@ -365,8 +369,8 @@ export default function PlayerProfile() {
 
           {/* Name / username / role tags */}
           <div className="mt-3">
-            <h1 className="font-extrabold text-navy-900 text-xl leading-tight">{player.name}</h1>
-            {player.username && <p className="text-navy-400 text-sm mt-0.5">@{player.username}</p>}
+            <h1 className="font-black text-navy-900 text-[22px] leading-tight tracking-tight">{player.name}</h1>
+            {player.username && <p className="text-navy-400 text-sm mt-0.5 font-medium">@{player.username}</p>}
 
             {/* All roles — active/most-used first */}
             {(() => {
@@ -407,6 +411,9 @@ export default function PlayerProfile() {
                 {player.city && user?.phone && isOwnProfile && <span className="mx-1">·</span>}
                 {user?.phone && isOwnProfile && <span>{user.phone}</span>}
               </p>
+            )}
+            {player.bio && (
+              <p className="text-navy-600 text-sm mt-2 leading-snug">{player.bio}</p>
             )}
           </div>
 
@@ -528,12 +535,9 @@ export default function PlayerProfile() {
 
             {/* KYC — gated to organiser/umpire/ground_owner */}
             {needsAadhaar && (
-              user?.kycVerified ? (
-                /* Verified state — non-clickable */
-                <div
-                  className="w-full flex items-center gap-3 px-4 py-4"
-                  style={{ borderBottom: `1px solid ${roleColor.border}` }}
-                >
+              user?.kycStatus === 'approved' ? (
+                /* Approved state */
+                <div className="w-full flex items-center gap-3 px-4 py-4" style={{ borderBottom: `1px solid ${roleColor.border}` }}>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#dcfce7' }}>
                     <ShieldCheck size={17} className="text-green-600" />
                   </div>
@@ -543,13 +547,33 @@ export default function PlayerProfile() {
                   </div>
                   <span className="text-xs font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-1 rounded-lg flex-shrink-0">Done</span>
                 </div>
+              ) : user?.kycStatus === 'pending' ? (
+                /* Pending admin review */
+                <div className="w-full flex items-center gap-3 px-4 py-4" style={{ borderBottom: `1px solid ${roleColor.border}` }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fef3c7' }}>
+                    <ShieldCheck size={17} className="text-amber-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-navy-900 text-sm">KYC Verification</p>
+                    <p className="text-xs mt-0.5 text-amber-600 font-semibold">⏳ Pending admin review</p>
+                  </div>
+                  <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg flex-shrink-0">Pending</span>
+                </div>
+              ) : user?.kycStatus === 'rejected' ? (
+                /* Rejected — allow re-submission */
+                <button onClick={() => navigate('/aadhaar-verify')} className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left" style={{ borderBottom: `1px solid ${roleColor.border}` }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fee2e2' }}>
+                    <ShieldCheck size={17} className="text-red-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-navy-900 text-sm">KYC Verification</p>
+                    <p className="text-xs mt-0.5 text-red-500 font-semibold">✗ Rejected — tap to resubmit</p>
+                  </div>
+                  <ChevronRight size={16} className="text-red-400 flex-shrink-0" />
+                </button>
               ) : (
-                /* Not verified — action button */
-                <button
-                  onClick={() => navigate('/aadhaar-verify')}
-                  className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
-                  style={{ borderBottom: `1px solid ${roleColor.border}` }}
-                >
+                /* Not submitted yet */
+                <button onClick={() => navigate('/aadhaar-verify')} className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left" style={{ borderBottom: `1px solid ${roleColor.border}` }}>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
                     <ShieldCheck size={17} style={{ color: roleColor.primary }} />
                   </div>
@@ -625,22 +649,21 @@ export default function PlayerProfile() {
 
             {/* Theme */}
             <div
-              className="w-full flex items-center gap-3 px-4 py-4"
+              className="w-full px-4 py-4"
               style={{ borderBottom: `1px solid ${roleColor.border}` }}
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
-                {(themeMode || 'auto') === 'dark'
-                  ? <Moon size={17} style={{ color: roleColor.primary }} />
-                  : (themeMode || 'auto') === 'light'
-                    ? <Sun size={17} style={{ color: roleColor.primary }} />
-                    : <Zap size={17} style={{ color: roleColor.primary }} />
-                }
-              </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+                  {(themeMode || 'auto') === 'dark'
+                    ? <Moon size={17} style={{ color: roleColor.primary }} />
+                    : (themeMode || 'auto') === 'light'
+                      ? <Sun size={17} style={{ color: roleColor.primary }} />
+                      : <Zap size={17} style={{ color: roleColor.primary }} />
+                  }
+                </div>
                 <p className="font-semibold text-navy-900 text-sm">App Theme</p>
-                <p className="text-navy-400 text-xs mt-0.5">Choose how the app looks</p>
               </div>
-              <div className="flex items-center gap-1 rounded-xl overflow-hidden flex-shrink-0" style={{ border: `1.5px solid ${roleColor.border}`, background: roleColor.light }}>
+              <div className="flex rounded-xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}`, background: roleColor.light }}>
                 {[
                   { id: 'light', icon: <Sun size={13} />, label: 'Light' },
                   { id: 'auto',  icon: <Zap size={13} />,  label: 'Auto'  },
@@ -651,7 +674,7 @@ export default function PlayerProfile() {
                     <button
                       key={opt.id}
                       onClick={() => setThemeMode(opt.id)}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold transition-all"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[12px] font-bold transition-all"
                       style={{
                         background: active ? roleColor.primary : 'transparent',
                         color: active ? '#fff' : roleColor.primary,
@@ -696,56 +719,108 @@ export default function PlayerProfile() {
       {/* ── Stats Tabs (Player role only for own profile, or any role for others) ── */}
       {(role === 'player' || playerId) && (
         <>
-          <div className="tab-bar mt-4 bg-[var(--cy-surface)] border-t border-b border-slate-100">
-            {PLAYER_TABS.map(t => (
-              <button key={t} className={`tab-item flex-shrink-0 ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>{t}</button>
-            ))}
+          <div className="sticky top-0 z-10 bg-[var(--cy-surface)] flex overflow-x-auto"
+            style={{ borderBottom: `2px solid var(--cy-border)`, scrollbarWidth: 'none' }}>
+            {PLAYER_TABS.map(t => {
+              const active = tab === t
+              return (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className="flex-shrink-0 px-4 py-3 text-[13px] whitespace-nowrap transition-colors"
+                  style={{
+                    color: active ? roleColor.primary : 'var(--cy-muted)',
+                    fontWeight: active ? 700 : 500,
+                    borderBottom: active ? `2.5px solid ${roleColor.primary}` : '2.5px solid transparent',
+                    marginBottom: -2,
+                  }}
+                >
+                  {t}
+                </button>
+              )
+            })}
           </div>
 
           <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-24">
             {/* OVERVIEW */}
             {tab === 'Overview' && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { label:'Batting Avg', val:avg(player.batting.runs, player.batting.dismissed) },
-                    { label:'Strike Rate', val:sr(player.batting.runs, player.batting.innings * 22) },
-                    { label:'High Score',  val:player.batting.hs },
-                  ].map(s => (
-                    <div key={s.label} className="stat-tile">
-                      <p className="font-bold text-navy-900 text-lg tabular-nums">{s.val}</p>
-                      <p className="text-navy-400 text-xs">{s.label}</p>
-                    </div>
-                  ))}
+              <div className="space-y-3 animate-fade-in">
+                {/* Key batting stats */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <div className="grid grid-cols-3">
+                    {[
+                      { label:'Batting Avg', val:avg(player.batting.runs, player.batting.dismissed) },
+                      { label:'Strike Rate', val:sr(player.batting.runs, player.batting.innings * 22) },
+                      { label:'High Score',  val:player.batting.hs },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col items-center py-4 px-2"
+                        style={i < 2 ? { borderRight: `1px solid ${roleColor.border}` } : undefined}>
+                        <p className="font-black text-[22px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[10px] font-semibold mt-1.5 text-center leading-tight">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="card">
-                  <h3 className="font-semibold text-navy-900 text-sm mb-3">Recent form (last 5 innings)</h3>
-                  <ResponsiveContainer width="100%" height={100}>
-                    <BarChart data={chartData} barSize={28}>
-                      <XAxis dataKey="inn" tick={{fontSize:11,fill:'#94a3b8'}} axisLine={false} tickLine={false} />
-                      <YAxis hide />
-                      <Tooltip
-                        contentStyle={{background:'#0f172a',border:'none',borderRadius:8,color:'#fff',fontSize:12,padding:'4px 10px'}}
-                        formatter={(v, _n, props) => [`${v} runs`, props?.payload?.matchName || '']}
-                        cursor={{fill:'rgba(34,197,94,0.06)'}}
-                      />
-                      <Bar dataKey="runs" radius={[6,6,0,0]}>
-                        {chartData.map((d, i) => <Cell key={i} fill={d.runs >= 50 ? '#22c55e' : '#e2e8f0'} />)}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { label:'50s',   val:player.batting.fifties  },
-                    { label:'100s',  val:player.batting.hundreds },
-                    { label:'Ducks', val:player.batting.ducks    },
-                  ].map(s => (
-                    <div key={s.label} className="stat-tile">
-                      <p className="font-bold text-navy-900 text-lg tabular-nums">{s.val}</p>
-                      <p className="text-navy-400 text-xs">{s.label}</p>
+
+                {/* Recent form chart */}
+                <div className="bg-[var(--cy-surface)] rounded-2xl p-4" style={{ border: `1.5px solid ${roleColor.border}` }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-navy-900 text-sm">Recent Form</h3>
+                    <span className="text-[10px] font-semibold text-navy-400">Last 5 innings</span>
+                  </div>
+                  {chartData.every(d => d.runs === 0) ? (
+                    <div className="flex flex-col items-center justify-center py-6 gap-1">
+                      <BarChart2 size={28} className="opacity-20" style={{ color: roleColor.primary }} />
+                      <p className="text-navy-400 text-xs font-medium mt-1">No innings recorded yet</p>
                     </div>
-                  ))}
+                  ) : (
+                    <ResponsiveContainer width="100%" height={120}>
+                      <BarChart data={chartData} barSize={32} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                        <XAxis dataKey="inn" tick={{fontSize:11,fill:'#94a3b8',fontWeight:600}} axisLine={false} tickLine={false} />
+                        <YAxis hide />
+                        <Tooltip
+                          contentStyle={{background:'#0f172a',border:'none',borderRadius:10,color:'#fff',fontSize:12,padding:'6px 12px'}}
+                          formatter={(v, _n, props) => [`${v} runs`, props?.payload?.matchName || '']}
+                          cursor={{fill:'rgba(124,58,237,0.06)'}}
+                        />
+                        <Bar dataKey="runs" radius={[6,6,2,2]}>
+                          {chartData.map((d, i) => <Cell key={i} fill={d.runs >= 50 ? '#22c55e' : d.runs > 0 ? roleColor.primary : roleColor.border} />)}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+
+                {/* Milestones row */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: roleColor.primary }}>Milestones</p>
+                  <div className="grid grid-cols-3 pb-2">
+                    {[
+                      { label:'Fifties',  val:player.batting.fifties,  icon:'🏅' },
+                      { label:'Hundreds', val:player.batting.hundreds, icon:'💯' },
+                      { label:'Ducks',    val:player.batting.ducks,    icon:'🦆' },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col items-center py-3 px-2"
+                        style={i < 2 ? { borderRight: `1px solid ${roleColor.border}` } : undefined}>
+                        <span className="text-lg leading-none mb-1">{s.icon}</span>
+                        <p className="font-black text-[20px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[10px] font-semibold mt-1">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Total runs highlight */}
+                <div className="rounded-2xl px-5 py-4 flex items-center justify-between"
+                  style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` }}>
+                  <div>
+                    <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">Total Runs</p>
+                    <p className="font-black text-white text-[32px] tabular-nums leading-tight">{player.batting.runs}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">Innings</p>
+                    <p className="font-black text-white text-[32px] tabular-nums leading-tight">{player.batting.innings}</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -753,60 +828,136 @@ export default function PlayerProfile() {
             {/* BATTING */}
             {tab === 'Batting' && (
               <div className="space-y-3 animate-fade-in">
-                {[
-                  { label:'Total Runs',       val:player.batting.runs      },
-                  { label:'Innings',          val:player.batting.innings   },
-                  { label:'Times Dismissed',  val:player.batting.dismissed },
-                  { label:'Not Outs',         val:player.batting.notOut    },
-                  { label:'Average',          val:avg(player.batting.runs, player.batting.dismissed) },
-                  { label:'Strike Rate',      val:sr(player.batting.runs, player.batting.innings*22) },
-                  { label:'Highest Score',    val:player.batting.hs        },
-                  { label:'Fifties',          val:player.batting.fifties   },
-                  { label:'Hundreds',         val:player.batting.hundreds  },
-                  { label:'Ducks',            val:player.batting.ducks     },
-                ].map(s => (
-                  <div key={s.label} className="flex items-center justify-between py-2 border-b border-slate-50">
-                    <span className="text-navy-500 text-sm">{s.label}</span>
-                    <span className="font-bold text-navy-900 tabular-nums">{s.val}</span>
+                {/* Hero banner */}
+                <div className="rounded-2xl px-5 py-4 flex items-center justify-between"
+                  style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` }}>
+                  <div>
+                    <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">Total Runs</p>
+                    <p className="font-black text-white text-[32px] tabular-nums leading-tight">{player.batting.runs}</p>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">Average</p>
+                    <p className="font-black text-white text-[32px] tabular-nums leading-tight">{avg(player.batting.runs, player.batting.dismissed)}</p>
+                  </div>
+                </div>
+                {/* Core stats grid */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: roleColor.primary }}>Core Stats</p>
+                  <div className="grid grid-cols-2 pb-2">
+                    {[
+                      { label:'Innings',         val:player.batting.innings   },
+                      { label:'Highest Score',   val:player.batting.hs        },
+                      { label:'Strike Rate',     val:sr(player.batting.runs, player.batting.innings*22) },
+                      { label:'Not Outs',        val:player.batting.notOut    },
+                      { label:'Times Dismissed', val:player.batting.dismissed },
+                      { label:'Ducks',           val:player.batting.ducks     },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col px-4 py-3"
+                        style={{
+                          borderRight: i % 2 === 0 ? `1px solid ${roleColor.border}` : undefined,
+                          borderTop: i >= 2 ? `1px solid ${roleColor.border}` : undefined,
+                        }}>
+                        <p className="font-black text-[20px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[11px] font-semibold mt-1">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Milestones */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: roleColor.primary }}>Milestones</p>
+                  <div className="grid grid-cols-2 pb-2">
+                    {[
+                      { label:'Fifties',  val:player.batting.fifties,  icon:'🏅' },
+                      { label:'Hundreds', val:player.batting.hundreds, icon:'💯' },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col items-center py-4"
+                        style={i === 0 ? { borderRight: `1px solid ${roleColor.border}` } : undefined}>
+                        <span className="text-xl leading-none mb-1">{s.icon}</span>
+                        <p className="font-black text-[24px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[11px] font-semibold mt-1">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
             {/* BOWLING */}
             {tab === 'Bowling' && (
               <div className="space-y-3 animate-fade-in">
-                {[
-                  { label:'Wickets',       val:player.bowling.wkts  },
-                  { label:'Overs Bowled',  val:player.bowling.overs },
-                  { label:'Runs Conceded', val:player.bowling.runs  },
-                  { label:'Economy Rate',  val:eco(player.bowling.runs, player.bowling.overs) },
-                  { label:'Average',       val:avg(player.bowling.runs, player.bowling.wkts) },
-                  { label:'Best Figures',  val:player.bowling.best  },
-                  { label:'3-Wkt Hauls',   val:player.bowling.threeWickets },
-                  { label:'5-Wkt Hauls',   val:player.bowling.fiveWickets  },
-                ].map(s => (
-                  <div key={s.label} className="flex items-center justify-between py-2 border-b border-slate-50">
-                    <span className="text-navy-500 text-sm">{s.label}</span>
-                    <span className="font-bold text-navy-900 tabular-nums">{s.val}</span>
+                {/* Hero banner */}
+                <div className="rounded-2xl px-5 py-4 flex items-center justify-between"
+                  style={{ background: `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` }}>
+                  <div>
+                    <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">Wickets</p>
+                    <p className="font-black text-white text-[32px] tabular-nums leading-tight">{player.bowling.wkts}</p>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wide">Economy</p>
+                    <p className="font-black text-white text-[32px] tabular-nums leading-tight">{eco(player.bowling.runs, player.bowling.overs)}</p>
+                  </div>
+                </div>
+                {/* Core stats grid */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: roleColor.primary }}>Core Stats</p>
+                  <div className="grid grid-cols-2 pb-2">
+                    {[
+                      { label:'Overs Bowled',  val:player.bowling.overs },
+                      { label:'Runs Conceded', val:player.bowling.runs  },
+                      { label:'Average',       val:avg(player.bowling.runs, player.bowling.wkts) },
+                      { label:'Best Figures',  val:player.bowling.best  },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col px-4 py-3"
+                        style={{
+                          borderRight: i % 2 === 0 ? `1px solid ${roleColor.border}` : undefined,
+                          borderTop: i >= 2 ? `1px solid ${roleColor.border}` : undefined,
+                        }}>
+                        <p className="font-black text-[20px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[11px] font-semibold mt-1">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Hauls */}
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest px-4 pt-3 pb-1" style={{ color: roleColor.primary }}>Hauls</p>
+                  <div className="grid grid-cols-2 pb-2">
+                    {[
+                      { label:'3-Wkt Hauls', val:player.bowling.threeWickets, icon:'⚡' },
+                      { label:'5-Wkt Hauls', val:player.bowling.fiveWickets,  icon:'🔥' },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col items-center py-4"
+                        style={i === 0 ? { borderRight: `1px solid ${roleColor.border}` } : undefined}>
+                        <span className="text-xl leading-none mb-1">{s.icon}</span>
+                        <p className="font-black text-[24px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[11px] font-semibold mt-1">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
             {/* FIELDING */}
             {tab === 'Fielding' && (
               <div className="space-y-3 animate-fade-in">
-                {[
-                  { label:'Catches',         val:player.fielding.catches  },
-                  { label:'Direct Run-outs', val:player.fielding.runOuts  },
-                  { label:'Stumpings',       val:player.fielding.stumpings },
-                ].map(s => (
-                  <div key={s.label} className="flex items-center justify-between py-2 border-b border-slate-50">
-                    <span className="text-navy-500 text-sm">{s.label}</span>
-                    <span className="font-bold text-navy-900 tabular-nums">{s.val}</span>
+                <div className="rounded-2xl overflow-hidden" style={{ background: roleColor.light, border: `1.5px solid ${roleColor.border}` }}>
+                  <div className="grid grid-cols-3">
+                    {[
+                      { label:'Catches',     val:player.fielding.catches,   icon:'🤝' },
+                      { label:'Run-outs',    val:player.fielding.runOuts,   icon:'🎯' },
+                      { label:'Stumpings',   val:player.fielding.stumpings, icon:'🏏' },
+                    ].map((s, i) => (
+                      <div key={s.label} className="flex flex-col items-center py-5"
+                        style={i < 2 ? { borderRight: `1px solid ${roleColor.border}` } : undefined}>
+                        <span className="text-xl leading-none mb-2">{s.icon}</span>
+                        <p className="font-black text-[26px] tabular-nums leading-none" style={{ color: roleColor.primary }}>{s.val}</p>
+                        <p className="text-navy-500 text-[11px] font-semibold mt-1.5">{s.label}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             )}
 

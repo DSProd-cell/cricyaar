@@ -1,22 +1,10 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
-import { Check, Megaphone, Swords, ClipboardList, Scale, Building2, MapPin, ArrowLeft, ArrowRight, Shield } from 'lucide-react'
+import { Check, Swords, ClipboardList, Scale, Building2, MapPin, ArrowLeft, ArrowRight, Shield } from 'lucide-react'
 
 const ROLES = [
-  {
-    id: 'fan',
-    label: 'Fan',
-    Icon: Megaphone,
-    color: '#0891b2',
-    bg: '#ecfeff',
-    border: '#a5f3fc',
-    darkBg: '#164e63',
-    emoji: '📣',
-    tagline: 'Live the game from the stands',
-    desc: 'Follow live scores, cheer for your favourite teams, and track matches happening in your city — no bat or ball required.',
-  },
   {
     id: 'player',
     label: 'Player',
@@ -86,28 +74,50 @@ export default function RoleOnboard() {
   const preRole = location.state?.preSelectedRole || null
 
   const [step, setStep] = useState(1)           // 1 = role, 2 = city
-  const [selectedRole, setSelectedRole] = useState(preRole || '')
+  // Multi-select: default to ['player'] unless a pre-role came in
+  const [selectedRoles, setSelectedRoles] = useState(
+    preRole ? [preRole] : ['player']
+  )
   const [city, setCity] = useState('')
   const [customCity, setCustomCity] = useState('')
   const [consent, setConsent] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const roleData = ROLES.find(r => r.id === selectedRole)
+  // One-time guard: already onboarded → go home (after all hooks)
+  if (user?.isNew === false) {
+    return <Navigate to="/" replace />
+  }
+
+  // Primary role = first selected (drives color/CTA label)
+  const primaryRole = selectedRoles[0] || 'player'
+  const roleData    = ROLES.find(r => r.id === primaryRole)
+
+  const toggleRole = (id) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(id)) {
+        // Keep at least one
+        if (prev.length === 1) return prev
+        return prev.filter(r => r !== id)
+      }
+      // New role goes to front if it's player, else append
+      return id === 'player' ? [id, ...prev] : [...prev, id]
+    })
+  }
 
   const handleRoleContinue = () => {
-    if (!selectedRole) return
+    if (!selectedRoles.length) return
     setStep(2)
   }
 
   const handleFinish = async () => {
     const finalCity = city === 'Other' ? customCity.trim() : city
-    // city is stored as the city name string, objects in CITIES are just for rendering
     if (!finalCity) return
     setLoading(true)
 
+    const primary = selectedRoles[0]
     const updates = {
-      role: selectedRole,
-      roles: [selectedRole],
+      role: primary,
+      roles: selectedRoles,
       city: finalCity,
       onboarded: true,
       last_role_changed_at: new Date().toISOString(),
@@ -120,12 +130,13 @@ export default function RoleOnboard() {
       return
     }
 
-    setUser({ ...user, role: selectedRole, roles: [selectedRole], city: finalCity, isNew: false })
-    localStorage.setItem('cricyaar_last_role', selectedRole)
+    setUser({ ...user, role: primary, roles: selectedRoles, city: finalCity, isNew: false })
+    localStorage.setItem('cricyaar_last_role', primary)
     localStorage.setItem('whats_new_seen_version', 'v3')
     addToast(`Welcome to CricYaar! Let's get started.`, 'success')
-    // Players go to profile setup; everyone else goes home
-    if (selectedRole === 'player') {
+
+    // Go to cricket-style setup only if player role selected AND not already done
+    if (selectedRoles.includes('player') && !user?.playerSetupDone) {
       navigate('/player-setup')
     } else {
       navigate('/')
@@ -162,23 +173,29 @@ export default function RoleOnboard() {
             <p className="text-navy-500 text-sm mt-1">Pick your role — you can always add more later.</p>
           </div>
 
+          {/* Multi-select hint */}
+          <p className="text-xs text-navy-400 font-medium mb-3 flex items-center gap-1.5">
+            <span className="inline-block w-4 h-4 rounded border-2 border-navy-300 flex-shrink-0" />
+            Select all that apply — you can switch roles later
+          </p>
+
           <div className="flex-1 space-y-3 overflow-y-auto">
             {ROLES.map(role => {
-              const isSelected = selectedRole === role.id
+              const isSelected = selectedRoles.includes(role.id)
+              const isPrimary  = selectedRoles[0] === role.id
               return (
                 <button
                   key={role.id}
-                  onClick={() => setSelectedRole(role.id)}
+                  onClick={() => toggleRole(role.id)}
                   className="w-full text-left rounded-2xl border-2 p-4 transition-all duration-200"
                   style={{
                     borderColor: isSelected ? role.color : '#e2e8f0',
                     background: isSelected ? role.bg : 'white',
                     boxShadow: isSelected ? `0 4px 16px ${role.color}22` : '0 1px 3px rgba(0,0,0,0.04)',
-                    transform: isSelected ? 'scale(1.01)' : 'scale(1)',
                   }}
                 >
                   <div className="flex items-start gap-3">
-                    {/* Icon circle */}
+                    {/* Checkbox circle */}
                     <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors text-xl"
                       style={{ background: isSelected ? role.color : '#f1f5f9' }}
@@ -191,13 +208,18 @@ export default function RoleOnboard() {
 
                     <div className="flex-1 min-w-0 pt-0.5">
                       <div className="flex items-center justify-between">
-                        <p className="font-bold text-navy-900 text-[15px]">{role.label}</p>
-                        {isSelected && (
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: role.color }}>
-                            <Check size={11} color="white" strokeWidth={3} />
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-navy-900 text-[15px]">{role.label}</p>
+                          {isPrimary && isSelected && (
+                            <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+                              style={{ background: role.color, color: '#fff' }}>Primary</span>
+                          )}
+                        </div>
+                        {/* Multi-select checkbox */}
+                        <div className="w-5 h-5 rounded-md flex-shrink-0 border-2 flex items-center justify-center"
+                          style={{ borderColor: isSelected ? role.color : '#cbd5e1', background: isSelected ? role.color : 'white' }}>
+                          {isSelected && <Check size={11} color="white" strokeWidth={3} />}
+                        </div>
                       </div>
                       <p className="text-xs font-semibold mt-0.5" style={{ color: isSelected ? role.color : '#64748b' }}>
                         {role.tagline}
@@ -215,14 +237,15 @@ export default function RoleOnboard() {
           <button
             className="mt-5 w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition-all"
             style={{
-              background: selectedRole ? (roleData?.color || '#16a34a') : '#e2e8f0',
-              color: selectedRole ? 'white' : '#94a3b8',
-              boxShadow: selectedRole ? `0 6px 20px ${roleData?.color}44` : 'none',
+              background: selectedRoles.length ? (roleData?.color || '#16a34a') : '#e2e8f0',
+              color: selectedRoles.length ? 'white' : '#94a3b8',
+              boxShadow: selectedRoles.length ? `0 6px 20px ${roleData?.color}44` : 'none',
             }}
             onClick={handleRoleContinue}
-            disabled={!selectedRole}
+            disabled={!selectedRoles.length}
           >
-            Continue as {roleData?.label || 'a Yaar'}
+            Continue
+            {selectedRoles.length > 1 && ` with ${selectedRoles.length} roles`}
             <ArrowRight size={18} />
           </button>
         </div>

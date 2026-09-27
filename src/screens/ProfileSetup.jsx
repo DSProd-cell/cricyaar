@@ -2,35 +2,21 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
-import { Check, Swords, ClipboardList, Scale, Megaphone, Building2 } from 'lucide-react'
-import { ROLE_META } from '../data/mock'
-
-const ROLES = [
-  { id:'fan',          label:'Fan',          Icon:Megaphone,      desc:'Follow live scores and match results.' },
-  { id:'player',       label:'Player',       Icon:Swords,         desc:'Track your stats, join teams, and play in matches.' },
-  { id:'organiser',    label:'Organiser',    Icon:ClipboardList,  desc:'Create matches and tournaments, manage teams, and score live.' },
-  { id:'umpire',       label:'Umpire',       Icon:Scale,          desc:'Get assigned to matches and track your umpiring record.' },
-  { id:'ground_owner', label:'Ground Owner', Icon:Building2,      desc:'List your ground, set pricing, and manage bookings.' },
-]
+import { Check } from 'lucide-react'
 
 export default function ProfileSetup() {
   const navigate = useNavigate()
   const { user, setUser, addToast } = useStore()
   const [name, setName]         = useState('')
   const [username, setUsername] = useState('')
-  const [city, setCity]         = useState('Bengaluru')
-  const [selectedRole, setSelectedRole] = useState('')
   const [errors, setErrors]     = useState({})
   const [loading, setLoading]   = useState(false)
-
-  const selectedMeta = ROLE_META[selectedRole]
 
   const validate = () => {
     const e = {}
     if (!name.trim() || name.trim().length < 2) e.name = 'Please enter your full name (2+ characters).'
     if (!username.trim() || username.length < 3) e.username = 'Username must be 3–20 characters.'
     if (!/^[a-z0-9_]+$/.test(username)) e.username = 'Letters, numbers, and underscores only.'
-    if (!selectedRole) e.roles = 'Please select a role to continue.'
     return e
   }
 
@@ -45,9 +31,9 @@ export default function ProfileSetup() {
       .update({
         name: name.trim(),
         username,
-        city,
-        role: selectedRole,
-        roles: [selectedRole],
+        city: 'Bengaluru',
+        role: 'player',
+        roles: ['player'],
         onboarded: true,
         last_role_changed_at: new Date().toISOString(),
       })
@@ -62,18 +48,18 @@ export default function ProfileSetup() {
 
     setUser({
       ...user,
-      name: name.trim(), username, city,
-      role: selectedRole, roles: [selectedRole],
+      name: name.trim(), username, city: 'Bengaluru',
+      role: 'player', roles: ['player'],
       isNew: false,
     })
-    localStorage.setItem('cricyaar_last_role', selectedRole)
-    addToast(`Welcome to CricYaar, ${name.trim().split(' ')[0]}!`, 'success')
-    // New users don't need to see "What's New" — everything is new to them
+    localStorage.setItem('cricyaar_last_role', 'player')
     localStorage.setItem('whats_new_seen_version', 'v3')
-    navigate('/')
+    addToast(`Welcome to CricYaar, ${name.trim().split(' ')[0]}! 🏏`, 'success')
+    // Go to cricket style setup (one-time), then IPL pick → home
+    navigate('/player-setup')
   }
 
-  const canSubmit = name.trim().length >= 2 && username.length >= 3 && !!selectedRole
+  const canSubmit = name.trim().length >= 2 && username.length >= 3
 
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center p-6">
@@ -106,51 +92,20 @@ export default function ProfileSetup() {
             )}
           </div>
 
-          {/* City */}
+          {/* City — locked to Bengaluru (only live city) */}
           <div>
-            <label className="block text-sm font-semibold text-navy-700 mb-1.5">City <span className="text-navy-400 font-normal">(optional)</span></label>
-            <input className="cm-input" placeholder="Bengaluru" value={city} onChange={e => setCity(e.target.value)} maxLength={40} />
-            <p className="text-navy-400 text-xs mt-1">CricYaar is live in Bengaluru only for now — more cities coming soon.</p>
+            <label className="block text-sm font-semibold text-navy-700 mb-1.5">City</label>
+            <div className="cm-input flex items-center justify-between bg-slate-50 cursor-not-allowed select-none">
+              <span className="font-semibold text-navy-800">Bengaluru</span>
+              <span className="text-[10px] font-bold text-brand-600 bg-brand-50 border border-brand-200 rounded-full px-2 py-0.5 uppercase tracking-wide">Live</span>
+            </div>
+            <p className="text-navy-400 text-xs mt-1">Other cities coming soon — currently available in Bengaluru only.</p>
           </div>
 
-          {/* Single-select role */}
-          <div>
-            <label className="block text-sm font-semibold text-navy-700 mb-2">
-              I am a <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {ROLES.map(r => {
-                const isSelected = selectedRole === r.id
-                const meta = ROLE_META[r.id]
-                return (
-                  <button
-                    key={r.id}
-                    className={`role-card relative ${isSelected ? 'selected' : ''}`}
-                    onClick={() => { setSelectedRole(r.id); setErrors(x => ({...x, roles:''})) }}
-                  >
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1.5"
-                      style={{ background: isSelected ? `${meta.color}20` : '#f8fafc' }}
-                    >
-                      <r.Icon size={16} style={{ color: isSelected ? meta.color : '#94a3b8' }} />
-                    </div>
-                    <p className="font-semibold text-sm text-navy-900">{r.label}</p>
-                    {isSelected && (
-                      <div className="absolute top-2 right-2 w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center">
-                        <Check size={11} className="text-white" />
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Selected role description */}
-            {selectedRole && selectedMeta && (
-              <div className="mt-3 px-3 py-2.5 rounded-xl text-sm" style={{ background: selectedMeta.bg, color: selectedMeta.color }}>
-                <span className="font-semibold">{ROLE_META[selectedRole]?.label}:</span> {selectedMeta.desc}
-              </div>
-            )}
-            {errors.roles && <p className="text-red-600 text-xs mt-1" role="alert">{errors.roles}</p>}
+          {/* Role info — always Player, no selection needed */}
+          <div className="px-3 py-3 rounded-xl bg-purple-50 border border-purple-100">
+            <p className="text-sm font-semibold text-purple-700">🏏 You'll start as a Player</p>
+            <p className="text-xs text-purple-500 mt-0.5">Unlock Umpire, Organiser &amp; Ground Owner roles anytime inside the app after KYC + Pro.</p>
           </div>
 
           <button className="btn-primary w-full" onClick={handleSubmit} disabled={!canSubmit || loading} aria-busy={loading}>

@@ -48,22 +48,18 @@ export default function AadhaarVerification() {
   const handleConfirm = async () => {
     setLoading(true)
     await new Promise(r => setTimeout(r, 1200))
-    // Persist kyc_verified to Supabase profiles so it survives logout/login
+    // Submit for admin approval — set kyc_status = 'pending'
     if (user?.id) {
-      await supabase.from('profiles').update({ kyc_verified: true }).eq('id', user.id)
+      await supabase.from('profiles').update({ kyc_status: 'pending' }).eq('id', user.id)
     }
     setLoading(false); setStep(4)
+    setUser({ ...user, kycStatus: 'pending' })
     if (fromGroundOwner) {
-      setUser({ ...user, groundOwnerVerified: true, kycVerified: true })
-      addToast('Identity verified! You can now list your ground.', 'success')
-      setTimeout(() => navigate('/ground-owner'), 1500)
+      addToast('KYC submitted! Admin will review within 24 hours.', 'info')
     } else if (fromReceiveMoney) {
-      setUser({ ...user, kycVerified: true })
-      addToast('KYC verified! You can now receive payments.', 'success')
-      setTimeout(() => navigate('/receive-money'), 1200)
+      addToast('KYC submitted! You\'ll be notified once approved.', 'info')
     } else {
-      setUser({ ...user, kycVerified: true })
-      addToast('KYC verified successfully!', 'success')
+      addToast('KYC submitted for review!', 'info')
     }
   }
 
@@ -214,18 +210,18 @@ export default function AadhaarVerification() {
               <CheckCircle size={40} className="text-teal-600" />
             </div>
             <div className="text-center">
-              <h2 className="text-2xl font-extrabold text-navy-900 mb-2">Verification Complete!</h2>
+              <h2 className="text-2xl font-extrabold text-navy-900 mb-2">Submitted for Review!</h2>
               <p className="text-navy-500 text-sm leading-relaxed max-w-xs">
-                Your ground listing is now under admin review. You'll receive a WhatsApp message once it goes live with the <strong>✓ Verified Owner</strong> badge.
+                Your KYC details have been sent to the CricYaar admin team. You'll be notified once your identity is approved.
               </p>
             </div>
             <div className="card p-4 w-full max-w-xs text-sm space-y-2 text-navy-700">
-              <div className="flex justify-between"><span>Aadhaar Status</span><span className="font-semibold text-teal-600">Verified</span></div>
-              <div className="flex justify-between"><span>Ground Status</span><span className="font-semibold text-amber-600">Under Review</span></div>
+              <div className="flex justify-between"><span>Aadhaar Status</span><span className="font-semibold text-teal-600">Submitted</span></div>
+              <div className="flex justify-between"><span>KYC Status</span><span className="font-semibold text-amber-600">Pending Approval</span></div>
               <div className="flex justify-between"><span>Est. approval</span><span className="font-semibold">Within 24 hours</span></div>
             </div>
-            <button onClick={() => navigate(fromGroundOwner ? '/ground-owner' : '/')} className="btn-primary w-full max-w-xs" style={{ background: '#0891b2' }}>
-              {fromGroundOwner ? 'Go to My Ground →' : 'Back to Home'}
+            <button onClick={() => navigate('/')} className="btn-primary w-full max-w-xs" style={{ background: '#0891b2' }}>
+              Back to Home
             </button>
           </div>
         )}
