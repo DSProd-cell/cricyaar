@@ -33,13 +33,9 @@ export default function InviteOnOpenSheet() {
 
   const handleShare = () => {
     const msg = `🏏 Join CricYaar — India's fraud-free cricket app!\n\nSign up with my code *${code}* and get your first Pro month FREE:\nhttps://cricyaar.app/join?ref=${code}\n\n✅ Verified stats · Live scoring · Tournaments`
-    if (navigator.share) {
-      navigator.share({ title: 'Join CricYaar', text: msg })
-    } else {
-      navigator.clipboard?.writeText(msg)
-      addToast('Referral link copied!')
-    }
-    setOpen(false)
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`
+    window.open(waUrl, '_blank', 'noopener,noreferrer')
+    handleClose()
   }
 
   const handleClose = () => {
@@ -50,7 +46,7 @@ export default function InviteOnOpenSheet() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[75] flex flex-col justify-end" onClick={handleClose}>
+    <div className="fixed inset-0 z-[9998] flex flex-col justify-end" onClick={handleClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease' }} />
       <div
         className="relative rounded-t-3xl overflow-hidden shadow-2xl"
@@ -80,8 +76,12 @@ export default function InviteOnOpenSheet() {
         <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} /></div>
 
         {/* Close */}
-        <button onClick={handleClose} className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.08)' }}>
-          <X size={14} className="text-white/60" />
+        <button
+          onClick={e => { e.stopPropagation(); handleClose() }}
+          className="absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(255,255,255,0.12)', zIndex: 10 }}
+        >
+          <X size={16} className="text-white/80" />
         </button>
 
         <div className="relative px-5 pt-2 pb-8">

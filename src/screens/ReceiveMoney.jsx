@@ -165,7 +165,7 @@ export default function ReceiveMoney() {
       '',
       '_Sent via CricYaar_',
     ].filter(l => l !== null).join('\n')
-    window.location.href = `whatsapp://send?text=${encodeURIComponent(lines)}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(lines)}`, '_blank', 'noopener,noreferrer')
     setStep(2)
   }
 

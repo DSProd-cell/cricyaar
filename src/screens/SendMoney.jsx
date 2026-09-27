@@ -145,13 +145,13 @@ export default function SendMoney() {
     const msg = encodeURIComponent(
       `Hi ${recipientName.split(' ')[0]}, I'm about to send you ₹${amt.toLocaleString('en-IN')} for ${purposeObj.label} via UPI.\n\nPlease confirm your UPI ID: ${recipientUpi || '(tell me your UPI ID)'}\n\nSent via CricYaar`
     )
-    window.location.href = `whatsapp://send?phone=${fullPhone}&text=${msg}`
+    window.open(`https://wa.me/${fullPhone}?text=${msg}`, '_blank', 'noopener,noreferrer')
     setHasContactedVia('whatsapp')
     setTimeout(() => setContactDone(true), 1800)
   }
 
   const openCall = () => {
-    window.location.href = `tel:${phoneDigits}`
+    window.open(`tel:${phoneDigits}`)
     setHasContactedVia('call')
     setTimeout(() => setContactDone(true), 1800)
   }
