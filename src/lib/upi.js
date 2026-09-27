@@ -9,15 +9,11 @@
  * IFSC is ever involved, and no payment gateway sits in the middle.
  */
 export function buildUpiLink({ payeeVpa, payeeName, amount, note, refId }) {
-  const params = new URLSearchParams({
-    pa: payeeVpa,
-    pn: payeeName,
-    am: String(amount),
-    cu: 'INR',
-  })
-  if (note) params.set('tn', note)
-  if (refId) params.set('tr', refId)
-  return `upi://pay?${params.toString()}`
+  // Build manually — URLSearchParams encodes '@' as '%40' which breaks BHIM and some UPI apps
+  let url = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${String(amount)}&cu=INR`
+  if (note)  url += `&tn=${encodeURIComponent(note)}`
+  if (refId) url += `&tr=${encodeURIComponent(refId)}`
+  return url
 }
 
 /** Loose validation for a UPI VPA, e.g. `name@okhdfcbank`. */

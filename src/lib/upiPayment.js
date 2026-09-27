@@ -7,7 +7,9 @@ import { buildUpiLink } from './upi'
 class UpiPaymentWeb extends WebPlugin {
   async pay({ vpa, payeeName, amount, note, refId }) {
     const link = buildUpiLink({ payeeVpa: vpa, payeeName, amount, note, refId })
-    window.location.href = link
+    // '_system' tells Capacitor to hand off to the OS intent system (Android UPI app chooser)
+    // and return to the app afterwards — unlike window.location.href which navigates away
+    window.open(link, '_system')
     return { status: 'UNKNOWN' }
   }
 }

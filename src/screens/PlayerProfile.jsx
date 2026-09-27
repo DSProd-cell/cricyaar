@@ -187,7 +187,7 @@ function LogoutModal({ onCancel, onConfirm }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function PlayerProfile() {
-  const { user, setUser, logout, addToast, themeMode, setThemeMode, publishedTeams } = useStore()
+  const { user, setUser, logout, addToast, themeMode, setThemeMode, publishedTeams, triggerShare } = useStore()
   const navigate   = useNavigate()
   const { playerId } = useParams()
 
@@ -510,7 +510,10 @@ export default function PlayerProfile() {
             lightBg={roleColor.light}
           />
           <button
-            onClick={() => navigate('/share-performance')}
+            onClick={() => triggerShare({
+              title: `${roleColor.label} Performance · ${player.name}`,
+              stats: quickStats.map(s => ({ label: s.label, value: String(s.val) })),
+            })}
             className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
           >
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>

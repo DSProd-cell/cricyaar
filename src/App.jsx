@@ -95,20 +95,25 @@ function WhatsNewGate({ children }) {
   // Theme: respect user preference, fall back to time-based auto
   const themeMode = useStore(s => s.themeMode) || 'auto'
   useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+
     const applyTheme = () => {
       if (themeMode === 'light') {
         document.documentElement.setAttribute('data-theme', 'light')
       } else if (themeMode === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark')
       } else {
-        const h = new Date().getHours()
-        document.documentElement.setAttribute('data-theme', h >= 6 && h < 19 ? 'light' : 'dark')
+        // Auto: follow the OS/system dark-mode setting
+        document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light')
       }
     }
+
     applyTheme()
     if (themeMode !== 'auto') return
-    const interval = setInterval(applyTheme, 60 * 60 * 1000)
-    return () => clearInterval(interval)
+
+    // Re-apply whenever the system setting changes (e.g. scheduled dark mode)
+    mq.addEventListener('change', applyTheme)
+    return () => mq.removeEventListener('change', applyTheme)
   }, [themeMode])
 
   // ── 30-day session persistence ─────────────────────────────────────────────
