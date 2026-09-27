@@ -94,7 +94,7 @@ export default function GlobalFAB() {
                 key={item.key}
                 onClick={() => handleAction(item.key)}
                 className="flex items-center gap-2.5 rounded-full pl-3 pr-2 py-1.5 shadow-lg font-semibold text-sm transition-all active:scale-95 whitespace-nowrap"
-                style={{ background: '#fff', border: '1.5px solid #e2e8f0' }}
+                style={{ background: 'var(--cy-surface)', border: '1.5px solid var(--cy-border)' }}
               >
                 <span className="text-navy-800">{item.label}</span>
                 <div

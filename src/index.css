@@ -42,6 +42,7 @@
   --cy-slate-50:  #f8fafc;
 }
 
+/* ── Dark vars — shared by system-dark and explicit [data-theme="dark"] ── */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --cy-bg: #020b14;
@@ -58,10 +59,6 @@
     --cy-icon-border: rgba(255,255,255,0.12);
     --cy-icon-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3);
     --cy-label-inactive: rgba(255,255,255,0.4);
-
-    /* Inverted ramp: navy-900/slate-900 (was near-black ink) becomes the
-       brightest tone for headings on a dark surface; navy-50/slate-50 (was
-       a near-white background tint) becomes the darkest background tint. */
     --cy-navy-900: #f1f5f9; --cy-navy-800: #e2e8f0; --cy-navy-700: #cbd5e1;
     --cy-navy-600: #94a3b8; --cy-navy-500: #94a3b8; --cy-navy-400: #64748b;
     --cy-navy-300: #475569; --cy-navy-200: #334155; --cy-navy-100: #1e293b;
@@ -71,6 +68,100 @@
     --cy-slate-300: #475569; --cy-slate-200: #334155; --cy-slate-100: #1e293b;
     --cy-slate-50:  #0f172a;
   }
+}
+
+/* Explicit dark — user picked Dark regardless of system setting */
+:root[data-theme="dark"] {
+  --cy-bg: #020b14;
+  --cy-surface: #0d1b2a;
+  --cy-input-bg: #0a1622;
+  --cy-subtle: #13253a;
+  --cy-text: #f1f5f9;
+  --cy-muted: #94a3b8;
+  --cy-border: rgba(255,255,255,0.08);
+  --cy-nav-bg: rgba(12,12,14,0.88);
+  --cy-nav-border: rgba(255,255,255,0.10);
+  --cy-nav-shadow: 0 6px 32px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  --cy-icon-inactive: rgba(255,255,255,0.06);
+  --cy-icon-border: rgba(255,255,255,0.12);
+  --cy-icon-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3);
+  --cy-label-inactive: rgba(255,255,255,0.4);
+  --cy-navy-900: #f1f5f9; --cy-navy-800: #e2e8f0; --cy-navy-700: #cbd5e1;
+  --cy-navy-600: #94a3b8; --cy-navy-500: #94a3b8; --cy-navy-400: #64748b;
+  --cy-navy-300: #475569; --cy-navy-200: #334155; --cy-navy-100: #1e293b;
+  --cy-navy-50:  #0f172a;
+  --cy-slate-900: #f1f5f9; --cy-slate-800: #e2e8f0; --cy-slate-700: #cbd5e1;
+  --cy-slate-600: #94a3b8; --cy-slate-500: #94a3b8; --cy-slate-400: #64748b;
+  --cy-slate-300: #475569; --cy-slate-200: #334155; --cy-slate-100: #1e293b;
+  --cy-slate-50:  #0f172a;
+  color-scheme: dark;
+}
+
+/* Explicit light — user picked Light; overrides system dark */
+:root[data-theme="light"] {
+  --cy-bg: #f8fafc;
+  --cy-surface: #ffffff;
+  --cy-input-bg: #f8fafc;
+  --cy-subtle: #f1f5f9;
+  --cy-text: #0f172a;
+  --cy-muted: #64748b;
+  --cy-border: #e2e8f0;
+  --cy-nav-bg: rgba(255,255,255,0.82);
+  --cy-nav-border: rgba(255,255,255,0.65);
+  --cy-nav-shadow: 0 6px 32px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.90);
+  --cy-icon-inactive: rgba(120,120,128,0.10);
+  --cy-icon-border: rgba(255,255,255,0.5);
+  --cy-icon-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
+  --cy-label-inactive: #94a3b8;
+  --cy-navy-900: #0f172a; --cy-navy-800: #1e293b; --cy-navy-700: #334155;
+  --cy-navy-600: #475569; --cy-navy-500: #64748b; --cy-navy-400: #94a3b8;
+  --cy-navy-300: #cbd5e1; --cy-navy-200: #e2e8f0; --cy-navy-100: #f1f5f9;
+  --cy-navy-50:  #f8fafc;
+  --cy-slate-900: #0f172a; --cy-slate-800: #1e293b; --cy-slate-700: #334155;
+  --cy-slate-600: #475569; --cy-slate-500: #64748b; --cy-slate-400: #94a3b8;
+  --cy-slate-300: #cbd5e1; --cy-slate-200: #e2e8f0; --cy-slate-100: #f1f5f9;
+  --cy-slate-50:  #f8fafc;
+  color-scheme: light;
+}
+
+/* ── Global dark-mode overrides for Tailwind hardcoded colors ─────────────
+   Tailwind's built-in `bg-white`, `bg-gray-*`, `text-gray-*` are NOT mapped
+   to CSS vars, so they stay white/gray regardless of theme. These rules fix
+   them globally whenever dark mode is active (either via data-theme or system
+   preference) without touching every component file.                      */
+
+/* Explicit dark theme selected by user */
+[data-theme="dark"] .bg-white  { background-color: var(--cy-surface) !important; }
+[data-theme="dark"] .bg-gray-50,
+[data-theme="dark"] .bg-gray-100 { background-color: var(--cy-subtle) !important; }
+[data-theme="dark"] .bg-gray-200  { background-color: var(--cy-border) !important; }
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800 { color: var(--cy-navy-900) !important; }
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600 { color: var(--cy-navy-600) !important; }
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-gray-400 { color: var(--cy-muted) !important; }
+[data-theme="dark"] .border-gray-100,
+[data-theme="dark"] .border-gray-200 { border-color: var(--cy-border) !important; }
+[data-theme="dark"] .divide-gray-100 > * + *,
+[data-theme="dark"] .divide-gray-200 > * + * { border-color: var(--cy-border) !important; }
+
+/* System dark preference (auto mode) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bg-white  { background-color: var(--cy-surface) !important; }
+  :root:not([data-theme="light"]) .bg-gray-50,
+  :root:not([data-theme="light"]) .bg-gray-100 { background-color: var(--cy-subtle) !important; }
+  :root:not([data-theme="light"]) .bg-gray-200  { background-color: var(--cy-border) !important; }
+  :root:not([data-theme="light"]) .text-gray-900,
+  :root:not([data-theme="light"]) .text-gray-800 { color: var(--cy-navy-900) !important; }
+  :root:not([data-theme="light"]) .text-gray-700,
+  :root:not([data-theme="light"]) .text-gray-600 { color: var(--cy-navy-600) !important; }
+  :root:not([data-theme="light"]) .text-gray-500,
+  :root:not([data-theme="light"]) .text-gray-400 { color: var(--cy-muted) !important; }
+  :root:not([data-theme="light"]) .border-gray-100,
+  :root:not([data-theme="light"]) .border-gray-200 { border-color: var(--cy-border) !important; }
+  :root:not([data-theme="light"]) .divide-gray-100 > * + *,
+  :root:not([data-theme="light"]) .divide-gray-200 > * + * { border-color: var(--cy-border) !important; }
 }
 
 /* Some screens (live Scoring, the Pro checkout, the UMP match console) are
