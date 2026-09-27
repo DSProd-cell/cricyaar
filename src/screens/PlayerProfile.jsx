@@ -494,7 +494,7 @@ export default function PlayerProfile() {
                   <ShieldCheck size={17} style={{ color: roleColor.primary }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-navy-900 text-sm">Aadhaar Verification</p>
+                  <p className="font-semibold text-navy-900 text-sm">KYC Verification</p>
                   <p className="text-navy-400 text-xs mt-0.5">Required to collect payments</p>
                 </div>
                 <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />

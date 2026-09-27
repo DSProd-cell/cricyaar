@@ -1,6 +1,85 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+
+// ── Cricket sound synthesiser (Web Audio API, no external files needed) ──────
+function useCricketSounds() {
+  const ctxRef = useRef(null)
+
+  const getCtx = () => {
+    if (!ctxRef.current) {
+      try { ctxRef.current = new (window.AudioContext || window.webkitAudioContext)() } catch { return null }
+    }
+    if (ctxRef.current.state === 'suspended') ctxRef.current.resume()
+    return ctxRef.current
+  }
+
+  // Step 1 — Jersey whoosh: fabric swish
+  const playJersey = useCallback(() => {
+    const ctx = getCtx(); if (!ctx) return
+    const t = ctx.currentTime
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.35, ctx.sampleRate)
+    const d = buf.getChannelData(0)
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 0.7)
+    const src = ctx.createBufferSource(); src.buffer = buf
+    const filter = ctx.createBiquadFilter()
+    filter.type = 'bandpass'; filter.frequency.setValueAtTime(900, t); filter.frequency.linearRampToValueAtTime(300, t + 0.3)
+    filter.Q.value = 0.8
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0.18, t); gain.gain.linearRampToValueAtTime(0, t + 0.35)
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start(t)
+  }, [])
+
+  // Step 2 — Wicket crack: sharp impact + 3 rattle clicks
+  const playWicket = useCallback(() => {
+    const ctx = getCtx(); if (!ctx) return
+    const t = ctx.currentTime
+    // Main crack
+    const osc = ctx.createOscillator(); osc.frequency.setValueAtTime(220, t); osc.frequency.exponentialRampToValueAtTime(60, t + 0.12)
+    osc.type = 'sawtooth'
+    const crack = ctx.createGain(); crack.gain.setValueAtTime(0.4, t); crack.gain.exponentialRampToValueAtTime(0.001, t + 0.14)
+    osc.connect(crack); crack.connect(ctx.destination); osc.start(t); osc.stop(t + 0.15)
+    // Rattle (3 small clicks)
+    ;[0.15, 0.23, 0.29].forEach((dt, i) => {
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate)
+      const dd = buf.getChannelData(0)
+      for (let k = 0; k < dd.length; k++) dd[k] = (Math.random() * 2 - 1) * Math.pow(1 - k / dd.length, 1.5)
+      const s = ctx.createBufferSource(); s.buffer = buf
+      const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1800
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.22 - i * 0.06, t)
+      s.connect(f); f.connect(g); g.connect(ctx.destination); s.start(t + dt)
+    })
+  }, [])
+
+  // Step 3 — Six: hard bat thwack + rising crowd cheer
+  const playSix = useCallback(() => {
+    const ctx = getCtx(); if (!ctx) return
+    const t = ctx.currentTime
+    // Thwack
+    const osc = ctx.createOscillator(); osc.frequency.setValueAtTime(180, t); osc.frequency.exponentialRampToValueAtTime(80, t + 0.09)
+    osc.type = 'square'
+    const thwack = ctx.createGain(); thwack.gain.setValueAtTime(0.5, t); thwack.gain.exponentialRampToValueAtTime(0.001, t + 0.1)
+    osc.connect(thwack); thwack.connect(ctx.destination); osc.start(t); osc.stop(t + 0.12)
+    // Rising cheer (noise burst)
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.8, ctx.sampleRate)
+    const dd = buf.getChannelData(0)
+    for (let i = 0; i < dd.length; i++) dd[i] = (Math.random() * 2 - 1) * 0.3
+    const src = ctx.createBufferSource(); src.buffer = buf
+    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'
+    filter.frequency.setValueAtTime(400, t + 0.1); filter.frequency.linearRampToValueAtTime(1200, t + 0.9)
+    filter.Q.value = 0.6
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(0, t + 0.08); gain.gain.linearRampToValueAtTime(0.2, t + 0.3); gain.gain.linearRampToValueAtTime(0, t + 0.85)
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start(t + 0.1)
+    // Victory tone (ascending notes)
+    ;[0, 0.15, 0.32].forEach((dt, i) => {
+      const o = ctx.createOscillator(); o.type = 'sine'
+      o.frequency.value = [440, 554, 659][i]
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.15, t + dt + 0.12); g.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.28)
+      o.connect(g); g.connect(ctx.destination); o.start(t + dt + 0.12); o.stop(t + dt + 0.3)
+    })
+  }, [])
+
+  return { playJersey, playWicket, playSix }
+}
 
 // ── Config ─────────────────────────────────────────────────────────────────
 const FRIEND_COUNT = 2
@@ -382,10 +461,31 @@ function SixAnim({ accent }) {
 
 // ── CRED-style Level Detail Sheet ───────────────────────────────────────────
 function LevelDetailSheet({ lvl, onClose, onShare, jerseyNum }) {
+  const { playJersey, playWicket, playSix } = useCricketSounds()
+  const stepRefs = [useRef(null), useRef(null), useRef(null)]
+  const soundFns = [playJersey, playWicket, playSix]
+  const playedRef = useRef([false, false, false])
+
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
   }, [])
+
+  // Play each step's sound once when it scrolls into view
+  useEffect(() => {
+    const observers = stepRefs.map((ref, i) => {
+      if (!ref.current) return null
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !playedRef.current[i]) {
+          playedRef.current[i] = true
+          soundFns[i]()
+        }
+      }, { threshold: 0.6 })
+      obs.observe(ref.current)
+      return obs
+    })
+    return () => observers.forEach(o => o?.disconnect())
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const accent = lvl.level===1 ? '#A78BFA' : lvl.level===2 ? '#60A5FA' : lvl.level===3 ? '#34D399' : '#C084FC'
   const stepAnims = [
@@ -444,7 +544,7 @@ function LevelDetailSheet({ lvl, onClose, onShare, jerseyNum }) {
         {/* Animated steps */}
         <div style={{ padding:'20px 28px 24px' }}>
           {lvl.steps.map(({ label, text }, i) => (
-            <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginBottom: i < lvl.steps.length-1 ? 44 : 0 }}>
+            <div key={i} ref={stepRefs[i]} style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginBottom: i < lvl.steps.length-1 ? 44 : 0 }}>
               {/* Cricket animation per step */}
               <div style={{ marginBottom:8 }}>{stepAnims[i]}</div>
 

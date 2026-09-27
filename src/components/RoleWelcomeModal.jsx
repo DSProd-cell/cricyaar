@@ -127,7 +127,9 @@ export default function RoleWelcomeModal() {
 
           {/* Heading */}
           <h2 className="font-extrabold text-navy-900 text-xl mb-1">
-            {isPro ? `Welcome, ${meta.label}! 🎉` : `You're a ${meta.label}`}
+            {isPro
+              ? `Welcome, ${user.name ? user.name.split(' ')[0] : meta.label}! 🎉`
+              : `You're a ${meta.label}`}
           </h2>
 
           {isPro ? (
