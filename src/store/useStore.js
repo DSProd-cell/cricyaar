@@ -12,6 +12,8 @@ export const useStore = create(
       pendingSignup: null,     // { firstName, lastName, cricketName } collected at login
       iplTeam: null,           // selected IPL team id (persisted)
       setIplTeam: (teamId) => set({ iplTeam: teamId }),
+      themeMode: 'auto',       // 'light' | 'dark' | 'auto' (auto = time-based)
+      setThemeMode: (mode) => set({ themeMode: mode }),
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
@@ -334,6 +336,7 @@ export const useStore = create(
         freeAgentRequests:         state.freeAgentRequests,
         umpireTournamentRequests:  state.umpireTournamentRequests,
         iplTeam:                   state.iplTeam,
+        themeMode:                 state.themeMode,
         lastKnownCoords:           state.lastKnownCoords,
         aiQueryCount:              state.aiQueryCount,
         aiQueryResetDate:          state.aiQueryResetDate,

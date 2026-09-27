@@ -12,7 +12,7 @@ import ShareAchievement from '../components/ShareAchievement'
 import {
   BarChart2, Activity, Users, Trophy, X, MapPin, Check, ChevronRight, Camera,
   Edit, LogOut, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
-  Swords, ClipboardList, Scale, Megaphone, Building2, Star,
+  Swords, ClipboardList, Scale, Megaphone, Building2, Star, Sun, Moon, Zap,
 } from 'lucide-react'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
@@ -185,7 +185,7 @@ function LogoutModal({ onCancel, onConfirm }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function PlayerProfile() {
-  const { user, setUser, logout, addToast } = useStore()
+  const { user, setUser, logout, addToast, themeMode, setThemeMode } = useStore()
   const navigate   = useNavigate()
   const { playerId } = useParams()
 
@@ -561,6 +561,49 @@ export default function PlayerProfile() {
               </div>
               <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
             </button>
+
+            {/* Theme */}
+            <div
+              className="w-full flex items-center gap-3 px-4 py-4"
+              style={{ borderBottom: `1px solid ${roleColor.border}` }}
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+                {(themeMode || 'auto') === 'dark'
+                  ? <Moon size={17} style={{ color: roleColor.primary }} />
+                  : (themeMode || 'auto') === 'light'
+                    ? <Sun size={17} style={{ color: roleColor.primary }} />
+                    : <Zap size={17} style={{ color: roleColor.primary }} />
+                }
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-navy-900 text-sm">App Theme</p>
+                <p className="text-navy-400 text-xs mt-0.5">Choose how the app looks</p>
+              </div>
+              <div className="flex items-center gap-1 rounded-xl overflow-hidden flex-shrink-0" style={{ border: `1.5px solid ${roleColor.border}`, background: roleColor.light }}>
+                {[
+                  { id: 'light', icon: <Sun size={13} />, label: 'Light' },
+                  { id: 'auto',  icon: <Zap size={13} />,  label: 'Auto'  },
+                  { id: 'dark',  icon: <Moon size={13} />, label: 'Dark'  },
+                ].map(opt => {
+                  const active = (themeMode || 'auto') === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => setThemeMode(opt.id)}
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold transition-all"
+                      style={{
+                        background: active ? roleColor.primary : 'transparent',
+                        color: active ? '#fff' : roleColor.primary,
+                        borderRadius: 8,
+                      }}
+                    >
+                      {opt.icon}
+                      <span>{opt.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
 
             {/* App Settings */}
             <button

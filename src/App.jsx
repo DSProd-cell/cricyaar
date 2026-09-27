@@ -91,16 +91,24 @@ function WhatsNewGate({ children }) {
     }
   }, [])
 
-  // Clock-based theme: 6am–7pm = light, 7pm–6am = dark
+  // Theme: respect user preference, fall back to time-based auto
+  const themeMode = useStore(s => s.themeMode) || 'auto'
   useEffect(() => {
     const applyTheme = () => {
-      const h = new Date().getHours()
-      document.documentElement.setAttribute('data-theme', h >= 6 && h < 19 ? 'light' : 'dark')
+      if (themeMode === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light')
+      } else if (themeMode === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+      } else {
+        const h = new Date().getHours()
+        document.documentElement.setAttribute('data-theme', h >= 6 && h < 19 ? 'light' : 'dark')
+      }
     }
     applyTheme()
+    if (themeMode !== 'auto') return
     const interval = setInterval(applyTheme, 60 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [themeMode])
 
   // ── 30-day session persistence ─────────────────────────────────────────────
   // On every app open: stamp last_active, sign out if inactive >30 days,
