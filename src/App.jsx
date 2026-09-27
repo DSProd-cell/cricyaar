@@ -150,6 +150,8 @@ function WhatsNewGate({ children }) {
                 isNew: !profile.onboarded,
                 avatar: profile.avatar_url || null,
                 subscription: profile.subscription || 'free',
+                kycVerified: profile.kyc_verified || false,
+                groundOwnerVerified: profile.ground_owner_verified || false,
               })
             }
           })

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, Shield, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
 
 export default function AadhaarVerification() {
   const navigate = useNavigate()
@@ -47,6 +48,10 @@ export default function AadhaarVerification() {
   const handleConfirm = async () => {
     setLoading(true)
     await new Promise(r => setTimeout(r, 1200))
+    // Persist kyc_verified to Supabase profiles so it survives logout/login
+    if (user?.id) {
+      await supabase.from('profiles').update({ kyc_verified: true }).eq('id', user.id)
+    }
     setLoading(false); setStep(4)
     if (fromGroundOwner) {
       setUser({ ...user, groundOwnerVerified: true, kycVerified: true })
@@ -58,7 +63,7 @@ export default function AadhaarVerification() {
       setTimeout(() => navigate('/receive-money'), 1200)
     } else {
       setUser({ ...user, kycVerified: true })
-      addToast('Aadhaar verified successfully!', 'success')
+      addToast('KYC verified successfully!', 'success')
     }
   }
 

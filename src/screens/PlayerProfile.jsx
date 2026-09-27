@@ -185,7 +185,7 @@ function LogoutModal({ onCancel, onConfirm }) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function PlayerProfile() {
-  const { user, setUser, logout, addToast, themeMode, setThemeMode } = useStore()
+  const { user, setUser, logout, addToast, themeMode, setThemeMode, publishedTeams } = useStore()
   const navigate   = useNavigate()
   const { playerId } = useParams()
 
@@ -239,8 +239,51 @@ export default function PlayerProfile() {
     addToast('Signed out successfully', 'info')
   }
 
-  const playerTeams  = TEAMS.filter(t => t.squad.includes(player.id))
-  const myMatches    = MATCHES.filter(m => m.xi1?.includes(player.id) || m.xi2?.includes(player.id))
+  // Teams: mock data + published teams (created in-app) + Supabase team_members
+  const [liveTeams, setLiveTeams] = useState([])
+  const [liveMatches, setLiveMatches] = useState([])
+
+  useEffect(() => {
+    if (!isOwnProfile || !user?.id) return
+    // Fetch teams from Supabase team_members table
+    supabase
+      .from('team_members')
+      .select('team_id, role')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        if (data?.length) {
+          const teamIds = data.map(r => r.team_id)
+          // Check in publishedTeams for matching IDs
+          const found = (publishedTeams || []).filter(t =>
+            teamIds.includes(t.id) || t.captain === user.id || (t.squad || []).includes(user.id)
+          )
+          setLiveTeams(found)
+        }
+      })
+    // Fetch recent matches from Supabase
+    supabase
+      .from('matches')
+      .select('*')
+      .or(`team1.eq.${user.id},team2.eq.${user.id}`)
+      .order('created_at', { ascending: false })
+      .limit(10)
+      .then(({ data }) => { if (data?.length) setLiveMatches(data) })
+  }, [isOwnProfile, user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // For own profile: combine mock + published + live from Supabase
+  const allTeams   = [...TEAMS, ...(publishedTeams || [])]
+  const playerTeams = isOwnProfile
+    ? [
+        ...allTeams.filter(t => (t.squad || []).includes(player.id) || t.captain === player.id),
+        ...liveTeams.filter(lt => !allTeams.find(at => at.id === lt.id)),
+      ]
+    : allTeams.filter(t => (t.squad || []).includes(player.id))
+  const myMatches = isOwnProfile
+    ? [
+        ...MATCHES.filter(m => m.xi1?.includes(player.id) || m.xi2?.includes(player.id)),
+        ...liveMatches.filter(lm => !MATCHES.find(mm => mm.id === lm.id)),
+      ]
+    : MATCHES.filter(m => m.xi1?.includes(player.id) || m.xi2?.includes(player.id))
 
   const chartData = useMemo(() => {
     const innings = MATCHES
@@ -483,22 +526,40 @@ export default function PlayerProfile() {
           </p>
           <div className="bg-[var(--cy-surface)] rounded-2xl overflow-hidden" style={{ border: `1.5px solid ${roleColor.border}` }}>
 
-            {/* Aadhaar — gated to organiser/umpire/ground_owner */}
+            {/* KYC — gated to organiser/umpire/ground_owner */}
             {needsAadhaar && (
-              <button
-                onClick={() => navigate('/aadhaar-verify')}
-                className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
-                style={{ borderBottom: `1px solid ${roleColor.border}` }}
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
-                  <ShieldCheck size={17} style={{ color: roleColor.primary }} />
+              user?.kycVerified ? (
+                /* Verified state — non-clickable */
+                <div
+                  className="w-full flex items-center gap-3 px-4 py-4"
+                  style={{ borderBottom: `1px solid ${roleColor.border}` }}
+                >
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#dcfce7' }}>
+                    <ShieldCheck size={17} className="text-green-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-navy-900 text-sm">KYC Verification</p>
+                    <p className="text-xs mt-0.5 text-green-600 font-semibold">✓ Verified</p>
+                  </div>
+                  <span className="text-xs font-bold text-green-600 bg-green-50 border border-green-200 px-2 py-1 rounded-lg flex-shrink-0">Done</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-navy-900 text-sm">KYC Verification</p>
-                  <p className="text-navy-400 text-xs mt-0.5">Required to collect payments</p>
-                </div>
-                <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
-              </button>
+              ) : (
+                /* Not verified — action button */
+                <button
+                  onClick={() => navigate('/aadhaar-verify')}
+                  className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 transition-colors text-left"
+                  style={{ borderBottom: `1px solid ${roleColor.border}` }}
+                >
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: roleColor.light }}>
+                    <ShieldCheck size={17} style={{ color: roleColor.primary }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-navy-900 text-sm">KYC Verification</p>
+                    <p className="text-navy-400 text-xs mt-0.5">Required to collect payments</p>
+                  </div>
+                  <ChevronRight size={16} style={{ color: roleColor.primary }} className="flex-shrink-0 opacity-60" />
+                </button>
+              )
             )}
 
             {/* CricYaar Pro */}
