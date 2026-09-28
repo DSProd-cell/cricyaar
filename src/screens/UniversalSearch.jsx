@@ -5,9 +5,9 @@ import { supabase } from '../lib/supabase'
 import { fetchApprovedGrounds } from '../lib/groundsApi'
 import { getCurrentCoords, distanceKm } from '../lib/geolocation'
 import TopBar from '../components/TopBar'
+import ReportFraudSheet from '../components/ReportFraudSheet'
 import {
-  Search, X, SlidersHorizontal, MapPin, Star,
-  User, Landmark, Trophy, Activity, ChevronRight, LocateFixed
+  Search, X, MapPin, Star, Flag, ChevronRight, LocateFixed
 } from 'lucide-react'
 
 const GROUND_INITIAL_LIMIT = 5
@@ -73,13 +73,12 @@ function GroundCard({ ground, onTap }) {
   )
 }
 
-function ProfileCard({ profile, onTap }) {
-  const isUmpire = profile.role === 'umpire'
-  const accentColor = isUmpire ? '#f59e0b' : '#10b981'
-  const accentBg    = isUmpire ? '#fef3c7' : '#d1fae5'
+function ProfileCard({ profile, onTap, onReport }) {
+  const isUmpire    = profile.role === 'umpire'
+  const accentColor  = isUmpire ? '#f59e0b' : '#10b981'
+  const accentBg     = isUmpire ? '#fef3c7' : '#d1fae5'
   const accentBorder = isUmpire ? '#fcd34d' : '#6ee7b7'
-  const label       = isUmpire ? 'Invite' : 'Invite'
-  const emoji       = isUmpire ? '⚖️' : '🏏'
+  const emoji        = isUmpire ? '⚖️' : '🏏'
 
   const sub = [
     profile.playing_role || profile.batting_style,
@@ -88,30 +87,38 @@ function ProfileCard({ profile, onTap }) {
   ].filter(Boolean).join(' · ')
 
   return (
-    <button
-      onClick={onTap}
-      className="w-full flex items-center gap-3 bg-[var(--cy-surface)] border border-[var(--cy-border)] rounded-2xl p-3 active:scale-[0.98] transition-transform text-left"
-    >
-      {profile.avatar_url ? (
-        <img src={profile.avatar_url} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" alt={profile.name} />
-      ) : (
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-xl" style={{ background: accentBg }}>
-          {emoji}
+    <div className="bg-[var(--cy-surface)] border border-[var(--cy-border)] rounded-2xl p-3 flex items-center gap-3">
+      <button onClick={onTap} className="flex items-center gap-3 flex-1 min-w-0 text-left active:scale-[0.98] transition-transform">
+        {profile.avatar_url ? (
+          <img src={profile.avatar_url} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" alt={profile.name} />
+        ) : (
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-xl" style={{ background: accentBg }}>
+            {emoji}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-[13px] text-navy-900 truncate">{profile.name || 'Cricketer'}</p>
+          {sub ? <p className="text-[11px] text-navy-500 mt-0.5 truncate">{sub}</p> : null}
+          <div className="flex items-center gap-1.5 mt-1">
+            <MapPin size={9} className="text-navy-400" />
+            <span className="text-[11px] text-navy-400">{profile.city || 'Bengaluru'}</span>
+          </div>
         </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-[13px] text-navy-900 truncate">{profile.name || 'Cricketer'}</p>
-        {sub ? <p className="text-[11px] text-navy-500 mt-0.5 truncate">{sub}</p> : null}
-        <div className="flex items-center gap-1.5 mt-1">
-          <MapPin size={9} className="text-navy-400" />
-          <span className="text-[11px] text-navy-400">{profile.city || 'Bengaluru'}</span>
+      </button>
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <div className="rounded-xl px-3 py-1.5 text-[11px] font-bold border"
+          style={{ background: accentBg, color: accentColor, borderColor: accentBorder }}>
+          Invite
         </div>
+        <button
+          onClick={e => { e.stopPropagation(); onReport() }}
+          className="w-8 h-8 flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 active:scale-90 transition-transform"
+          aria-label="Report user"
+        >
+          <Flag size={13} className="text-slate-400" />
+        </button>
       </div>
-      <div className="flex-shrink-0 rounded-xl px-3 py-1.5 text-[11px] font-bold border"
-        style={{ background: accentBg, color: accentColor, borderColor: accentBorder }}>
-        {label}
-      </div>
-    </button>
+    </div>
   )
 }
 
@@ -138,13 +145,14 @@ export default function UniversalSearch() {
   const { user, lastKnownCoords, setLastKnownCoords } = useStore()
   const city       = user?.city || 'Bengaluru'
 
-  const [query,      setQuery]      = useState('')
-  const [category,   setCategory]   = useState('ground')
-  const [subFilter,  setSubFilter]  = useState('All')
-  const [results,    setResults]    = useState([])
-  const [loading,    setLoading]    = useState(false)
-  const [myCoords,   setMyCoords]   = useState(lastKnownCoords || null)
-  const [showAll,    setShowAll]    = useState(false)
+  const [query,        setQuery]        = useState('')
+  const [category,     setCategory]     = useState('ground')
+  const [subFilter,    setSubFilter]    = useState('All')
+  const [results,      setResults]      = useState([])
+  const [loading,      setLoading]      = useState(false)
+  const [myCoords,     setMyCoords]     = useState(lastKnownCoords || null)
+  const [showAll,      setShowAll]      = useState(false)
+  const [reportTarget, setReportTarget] = useState(null) // { id, name }
 
   // Auto-detect location on mount for nearby grounds
   useEffect(() => {
@@ -252,6 +260,12 @@ export default function UniversalSearch() {
   return (
     <div className="min-h-dvh flex flex-col bg-[var(--cy-bg)]">
       <TopBar title="Search" />
+      {reportTarget && (
+        <ReportFraudSheet
+          reported={reportTarget}
+          onClose={() => setReportTarget(null)}
+        />
+      )}
 
       {/* Search bar */}
       <div className="px-4 pt-3 pb-2">
@@ -357,6 +371,7 @@ export default function UniversalSearch() {
                 key={p.id}
                 profile={p}
                 onTap={() => navigate(`/profile/${p.id}`)}
+                onReport={() => setReportTarget({ id: p.id, name: p.name })}
               />
             ))}
             {category === 'team' && results.map(t => (

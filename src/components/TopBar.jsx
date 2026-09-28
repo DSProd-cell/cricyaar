@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, ArrowLeft, Home, Gift } from 'lucide-react'
+import { Bell, ArrowLeft, Home, Gift, Headphones } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { getRoleColor } from '../lib/roleColors'
+import SupportSheet from './SupportSheet'
 
 /**
  * Universal TopBar — CricYaar PRD v3
@@ -20,8 +22,10 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
   const isPro     = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
   const isRoot    = !showBack && !showHome
   const roleColor = getRoleColor(user?.role)
+  const [showSupport, setShowSupport] = useState(false)
 
   return (
+    <>
     <header
       className="sticky top-0 z-20 flex flex-col"
       style={{
@@ -82,7 +86,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
         </button>
       </div>
 
-      {/* RIGHT: PRO + Refer + Bell */}
+      {/* RIGHT: PRO + Refer + Support + Bell */}
       <div className="flex items-center gap-0.5 flex-shrink-0">
         <button
           onClick={() => navigate('/invite')}
@@ -96,6 +100,13 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
         >
           <Gift size={13} strokeWidth={2.5} color="#fff" />
           <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.01em' }}>Refer &amp; Earn</span>
+        </button>
+        <button
+          onClick={() => setShowSupport(true)}
+          className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0"
+          aria-label="Get support"
+        >
+          <Headphones size={20} className="text-navy-600" />
         </button>
         <button
           onClick={() => navigate('/notifications')}
@@ -112,5 +123,8 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
       </div>
     </div>
     </header>
+
+    {showSupport && <SupportSheet onClose={() => setShowSupport(false)} />}
+    </>
   )
 }

@@ -5,6 +5,7 @@ import { avg, sr, eco } from '../utils/cricket'
 import { supabase } from '../lib/supabase'
 import { uploadAvatar } from '../lib/uploads'
 import TopBar from '../components/TopBar'
+import ReportFraudSheet from '../components/ReportFraudSheet'
 import { getRoleColor, CAN_COLLECT, NEEDS_AADHAAR } from '../lib/roleColors'
 import { resetSplash } from '../components/SplashOverlay'
 import IplTeamPicker from './IplTeamPicker'
@@ -12,7 +13,7 @@ import ShareAchievement from '../components/ShareAchievement'
 import {
   BarChart2, Activity, Users, Trophy, X, MapPin, Check, ChevronRight, Camera,
   Edit, LogOut, ShieldCheck, Crown, Gift, Settings, Wallet, ArrowUpRight,
-  Swords, ClipboardList, Scale, Megaphone, Building2, Star, Sun, Moon, Zap,
+  Swords, ClipboardList, Scale, Megaphone, Building2, Star, Sun, Moon, Zap, Flag,
 } from 'lucide-react'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
@@ -204,6 +205,7 @@ export default function PlayerProfile() {
 
   const [tab, setTab]             = useState('Overview')
   const [showEdit, setShowEdit]   = useState(false)
+  const [showReport, setShowReport] = useState(false)
   const [showSignOut, setShowSignOut] = useState(false)
   const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
@@ -326,13 +328,21 @@ export default function PlayerProfile() {
           {/* Large decorative emoji top-right */}
           <div className="absolute -right-2 -top-2 text-[80px] opacity-10 select-none pointer-events-none leading-none">{roleColor.emoji}</div>
           {/* Edit button top-right */}
-          {isOwnProfile && (
+          {isOwnProfile ? (
             <button
               onClick={() => setShowEdit(true)}
               className="absolute top-3 right-4 w-9 h-9 flex items-center justify-center rounded-xl bg-white/20 border border-white/25 hover:bg-white/30 transition-colors backdrop-blur-sm"
               aria-label="Edit profile"
             >
               <Edit size={16} className="text-white" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowReport(true)}
+              className="absolute top-3 right-4 w-9 h-9 flex items-center justify-center rounded-xl bg-white/20 border border-white/25 hover:bg-white/30 transition-colors backdrop-blur-sm"
+              aria-label="Report user"
+            >
+              <Flag size={16} className="text-white" />
             </button>
           )}
         </div>
@@ -1072,6 +1082,12 @@ export default function PlayerProfile() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 8500, overflowY: 'auto' }}>
           <IplTeamPicker onDone={() => setShowTeamPicker(false)} />
         </div>
+      )}
+      {showReport && (
+        <ReportFraudSheet
+          reported={{ id: player.id, name: player.name }}
+          onClose={() => setShowReport(false)}
+        />
       )}
     </div>
   )
