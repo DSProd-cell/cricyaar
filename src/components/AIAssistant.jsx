@@ -492,6 +492,24 @@ export default function AIAssistant() {
   const [ticketId, setTicketId]               = useState(null)
   const [ticketSubmitted, setTicketSubmitted] = useState(false)
   const [supportMsgIndex, setSupportMsgIndex] = useState(null)
+  const [btnVisible, setBtnVisible]           = useState(true)
+  const lastScrollY = useRef(0)
+  const hideTimer   = useRef(null)
+
+  useEffect(() => {
+    const onScroll = () => {
+      const current = window.scrollY
+      const goingDown = current > lastScrollY.current + 4
+      lastScrollY.current = current
+      if (goingDown) {
+        setBtnVisible(false)
+        clearTimeout(hideTimer.current)
+        hideTimer.current = setTimeout(() => setBtnVisible(true), 600)
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(hideTimer.current) }
+  }, [])
   const roleGreeting = (() => {
     const role = user?.role || 'fan'
     const name = user?.name ? `, ${user.name.split(' ')[0]}` : ''
@@ -604,10 +622,15 @@ export default function AIAssistant() {
       {!open && !showBroadcast && (
         <button
           onClick={() => setShowBroadcast(true)}
-          className="fixed bottom-[82px] right-4 z-[58] flex items-center gap-1.5 pl-2 pr-3 h-10 rounded-full shadow-lg transition-all active:scale-95"
+          className="fixed right-4 z-[58] flex items-center gap-1.5 pl-2 pr-3 h-10 rounded-full shadow-lg active:scale-95"
           style={{
+            bottom: 82,
             background: 'linear-gradient(135deg, #7C3AED, #6366f1)',
             boxShadow: '0 4px 16px rgba(124,58,237,0.45)',
+            transform: btnVisible ? 'translateY(0) scale(1)' : 'translateY(120%) scale(0.85)',
+            opacity: btnVisible ? 1 : 0,
+            transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease',
+            pointerEvents: btnVisible ? 'auto' : 'none',
           }}
           aria-label="Inform DS — Broadcast to CricYaar users"
         >
