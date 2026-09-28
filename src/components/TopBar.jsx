@@ -29,8 +29,9 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
     <header
       className="sticky top-0 z-20 flex flex-col"
       style={{
-        background: 'var(--cy-surface)',
+        background: 'var(--cy-topbar-bg)',
         borderBottom: `2px solid ${roleColor.primary}`,
+        transition: 'background 0.4s ease',
       }}
     >
       {/* Status-bar spacer — fills the safe area so content isn't hidden under the notch.
@@ -47,7 +48,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
             className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0 -ml-1"
             aria-label="Go back"
           >
-            <ArrowLeft size={20} className="text-navy-700" />
+            <ArrowLeft size={20} style={{ color: 'var(--cy-topbar-text)' }} />
           </button>
         )}
         {showHome && !showBack && (
@@ -56,7 +57,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
             className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0 -ml-1"
             aria-label="Go to Home"
           >
-            <Home size={20} className="text-navy-700" />
+            <Home size={20} style={{ color: 'var(--cy-topbar-text)' }} />
           </button>
         )}
 
@@ -74,7 +75,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
 
           <div className="flex flex-col justify-center min-w-0">
             {title && showBack ? (
-              <p className="font-bold text-navy-900 text-sm truncate leading-tight">{title}</p>
+              <p className="font-bold text-sm truncate leading-tight" style={{ color: 'var(--cy-topbar-text)' }}>{title}</p>
             ) : (
               isRoot && (
                 <p className="text-brand-500 text-[8px] font-extrabold tracking-[0.15em] uppercase leading-none">
@@ -87,7 +88,7 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
       </div>
 
       {/* RIGHT: PRO + Refer + Support + Bell */}
-      <div className="flex items-center gap-0.5 flex-shrink-0">
+      <div className="flex items-center gap-0.5 flex-shrink-0" style={{ color: 'var(--cy-topbar-text)' }}>
         <button
           onClick={() => navigate('/invite')}
           className="flex items-center gap-1.5 h-8 rounded-full flex-shrink-0 active:scale-95 transition-all"
@@ -106,14 +107,14 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0"
           aria-label="Get support"
         >
-          <Headphones size={20} className="text-navy-600" />
+          <Headphones size={20} style={{ color: 'var(--cy-topbar-text)' }} />
         </button>
         <button
           onClick={() => navigate('/notifications')}
           className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors flex-shrink-0"
           aria-label={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
         >
-          <Bell size={20} className="text-navy-600" />
+          <Bell size={20} style={{ color: 'var(--cy-topbar-text)' }} />
           {notificationCount > 0 && (
             <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
               {notificationCount > 9 ? '9+' : notificationCount}

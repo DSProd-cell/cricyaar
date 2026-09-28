@@ -16,6 +16,8 @@
 
   --cy-bg: #f8fafc;
   --cy-surface: #ffffff;
+  --cy-topbar-bg: var(--cy-surface);
+  --cy-topbar-text: var(--cy-text);
   --cy-input-bg: #f8fafc;
   --cy-subtle: #f1f5f9;
   --cy-text: #0f172a;
@@ -249,11 +251,12 @@
     padding: 6px 4px;
     border-radius: 22px;
     height: 64px;
-    background: rgba(10,10,12,0.92);
+    background: var(--cy-nav-bg, rgba(10,10,12,0.92));
     backdrop-filter: blur(28px) saturate(160%);
     -webkit-backdrop-filter: blur(28px) saturate(160%);
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow: 0 6px 32px rgba(0,0,0,0.60), 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+    border: 1px solid var(--cy-nav-border, rgba(255,255,255,0.10));
+    box-shadow: var(--cy-nav-shadow, 0 6px 32px rgba(0,0,0,0.60), 0 1px 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07));
+    transition: background 0.4s ease, border-color 0.4s ease;
   }
   .bottom-nav-item {
     flex: 1;
