@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ArrowLeft, Radio, CheckCircle2, ChevronRight } from 'lucide-react'
+import { Search, ArrowLeft, Radio, CheckCircle2, ChevronRight, X } from 'lucide-react'
 
 // Mock match records — in prod these come from Supabase
 const MOCK_RECORDS = [
   { id: 1, name: 'Debasish Patro',    role: 'Batsman',     club: 'Eden Gardens Cricket Club',    matches: 4,  runs: 247, wickets: 0,  mom: 2, lastMatch: 'Aug 12, 2024' },
   { id: 2, name: 'Debasish Roy',      role: 'All-rounder', club: 'Kolkata District League',       matches: 2,  runs: 88,  wickets: 3,  mom: 0, lastMatch: 'Jul 5, 2024'  },
   { id: 3, name: 'Debasish Singh',    role: 'Umpire',      club: 'Punjab Warriors T20',           matches: 6,  runs: 0,   wickets: 0,  mom: 0, lastMatch: 'Sep 1, 2024'  },
-  // Swapnil
   { id: 4, name: 'Swapnil Patil',     role: 'Batsman',     club: 'Bengaluru Strikers CC',         matches: 18, runs: 612, wickets: 4,  mom: 5, lastMatch: 'Sep 14, 2024' },
   { id: 5, name: 'Swapnil Kulkarni',  role: 'All-rounder', club: 'Whitefield Warriors',           matches: 11, runs: 344, wickets: 12, mom: 3, lastMatch: 'Aug 28, 2024' },
   { id: 6, name: 'Swapnil Deshmukh', role: 'Bowler',       club: 'Koramangala XI',                matches: 9,  runs: 41,  wickets: 19, mom: 2, lastMatch: 'Sep 3, 2024'  },
-  // Siddhant Maruti
   { id: 7, name: 'Siddhant Maruti',   role: 'All-rounder', club: 'Indiranagar Cricket Club',      matches: 14, runs: 489, wickets: 21, mom: 4, lastMatch: 'Sep 20, 2024' },
   { id: 8, name: 'Siddhant M.',       role: 'Batsman',     club: 'Bengaluru Premier League T20',  matches: 7,  runs: 276, wickets: 2,  mom: 1, lastMatch: 'Aug 18, 2024' },
 ]
@@ -20,29 +18,30 @@ function ScannerFrame({ active }) {
   return (
     <div style={{
       position: 'relative',
-      border: `1.5px solid ${active ? '#7C3AED' : 'rgba(124,58,237,0.35)'}`,
+      border: `1.5px solid ${active ? '#7C3AED' : 'rgba(124,58,237,0.4)'}`,
       borderRadius: 14,
-      height: 72,
+      height: 64,
       overflow: 'hidden',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       transition: 'border-color 0.3s',
-      background: 'rgba(124,58,237,0.04)',
+      background: 'rgba(124,58,237,0.06)',
     }}>
       {/* Corner brackets */}
       {[['top','left'],['top','right'],['bottom','left'],['bottom','right']].map(([v,h]) => (
         <div key={v+h} style={{
           position:'absolute', [v]: 6, [h]: 6,
           width: 14, height: 14,
-          borderTop: v === 'top' ? '2px solid #A78BFA' : 'none',
-          borderBottom: v === 'bottom' ? '2px solid #A78BFA' : 'none',
-          borderLeft: h === 'left' ? '2px solid #A78BFA' : 'none',
-          borderRight: h === 'right' ? '2px solid #A78BFA' : 'none',
+          borderTop: v === 'top' ? '2px solid #7C3AED' : 'none',
+          borderBottom: v === 'bottom' ? '2px solid #7C3AED' : 'none',
+          borderLeft: h === 'left' ? '2px solid #7C3AED' : 'none',
+          borderRight: h === 'right' ? '2px solid #7C3AED' : 'none',
           borderTopLeftRadius: v==='top'&&h==='left' ? 4 : 0,
           borderTopRightRadius: v==='top'&&h==='right' ? 4 : 0,
           borderBottomLeftRadius: v==='bottom'&&h==='left' ? 4 : 0,
           borderBottomRightRadius: v==='bottom'&&h==='right' ? 4 : 0,
+          opacity: active ? 1 : 0.5,
         }} />
       ))}
 
@@ -58,7 +57,7 @@ function ScannerFrame({ active }) {
       <div style={{ textAlign: 'center', zIndex: 1 }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center',
-          color: active ? '#A78BFA' : 'rgba(167,139,250,0.5)',
+          color: active ? '#7C3AED' : 'rgba(124,58,237,0.6)',
           fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
           transition: 'color 0.3s',
         }}>
@@ -66,7 +65,7 @@ function ScannerFrame({ active }) {
           {active ? 'SCAN ACTIVE' : 'SCAN READY'}
         </div>
         {!active && (
-          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 9, marginTop: 3 }}>
+          <p style={{ color: 'var(--cy-muted)', fontSize: 9, marginTop: 3 }}>
             Start typing to activate
           </p>
         )}
@@ -82,6 +81,7 @@ function ScannerFrame({ active }) {
           0%, 100% { opacity: 1 }
           50% { opacity: 0.4 }
         }
+        @keyframes spin { to { transform: translateY(-50%) rotate(360deg) } }
       `}</style>
     </div>
   )
@@ -92,50 +92,34 @@ function ResultCard({ record, selected, onSelect }) {
   return (
     <button
       onClick={() => onSelect(isSelected ? null : record)}
+      className="w-full text-left transition-all active:scale-[0.98]"
       style={{
-        width: '100%', textAlign: 'left',
-        background: isSelected ? 'rgba(124,58,237,0.14)' : 'rgba(255,255,255,0.05)',
-        border: `1px solid ${isSelected ? 'rgba(124,58,237,0.6)' : 'rgba(124,58,237,0.2)'}`,
+        background: isSelected ? 'rgba(124,58,237,0.1)' : 'var(--cy-surface)',
+        border: `1.5px solid ${isSelected ? '#7C3AED' : 'var(--cy-border)'}`,
         borderRadius: 12, padding: '10px 12px',
         display: 'flex', alignItems: 'center', gap: 10,
-        transition: 'all 0.2s', cursor: 'pointer',
-        WebkitTapHighlightColor: 'transparent',
       }}
-      onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.98)' }}
-      onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
     >
-      {/* AR dot */}
       <div style={{
         width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-        background: isSelected ? '#7C3AED' : '#5B21B6',
-        boxShadow: isSelected ? '0 0 8px rgba(124,58,237,0.8)' : 'none',
+        background: isSelected ? '#7C3AED' : '#a78bfa',
+        boxShadow: isSelected ? '0 0 8px rgba(124,58,237,0.6)' : 'none',
         transition: 'all 0.2s',
       }} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, marginBottom: 2 }}>
-          {record.name}
-        </p>
-        <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 10 }}>
-          {record.role} · {record.club}
-        </p>
+        <p className="font-bold text-[13px] text-navy-900 truncate">{record.name}</p>
+        <p className="text-[10px] text-navy-500 mt-0.5 truncate">{record.role} · {record.club}</p>
         <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-          {record.runs > 0 && (
-            <span style={{ color: '#A78BFA', fontSize: 10, fontWeight: 700 }}>{record.runs}R</span>
-          )}
-          {record.wickets > 0 && (
-            <span style={{ color: '#A78BFA', fontSize: 10, fontWeight: 700 }}>{record.wickets}W</span>
-          )}
-          <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>{record.matches} matches</span>
-          {record.mom > 0 && (
-            <span style={{ color: '#FFD700', fontSize: 10, fontWeight: 700 }}>⭐ {record.mom} MoM</span>
-          )}
+          {record.runs > 0 && <span style={{ color: '#7C3AED', fontSize: 10, fontWeight: 700 }}>{record.runs}R</span>}
+          {record.wickets > 0 && <span style={{ color: '#7C3AED', fontSize: 10, fontWeight: 700 }}>{record.wickets}W</span>}
+          <span className="text-[10px] text-navy-400">{record.matches} matches</span>
+          {record.mom > 0 && <span style={{ color: '#d97706', fontSize: 10, fontWeight: 700 }}>⭐ {record.mom} MoM</span>}
         </div>
       </div>
-      {isSelected ? (
-        <CheckCircle2 size={18} color="#7C3AED" style={{ flexShrink: 0 }} />
-      ) : (
-        <ChevronRight size={15} color="rgba(167,139,250,0.5)" style={{ flexShrink: 0 }} />
-      )}
+      {isSelected
+        ? <CheckCircle2 size={18} color="#7C3AED" style={{ flexShrink: 0 }} />
+        : <ChevronRight size={15} className="text-navy-300 flex-shrink-0" />
+      }
     </button>
   )
 }
@@ -167,58 +151,35 @@ export default function FetchPastRecord() {
   }
 
   return (
-    <div style={{
-      minHeight: '100dvh',
-      background: 'linear-gradient(160deg, #0a0118 0%, #120520 55%, #07021a 100%)',
-      display: 'flex', flexDirection: 'column',
-    }}>
+    <div className="min-h-dvh flex flex-col bg-[var(--cy-bg)]">
       {/* Header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        padding: '16px 16px 0',
-      }}>
+      <div className="flex items-center gap-3 px-4 pt-4 pb-2">
         <button
           onClick={() => navigate('/')}
-          style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.08)',
-            border: 'none', cursor: 'pointer', display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-          }}
+          className="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--cy-surface)] border border-[var(--cy-border)]"
         >
-          <ArrowLeft size={17} color="#fff" />
+          <ArrowLeft size={17} className="text-navy-700" />
         </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ color: '#fff', fontSize: 18, fontWeight: 800, lineHeight: 1.2 }}>
-            Fetch Past Records
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 2 }}>
-            Find your cricket history on CricYaar
-          </p>
+        <div className="flex-1">
+          <h1 className="font-extrabold text-navy-900 text-[17px] leading-tight">Fetch Past Records</h1>
+          <p className="text-[11px] text-navy-400 mt-0.5">Find your cricket history on CricYaar</p>
         </div>
         <button
           onClick={() => navigate('/')}
-          style={{
-            color: 'rgba(167,139,250,0.7)', fontSize: 12, fontWeight: 600,
-            background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px',
-          }}
+          className="text-[12px] font-semibold text-violet-500 px-2 py-1"
         >
           Skip
         </button>
       </div>
 
-      <div style={{ padding: '20px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="flex-1 px-4 pt-3 pb-8 flex flex-col gap-4">
 
         {/* Scanner frame */}
         <ScannerFrame active={query.length > 0} />
 
         {/* Search input */}
-        <div style={{ position: 'relative' }}>
-          <Search
-            size={15}
-            color="rgba(167,139,250,0.6)"
-            style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}
-          />
+        <div className="relative">
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-400 pointer-events-none" />
           <input
             ref={inputRef}
             type="text"
@@ -226,49 +187,37 @@ export default function FetchPastRecord() {
             onChange={e => setQuery(e.target.value)}
             placeholder="Search by player name or club…"
             autoFocus
-            style={{
-              width: '100%', padding: '12px 12px 12px 38px',
-              background: 'rgba(255,255,255,0.07)',
-              border: '1.5px solid rgba(124,58,237,0.35)',
-              borderRadius: 12, color: '#fff', fontSize: 14,
-              outline: 'none',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={e => { e.target.style.borderColor = 'rgba(124,58,237,0.8)' }}
-            onBlur={e => { e.target.style.borderColor = 'rgba(124,58,237,0.35)' }}
+            className="w-full pl-9 pr-9 py-3 rounded-2xl text-[14px] text-navy-900 placeholder-slate-400 outline-none bg-[var(--cy-surface)] border border-[var(--cy-border)] focus:border-violet-400 transition-colors"
           />
+          {query && !searching && (
+            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+              <X size={14} className="text-navy-400" />
+            </button>
+          )}
           {searching && (
             <div style={{
               position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
               width: 14, height: 14, borderRadius: '50%',
-              border: '2px solid rgba(124,58,237,0.3)',
+              border: '2px solid rgba(124,58,237,0.2)',
               borderTopColor: '#7C3AED',
               animation: 'spin 0.7s linear infinite',
             }} />
           )}
-          <style>{`@keyframes spin { to { transform: translateY(-50%) rotate(360deg) } }`}</style>
         </div>
 
         {/* Empty state */}
         {!query && (
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <div style={{ fontSize: 36, marginBottom: 10 }}>🏏</div>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600 }}>
-              Search your name to find matches you've played
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 6 }}>
-              Runs, wickets, Man of the Match — it's all there
-            </p>
+          <div className="text-center py-10">
+            <div className="text-4xl mb-3">🏏</div>
+            <p className="font-semibold text-navy-600 text-[13px]">Search your name to find matches you've played</p>
+            <p className="text-navy-400 text-[11px] mt-2">Runs, wickets, Man of the Match — it's all there</p>
           </div>
         )}
 
         {/* Results */}
         {results.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p style={{
-              color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.12em',
-            }}>
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] font-bold text-navy-400 uppercase tracking-widest">
               {results.length} record{results.length !== 1 ? 's' : ''} found
             </p>
             {results.map(r => (
@@ -279,43 +228,28 @@ export default function FetchPastRecord() {
 
         {/* No results */}
         {query && !searching && results.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: 28, marginBottom: 8 }}>🔍</div>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600 }}>
-              No records found for "{query}"
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11, marginTop: 4 }}>
-              Try your club name or a different spelling
-            </p>
+          <div className="text-center py-8">
+            <div className="text-3xl mb-2">🔍</div>
+            <p className="font-semibold text-navy-600 text-[13px]">No records found for "{query}"</p>
+            <p className="text-navy-400 text-[11px] mt-1">Try your club name or a different spelling</p>
           </div>
         )}
       </div>
 
-      {/* CTA — only when something is selected */}
+      {/* Selected CTA */}
       {selected && (
-        <div style={{ padding: '0 16px 36px' }}>
-          <div style={{
-            background: 'rgba(124,58,237,0.1)',
-            border: '1px solid rgba(124,58,237,0.3)',
-            borderRadius: 12, padding: '10px 14px', marginBottom: 10,
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <CheckCircle2 size={15} color="#7C3AED" />
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }}>
-              Selected: <span style={{ color: '#A78BFA', fontWeight: 700 }}>{selected.name}</span>
+        <div className="px-4 pb-10 pt-2 border-t border-[var(--cy-border)] bg-[var(--cy-surface)]">
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle2 size={14} className="text-violet-600 flex-shrink-0" />
+            <p className="text-[11px] text-navy-600">
+              Selected: <span className="font-bold text-violet-600">{selected.name}</span>
               {' · '}{selected.matches} matches · {selected.club}
             </p>
           </div>
           <button
             onClick={handleClaim}
-            style={{
-              width: '100%', padding: '15px',
-              background: 'linear-gradient(135deg,#7C3AED,#5B21B6)',
-              border: 'none', borderRadius: 14,
-              color: '#fff', fontSize: 15, fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 6px 24px rgba(124,58,237,0.5)',
-            }}
+            className="w-full py-4 rounded-2xl font-bold text-white text-[15px] active:scale-[0.98] transition-all"
+            style={{ background: 'linear-gradient(135deg,#7C3AED,#5B21B6)', boxShadow: '0 6px 20px rgba(124,58,237,0.35)' }}
           >
             🔐 Lock & Claim Records
           </button>

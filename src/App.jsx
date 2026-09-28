@@ -272,6 +272,7 @@ function AppShell({ children }) {
     '/welcome','/login','/otp','/setup','/role-warning','/role-select',
     '/whats-new','/pro-payment','/celebration','/player-match',
     '/role-onboard','/player-setup','/city-select','/profile-match','/ipl-pick',
+    '/fetch-past-record','/yarein-welcome',
   ].includes(pathname)
     || pathname.startsWith('/score')
     || pathname.startsWith('/ground-booking')
