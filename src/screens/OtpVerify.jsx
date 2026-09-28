@@ -122,10 +122,12 @@ export default function OtpVerify() {
 
       // For new users with pending signup data, persist name immediately
       if (isNewUser && pendingSignup) {
-        await supabase.from('profiles').update({
+        const profileUpdate = {
           name: pendingSignup.fullName,
           username: pendingSignup.cricketName,
-        }).eq('id', authUser.id)
+        }
+        if (pendingSignup.motherTongue) profileUpdate.mother_tongue = pendingSignup.motherTongue
+        await supabase.from('profiles').update(profileUpdate).eq('id', authUser.id)
       }
 
       setUser({
@@ -145,6 +147,7 @@ export default function OtpVerify() {
         legacyWickets: profile?.legacy_wickets || 0,
         legacyMatches: profile?.legacy_matches || 0,
         legacyMom:     profile?.legacy_mom     || 0,
+        motherTongue:  (isNewUser && pendingSignup?.motherTongue) ? pendingSignup.motherTongue : (profile?.mother_tongue || ''),
       })
       localStorage.setItem('whats_new_seen_version', 'v3')
       // Reset referral popup so it fires after every login/signup
