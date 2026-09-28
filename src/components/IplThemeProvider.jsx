@@ -58,16 +58,20 @@ export default function IplThemeProvider({ children }) {
     root.style.setProperty('--cy-on-primary',     t.textOnPrimary || '#ffffff')
 
     if (team) {
-      // Option A: full surface theme — every background follows the team's palette
-      const subtle = lightenHex(t.midBg, 0.055)
+      // Option A: full surface theme — every background follows the team's palette.
+      // midBg values are very dark so we lighten cards significantly for readability.
+      const cardBg  = lightenHex(t.midBg,  0.15) // card surface — clearly brighter than bg
+      const subtleBg = lightenHex(t.midBg, 0.08) // subtle rows/pills
 
       root.style.setProperty('--cy-bg',          t.darkBg)
-      root.style.setProperty('--cy-surface',     t.midBg)
-      root.style.setProperty('--cy-subtle',      subtle)
-      root.style.setProperty('--cy-input-bg',    t.darkBg)
-      root.style.setProperty('--cy-border',      hexToRgba(t.primary, 0.22))
+      root.style.setProperty('--cy-surface',     cardBg)
+      root.style.setProperty('--cy-subtle',      subtleBg)
+      root.style.setProperty('--cy-input-bg',    lightenHex(t.darkBg, 0.05))
+      root.style.setProperty('--cy-border',      hexToRgba(t.primary, 0.30))
       root.style.setProperty('--cy-text',        '#f1f5f9')
-      root.style.setProperty('--cy-muted',       hexToRgba(t.secondary, 0.70))
+      // Always use a reliable light gray for muted text — never the team secondary,
+      // which can be near-black (CSK: #1A2F5F, SRH: #1A1A1A) and unreadable on dark.
+      root.style.setProperty('--cy-muted',       '#94a3b8')
 
       // TopBar: solid primary color header
       root.style.setProperty('--cy-topbar-bg',   t.primary)

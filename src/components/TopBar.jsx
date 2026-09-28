@@ -78,7 +78,8 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
               <p className="font-bold text-sm truncate leading-tight" style={{ color: 'var(--cy-topbar-text)' }}>{title}</p>
             ) : (
               isRoot && (
-                <p className="text-brand-500 text-[8px] font-extrabold tracking-[0.15em] uppercase leading-none">
+                <p className="text-[8px] font-extrabold tracking-[0.15em] uppercase leading-none"
+                   style={{ color: 'var(--cy-topbar-text)', opacity: 0.75 }}>
                   Your Game. Your Record.
                 </p>
               )
@@ -94,8 +95,9 @@ export default function TopBar({ title, showBack, showHome, isHome }) {
           className="flex items-center gap-1.5 h-8 rounded-full flex-shrink-0 active:scale-95 transition-all"
           style={{
             padding: '0 12px',
-            background: 'linear-gradient(135deg,var(--cy-primary),var(--cy-bg-mid))',
-            boxShadow: '0 2px 10px rgba(124,58,237,0.4)',
+            background: 'rgba(0,0,0,0.25)',
+            border: '1px solid rgba(255,255,255,0.25)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
           }}
           aria-label="Refer &amp; Earn"
         >
