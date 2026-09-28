@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase, toE164 } from '../lib/supabase'
@@ -19,6 +19,8 @@ export default function Login() {
   const code = '+91'
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => { setErrors({}) }, [mode])
 
   const clearErr = (key) => setErrors(e => ({ ...e, [key]: '' }))
 

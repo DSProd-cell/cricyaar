@@ -300,7 +300,7 @@ export default function PlayerProfile() {
   const quickStats = roleStats(role, player)
 
   return (
-    <div className="min-h-dvh flex flex-col overflow-x-hidden bg-slate-50">
+    <div className="min-h-dvh flex flex-col bg-slate-50">
       <TopBar title={isOwnProfile ? 'My Profile' : player.name.split(' ')[0] + "'s Profile"} showBack />
 
       {/* ── Hero Card ───────────────────────────────────────────────────── */}
@@ -744,7 +744,7 @@ export default function PlayerProfile() {
             })}
           </div>
 
-          <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full pb-24">
+          <main className="flex-1 px-4 py-4 max-w-2xl mx-auto w-full" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))' }}>
             {/* OVERVIEW */}
             {tab === 'Overview' && (
               <div className="space-y-3 animate-fade-in">
@@ -1046,8 +1046,8 @@ export default function PlayerProfile() {
         </>
       )}
 
-      {/* Non-player roles — spacer so logout isn't cut off by bottom nav */}
-      {role !== 'player' && isOwnProfile && <div className="h-24" />}
+      {/* Spacer so last profile section isn't cut off by floating bottom nav */}
+      {isOwnProfile && <div style={{ height: 'calc(80px + env(safe-area-inset-bottom, 0px))' }} />}
 
       {/* Edit Profile Sheet */}
       {showEdit && (
