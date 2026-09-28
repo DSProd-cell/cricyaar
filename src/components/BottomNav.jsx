@@ -35,8 +35,8 @@ export default function BottomNav() {
 
   const roleItem = ROLE_FOURTH[role] || null
   const baseItems = [
-    { label: 'Home',   icon: Home,   path: '/'        },
-    { label: 'Search', icon: Search, path: '/grounds' },
+    { label: 'Home',   icon: Home,   path: '/'       },
+    { label: 'Search', icon: Search, path: '/search' },
   ]
   const tail = [{ label: 'Profile', icon: User, path: '/profile' }]
   const allItems = roleItem ? [...baseItems, roleItem, ...tail] : [...baseItems, ...tail]

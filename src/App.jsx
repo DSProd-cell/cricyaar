@@ -38,7 +38,8 @@ import Home           from './screens/Home'
 import MyCricket      from './screens/MyCricket'
 import Scoring        from './screens/Scoring'
 import LiveMatch      from './screens/LiveMatch'
-import GroundSearch   from './screens/GroundSearch'
+import GroundSearch      from './screens/GroundSearch'
+import UniversalSearch   from './screens/UniversalSearch'
 import GroundDetail   from './screens/GroundDetail'
 import Teams          from './screens/Teams'
 import TeamProfile    from './screens/TeamProfile'
@@ -316,6 +317,7 @@ export default function App() {
           <Route path="/score/:matchId" element={<AuthGuard><Scoring /></AuthGuard>} />
           <Route path="/live/:id"       element={<AuthGuard><LiveMatch /></AuthGuard>} />
           <Route path="/score"          element={<AuthGuard><Scoring /></AuthGuard>} />
+          <Route path="/search"         element={<AuthGuard><UniversalSearch /></AuthGuard>} />
           <Route path="/grounds"        element={<AuthGuard><GroundSearch /></AuthGuard>} />
           <Route path="/grounds/:id"    element={<AuthGuard><GroundDetail /></AuthGuard>} />
           <Route path="/teams"          element={<AuthGuard><Teams /></AuthGuard>} />

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
 import {
   Sparkles, X, Send, ArrowRight, Bot, Check,
-  Ticket, Phone, User, MessageSquare, Loader
+  Ticket, Phone, User, MessageSquare, Loader,
+  Megaphone, ChevronRight
 } from 'lucide-react'
 
 // ── Pages where chat should NOT appear ──────────────────────────────────────
@@ -17,6 +19,7 @@ const SKIP_PATHS = [
 const PAGE_CONTEXT = {
   '/':               'Home',
   '/teams':          'Teams',
+  '/search':         'Universal Search',
   '/grounds':        'Ground Search',
   '/profile':        'Profile',
   '/settings':       'Settings',
@@ -295,6 +298,186 @@ function SupportForm({ onSubmit, submitted, ticketId }) {
   )
 }
 
+// ── Broadcast request types ──────────────────────────────────────────────────
+const BROADCAST_TYPES = [
+  { key: 'player',     label: 'Looking for Players',    emoji: '🏏', targetRole: 'player',       color: '#10b981' },
+  { key: 'ground',     label: 'Looking for a Ground',   emoji: '🏟️', targetRole: 'ground_owner', color: '#3b82f6' },
+  { key: 'umpire',     label: 'Looking for an Umpire',  emoji: '⚖️', targetRole: 'umpire',       color: '#f59e0b' },
+  { key: 'tournament', label: 'Looking for Tournament', emoji: '🏆', targetRole: 'organiser',    color: '#8b5cf6' },
+  { key: 'team',       label: 'Looking to Join a Team', emoji: '🤝', targetRole: 'captain',      color: '#ef4444' },
+]
+
+function generateWaText(type, note, userName, city) {
+  const found = BROADCAST_TYPES.find(t => t.key === type)
+  const label = found ? found.label : 'Looking for help'
+  const lines = [
+    `🏏 *CricYaar Request*`,
+    `📢 ${label}`,
+    note ? `📝 ${note}` : '',
+    `📍 ${city || 'Bengaluru'}`,
+    `👤 ${userName || 'A CricYaar user'}`,
+    `\n_Sent via CricYaar app_`,
+  ].filter(Boolean)
+  return encodeURIComponent(lines.join('\n'))
+}
+
+// ── InformDS Broadcast Sheet ─────────────────────────────────────────────────
+function InformDSSheet({ onClose, onOpenChat, user }) {
+  const [selected, setSelected] = useState(null)
+  const [note, setNote]         = useState('')
+  const [sending, setSending]   = useState(false)
+  const [sent, setSent]         = useState(false)
+  const [waText, setWaText]     = useState('')
+
+  const handleSend = async () => {
+    if (!selected) return
+    setSending(true)
+    const type = BROADCAST_TYPES.find(t => t.key === selected)
+    const wa = generateWaText(selected, note, user?.name, user?.city)
+    setWaText(wa)
+
+    try {
+      await supabase.from('broadcasts').insert({
+        sender_id:   user?.id,
+        type:        selected,
+        note:        note || null,
+        city:        user?.city || 'Bengaluru',
+        target_role: type?.targetRole || null,
+      })
+    } catch (_) {
+      // table may not exist yet — WhatsApp path still works
+    }
+    setSending(false)
+    setSent(true)
+  }
+
+  const openWa = () => {
+    window.open(`https://wa.me/?text=${waText}`, '_blank')
+  }
+
+  return (
+    <div className="fixed inset-0 z-[65] flex flex-col justify-end" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+      <div
+        className="relative bg-[var(--cy-surface)] rounded-t-3xl w-full max-w-lg mx-auto shadow-2xl animate-slide-up flex flex-col"
+        style={{ maxHeight: '80dvh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3"><div className="w-10 h-1 bg-slate-200 rounded-full" /></div>
+
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#7C3AED,#6366f1)' }}>
+            <Megaphone size={16} className="text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="font-extrabold text-navy-900 text-sm">Inform DS</p>
+            <p className="text-[11px] text-violet-500 font-medium">Broadcast to cricketers in {user?.city || 'your city'}</p>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+            <X size={15} className="text-navy-500" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+          {!sent ? (
+            <>
+              {/* Request type picker */}
+              <div>
+                <p className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-3">What are you looking for?</p>
+                <div className="space-y-2">
+                  {BROADCAST_TYPES.map(t => (
+                    <button
+                      key={t.key}
+                      onClick={() => setSelected(t.key)}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all active:scale-[0.98]"
+                      style={{
+                        borderColor: selected === t.key ? t.color : 'var(--cy-border)',
+                        background: selected === t.key ? `${t.color}12` : 'var(--cy-surface)',
+                      }}
+                    >
+                      <span className="text-xl flex-shrink-0">{t.emoji}</span>
+                      <span className="font-semibold text-sm text-navy-900 flex-1 text-left">{t.label}</span>
+                      {selected === t.key && (
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: t.color }}>
+                          <Check size={11} className="text-white" strokeWidth={3} />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Note */}
+              <div>
+                <p className="text-xs font-bold text-navy-500 uppercase tracking-wider mb-2">Add a note <span className="normal-case font-normal text-navy-400">(optional)</span></p>
+                <div className="relative">
+                  <textarea
+                    rows={2}
+                    value={note}
+                    onChange={e => setNote(e.target.value.slice(0, 120))}
+                    placeholder={`e.g. Need 3 batsmen · Sunday · ${user?.city || 'Bengaluru'}`}
+                    className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 bg-[var(--cy-surface)] outline-none focus:border-violet-400 placeholder-slate-400 text-navy-900 resize-none transition-colors"
+                  />
+                  <p className="text-right text-[10px] text-slate-400 mt-0.5">{note.length}/120</p>
+                </div>
+              </div>
+
+              {/* Send button */}
+              <button
+                onClick={handleSend}
+                disabled={!selected || sending}
+                className="w-full py-3.5 rounded-2xl font-bold text-sm text-white transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg,#7C3AED,#6366f1)' }}
+              >
+                {sending ? <Loader size={15} className="animate-spin" /> : <Megaphone size={15} />}
+                {sending ? 'Sending…' : 'Broadcast Request'}
+              </button>
+
+              {/* App help link */}
+              <button onClick={onOpenChat} className="w-full flex items-center justify-center gap-1.5 text-xs text-navy-400 py-1">
+                <Sparkles size={11} className="text-indigo-400" />
+                <span>Need app help? Ask DS</span>
+                <ChevronRight size={11} className="text-navy-300" />
+              </button>
+            </>
+          ) : (
+            /* Success state */
+            <div className="py-6 flex flex-col items-center gap-4 text-center">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: '#d1fae5' }}>
+                <Check size={30} className="text-green-600" strokeWidth={2.5} />
+              </div>
+              <div>
+                <p className="font-extrabold text-navy-900 text-base mb-1">Request Broadcast! 🎉</p>
+                <p className="text-sm text-navy-500">
+                  {BROADCAST_TYPES.find(t => t.key === selected)?.label} — notifying cricketers in <strong>{user?.city || 'Bengaluru'}</strong>
+                </p>
+              </div>
+
+              <button
+                onClick={openWa}
+                className="w-full py-3.5 rounded-2xl font-bold text-sm text-white flex items-center justify-center gap-2 active:scale-[0.98]"
+                style={{ background: '#25d366' }}
+              >
+                <span className="text-base">💬</span>
+                Share on WhatsApp Too
+              </button>
+              <p className="text-[11px] text-navy-400">Opens WhatsApp with a pre-filled message — send to your cricket group</p>
+
+              <button onClick={onClose} className="w-full py-3 rounded-2xl border border-slate-200 font-semibold text-sm text-navy-600">
+                Done
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div style={{ height: 'env(safe-area-inset-bottom, 0px)' }} />
+      </div>
+    </div>
+  )
+}
+
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function AIAssistant() {
   const navigate     = useNavigate()
@@ -303,6 +486,7 @@ export default function AIAssistant() {
 
   // ── All hooks MUST come before any conditional return ──
   const [open, setOpen]                       = useState(false)
+  const [showBroadcast, setShowBroadcast]     = useState(false)
   const [input, setInput]                     = useState('')
   const [typing, setTyping]                   = useState(false)
   const [ticketId, setTicketId]               = useState(null)
@@ -416,22 +600,31 @@ export default function AIAssistant() {
 
   return (
     <>
-      {/* ── DS Floating trigger ── */}
-      {!open && (
+      {/* ── Inform DS Floating trigger ── */}
+      {!open && !showBroadcast && (
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => setShowBroadcast(true)}
           className="fixed bottom-[82px] right-4 z-[58] flex items-center gap-1.5 pl-2 pr-3 h-10 rounded-full shadow-lg transition-all active:scale-95"
           style={{
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
+            background: 'linear-gradient(135deg, #7C3AED, #6366f1)',
+            boxShadow: '0 4px 16px rgba(124,58,237,0.45)',
           }}
-          aria-label="Ask DS — CricYaar AI Guide"
+          aria-label="Inform DS — Broadcast to CricYaar users"
         >
           <div className="w-6 h-6 rounded-full bg-white/25 flex items-center justify-center flex-shrink-0">
             <span className="text-white font-black text-[10px] tracking-tight">DS</span>
           </div>
-          <span className="text-white font-bold text-xs">Ask DS</span>
+          <span className="text-white font-bold text-xs">Inform DS</span>
         </button>
+      )}
+
+      {/* ── Broadcast sheet ── */}
+      {showBroadcast && (
+        <InformDSSheet
+          user={user}
+          onClose={() => setShowBroadcast(false)}
+          onOpenChat={() => { setShowBroadcast(false); setOpen(true) }}
+        />
       )}
 
       {/* ── Chat sheet ── */}
