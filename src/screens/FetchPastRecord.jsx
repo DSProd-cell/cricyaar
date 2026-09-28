@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ArrowLeft, CheckCircle2, ChevronRight, X, Trophy, Star } from 'lucide-react'
+import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
+import { Search, ArrowLeft, CheckCircle2, ChevronRight, X, Trophy, Lock } from 'lucide-react'
 
 const MOCK_RECORDS = [
   { id: 1, name: 'Debasish Patro',    role: 'Batsman',     club: 'Eden Gardens Cricket Club',    matches: 4,  runs: 247, wickets: 0,  mom: 2, lastMatch: 'Aug 12, 2024' },
@@ -12,6 +14,14 @@ const MOCK_RECORDS = [
   { id: 7, name: 'Siddhant Maruti',   role: 'All-rounder', club: 'Indiranagar Cricket Club',      matches: 14, runs: 489, wickets: 21, mom: 4, lastMatch: 'Sep 20, 2024' },
   { id: 8, name: 'Siddhant M.',       role: 'Batsman',     club: 'Bengaluru Premier League T20',  matches: 7,  runs: 276, wickets: 2,  mom: 1, lastMatch: 'Aug 18, 2024' },
 ]
+
+// Returns true if record name shares at least one word (≥3 chars) with the user's name
+function nameMatches(recordName, userName) {
+  if (!userName) return true // no name set → allow free search
+  const userWords = userName.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
+  const recWords  = recordName.toLowerCase().split(/\s+/)
+  return userWords.some(uw => recWords.some(rw => rw.startsWith(uw) || uw.startsWith(rw)))
+}
 
 function ResultCard({ record, selected, onSelect }) {
   const isSel = selected?.id === record.id
@@ -25,7 +35,6 @@ function ResultCard({ record, selected, onSelect }) {
         boxShadow: isSel ? '0 2px 12px rgba(124,58,237,0.12)' : '0 1px 4px rgba(0,0,0,0.05)',
       }}
     >
-      {/* Avatar circle */}
       <div
         className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-[15px]"
         style={{ background: isSel ? '#ede9fe' : '#f1f5f9', color: isSel ? '#7C3AED' : '#64748b' }}
@@ -60,27 +69,63 @@ function ResultCard({ record, selected, onSelect }) {
 
 export default function FetchPastRecord() {
   const navigate = useNavigate()
-  const [query, setQuery]       = useState('')
-  const [results, setResults]   = useState([])
-  const [selected, setSelected] = useState(null)
+  const { user } = useStore()
+
+  // Pre-fill search with user's first name so only relevant matches appear
+  const firstName = user?.name?.split(' ')[0] || ''
+  const [query, setQuery]         = useState(firstName)
+  const [results, setResults]     = useState([])
+  const [selected, setSelected]   = useState(null)
   const [searching, setSearching] = useState(false)
+  const [claimedIds, setClaimedIds] = useState(new Set())
+  const [claiming, setClaiming]   = useState(false)
   const inputRef = useRef(null)
 
+  // Load already-claimed record IDs from Supabase
+  useEffect(() => {
+    supabase
+      .from('claimed_records')
+      .select('record_id')
+      .then(({ data }) => {
+        if (data?.length) setClaimedIds(new Set(data.map(r => r.record_id)))
+      })
+  }, [])
+
+  // Filter records: must match user's name AND not already claimed
   useEffect(() => {
     if (!query.trim()) { setResults([]); setSearching(false); return }
     setSearching(true)
     const t = setTimeout(() => {
       const q = query.toLowerCase()
-      setResults(MOCK_RECORDS.filter(r =>
-        r.name.toLowerCase().includes(q) || r.club.toLowerCase().includes(q)
-      ))
+      const matched = MOCK_RECORDS.filter(r => {
+        // Must match the search query
+        const queryMatch = r.name.toLowerCase().includes(q) || r.club.toLowerCase().includes(q)
+        if (!queryMatch) return false
+        // Must share a name word with the logged-in user's name
+        if (!nameMatches(r.name, user?.name)) return false
+        // Must not already be claimed by someone else
+        if (claimedIds.has(r.id)) return false
+        return true
+      })
+      setResults(matched)
       setSearching(false)
-    }, 500)
+    }, 400)
     return () => clearTimeout(t)
-  }, [query])
+  }, [query, claimedIds, user?.name])
 
-  const handleClaim = () => {
-    if (!selected) return
+  const handleClaim = async () => {
+    if (!selected || !user?.id) return
+    setClaiming(true)
+    // Mark as claimed in Supabase so nobody else can claim it
+    const { error } = await supabase
+      .from('claimed_records')
+      .insert({ record_id: selected.id, claimed_by: user.id })
+    setClaiming(false)
+    if (error && error.code !== '23505') {
+      // 23505 = unique_violation — already claimed by someone else between load and claim
+      // treat as a race: just block silently
+      return
+    }
     navigate('/yarein-welcome', { state: { record: selected } })
   }
 
@@ -120,6 +165,12 @@ export default function FetchPastRecord() {
       {/* Search card */}
       <div className="px-4 -mt-4">
         <div className="bg-white rounded-2xl shadow-lg p-4" style={{ border: '1px solid #e2e8f0' }}>
+          {/* Name-match notice */}
+          {user?.name && (
+            <p className="text-[10px] font-bold text-violet-600 uppercase tracking-widest mb-2.5 px-1">
+              🔒 Showing records matching your name — {user.name}
+            </p>
+          )}
           <div className="relative">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-400 pointer-events-none" />
             <input
@@ -127,7 +178,7 @@ export default function FetchPastRecord() {
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Search by player name or club…"
+              placeholder="Search by your name or club…"
               autoFocus
               className="w-full pl-9 pr-9 py-3 rounded-xl text-[14px] text-slate-800 placeholder-slate-400 outline-none transition-colors"
               style={{ background: '#f8fafc', border: '1.5px solid', borderColor: query ? '#7C3AED' : '#e2e8f0' }}
@@ -154,7 +205,8 @@ export default function FetchPastRecord() {
             </div>
             <p className="font-bold text-slate-700 text-[14px]">Find your cricket records</p>
             <p className="text-slate-500 text-[12px] mt-1.5 leading-relaxed px-6">
-              Search your name or club — your runs,<br />wickets and MoM awards are waiting
+              Only records matching your name will appear.<br />
+              Search by your name or club.
             </p>
           </div>
         )}
@@ -175,8 +227,10 @@ export default function FetchPastRecord() {
         {query && !searching && results.length === 0 && (
           <div className="text-center py-10">
             <div className="text-3xl mb-2">🔍</div>
-            <p className="font-semibold text-slate-700 text-[13px]">No records for "{query}"</p>
-            <p className="text-slate-400 text-[11px] mt-1">Try a different name or your club name</p>
+            <p className="font-semibold text-slate-700 text-[13px]">No records found for "{query}"</p>
+            <p className="text-slate-400 text-[11px] mt-1 px-6 leading-relaxed">
+              Records are matched to your name. Try searching your first name, last name, or club.
+            </p>
           </div>
         )}
       </div>
@@ -193,10 +247,14 @@ export default function FetchPastRecord() {
           </div>
           <button
             onClick={handleClaim}
-            className="w-full py-4 rounded-2xl font-bold text-white text-[15px] active:scale-[0.98] transition-all"
+            disabled={claiming}
+            className="w-full py-4 rounded-2xl font-bold text-white text-[15px] active:scale-[0.98] transition-all disabled:opacity-60"
             style={{ background: 'linear-gradient(135deg,#7C3AED,#5B21B6)', boxShadow: '0 6px 20px rgba(124,58,237,0.35)' }}
           >
-            🔐 Lock & Claim My Records
+            {claiming
+              ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" /> Claiming…</span>
+              : '🔐 Lock & Claim My Records'
+            }
           </button>
         </div>
       )}
