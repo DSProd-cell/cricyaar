@@ -141,6 +141,10 @@ export default function OtpVerify() {
         kycVerified: profile?.kyc_status === 'approved',
         kycApprovedAt: profile?.kyc_approved_at || null,
         playerSetupDone: profile?.player_setup_done || false,
+        legacyRuns:    profile?.legacy_runs    || 0,
+        legacyWickets: profile?.legacy_wickets || 0,
+        legacyMatches: profile?.legacy_matches || 0,
+        legacyMom:     profile?.legacy_mom     || 0,
       })
       localStorage.setItem('whats_new_seen_version', 'v3')
       // Reset referral popup so it fires after every login/signup

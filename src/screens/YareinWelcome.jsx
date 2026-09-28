@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import { supabase } from '../lib/supabase'
 
 function easeOut(t) { return 1 - Math.pow(1 - t, 3) }
 
@@ -13,6 +14,37 @@ export default function YareinWelcome() {
   const [show, setShow] = useState(false)
   const [progress, setProgress] = useState(0)
   const rafRef = useRef(null)
+
+  // Write claimed legacy stats to Supabase (additive merge)
+  useEffect(() => {
+    if (!record || !user?.id) return
+    const merge = async () => {
+      const { data: current } = await supabase
+        .from('profiles')
+        .select('legacy_runs, legacy_wickets, legacy_matches, legacy_mom')
+        .eq('id', user.id)
+        .single()
+      const newRuns     = (current?.legacy_runs    || 0) + (record.runs    || 0)
+      const newWickets  = (current?.legacy_wickets || 0) + (record.wickets || 0)
+      const newMatches  = (current?.legacy_matches || 0) + (record.matches || 0)
+      const newMom      = (current?.legacy_mom     || 0) + (record.mom     || 0)
+      await supabase.from('profiles').update({
+        legacy_runs:    newRuns,
+        legacy_wickets: newWickets,
+        legacy_matches: newMatches,
+        legacy_mom:     newMom,
+      }).eq('id', user.id)
+      // Update Zustand so ProfilePage reflects immediately
+      useStore.getState().setUser({
+        ...useStore.getState().user,
+        legacyRuns:    newRuns,
+        legacyWickets: newWickets,
+        legacyMatches: newMatches,
+        legacyMom:     newMom,
+      })
+    }
+    merge()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const t = setTimeout(() => setShow(true), 200)

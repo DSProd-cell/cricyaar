@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { supabase } from '../lib/supabase'
 import { fetchApprovedGrounds } from '../lib/groundsApi'
+import { getCurrentCoords, distanceKm } from '../lib/geolocation'
 import TopBar from '../components/TopBar'
 import {
   Search, X, SlidersHorizontal, MapPin, Star,
-  User, Landmark, Trophy, Activity, ChevronRight
+  User, Landmark, Trophy, Activity, ChevronRight, LocateFixed
 } from 'lucide-react'
+
+const GROUND_INITIAL_LIMIT = 5
 
 // ── Filter definitions ───────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -44,7 +47,14 @@ function GroundCard({ ground, onTap }) {
       )}
       <div className="flex-1 min-w-0">
         <p className="font-bold text-[13px] text-navy-900 truncate">{ground.name}</p>
-        <p className="text-[11px] text-navy-500 mt-0.5">{ground.area} · {ground.pitchType}</p>
+        <p className="text-[11px] text-navy-500 mt-0.5">
+          {ground.area} · {ground.pitchType}
+          {ground._distanceKm != null && (
+            <span className="text-brand-600 font-semibold">
+              {' · '}{ground._distanceKm < 1 ? `${Math.round(ground._distanceKm * 1000)} m` : `${ground._distanceKm.toFixed(1)} km`} away
+            </span>
+          )}
+        </p>
         <div className="flex items-center gap-2 mt-1">
           {ground.rating > 0 && (
             <span className="flex items-center gap-0.5 text-[11px] text-amber-600 font-semibold">
@@ -125,7 +135,7 @@ function EmptyState({ category, query }) {
 // ── Main component ───────────────────────────────────────────────────────────
 export default function UniversalSearch() {
   const navigate   = useNavigate()
-  const { user }   = useStore()
+  const { user, lastKnownCoords, setLastKnownCoords } = useStore()
   const city       = user?.city || 'Bengaluru'
 
   const [query,      setQuery]      = useState('')
@@ -133,9 +143,20 @@ export default function UniversalSearch() {
   const [subFilter,  setSubFilter]  = useState('All')
   const [results,    setResults]    = useState([])
   const [loading,    setLoading]    = useState(false)
+  const [myCoords,   setMyCoords]   = useState(lastKnownCoords || null)
+  const [showAll,    setShowAll]    = useState(false)
 
-  // Reset sub-filter when category changes
-  useEffect(() => { setSubFilter('All') }, [category])
+  // Auto-detect location on mount for nearby grounds
+  useEffect(() => {
+    let cancelled = false
+    getCurrentCoords().then(c => {
+      if (!cancelled && c) { setMyCoords(c); if (setLastKnownCoords) setLastKnownCoords(c) }
+    })
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset sub-filter and showAll when category changes
+  useEffect(() => { setSubFilter('All'); setShowAll(false) }, [category])
 
   const fetchResults = useCallback(async () => {
     setLoading(true)
@@ -158,7 +179,23 @@ export default function UniversalSearch() {
             return g.pitchType?.toLowerCase().includes(subFilter.toLowerCase())
           })
         }
+        // Attach distance and sort by nearest
+        if (myCoords) {
+          filtered = filtered.map(g => ({
+            ...g,
+            _distanceKm: (g.lat != null && g.lng != null)
+              ? distanceKm(myCoords.lat, myCoords.lng, g.lat, g.lng)
+              : null,
+          }))
+          filtered.sort((a, b) => {
+            if (a._distanceKm == null && b._distanceKm == null) return 0
+            if (a._distanceKm == null) return 1
+            if (b._distanceKm == null) return -1
+            return a._distanceKm - b._distanceKm
+          })
+        }
         setResults(filtered)
+        setShowAll(false)
 
       } else if (category === 'player' || category === 'umpire') {
         const role = category === 'player' ? 'player' : 'umpire'
@@ -203,7 +240,7 @@ export default function UniversalSearch() {
       setResults([])
     }
     setLoading(false)
-  }, [category, query, subFilter, city])
+  }, [category, query, subFilter, city, myCoords])
 
   useEffect(() => {
     const t = setTimeout(fetchResults, 300)
@@ -290,15 +327,31 @@ export default function UniversalSearch() {
         ) : (
           <>
             <p className="text-[11px] text-navy-400 font-semibold">
-              {results.length} {category}{results.length !== 1 ? 's' : ''} found in {city}
+              {results.length} {category}{results.length !== 1 ? 's' : ''} found
+              {category === 'ground' && myCoords ? ' · sorted by distance' : ` in ${city}`}
             </p>
-            {category === 'ground' && results.map(g => (
-              <GroundCard
-                key={g.id}
-                ground={g}
-                onTap={() => navigate(`/grounds/${g.id}`)}
-              />
-            ))}
+            {category === 'ground' && (() => {
+              const visible = showAll ? results : results.slice(0, GROUND_INITIAL_LIMIT)
+              return (
+                <>
+                  {visible.map(g => (
+                    <GroundCard
+                      key={g.id}
+                      ground={g}
+                      onTap={() => navigate(`/grounds/${g.id}`)}
+                    />
+                  ))}
+                  {results.length > GROUND_INITIAL_LIMIT && !showAll && (
+                    <button
+                      onClick={() => setShowAll(true)}
+                      className="w-full py-3 rounded-2xl border-2 border-dashed border-slate-200 text-[12px] font-bold text-navy-500 hover:border-brand-300 hover:text-brand-600 transition-colors"
+                    >
+                      Show {results.length - GROUND_INITIAL_LIMIT} more grounds ↓
+                    </button>
+                  )}
+                </>
+              )
+            })()}
             {(category === 'player' || category === 'umpire') && results.map(p => (
               <ProfileCard
                 key={p.id}

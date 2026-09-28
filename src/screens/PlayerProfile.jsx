@@ -25,8 +25,9 @@ function realProfileShape(user) {
     city: user?.city || '',
     bio: user?.bio || '',
     roles: user?.roles?.length ? user.roles : [user?.role || 'fan'],
-    batting:  { runs: 0, innings: 0, dismissed: 0, notOut: 0, hs: 0, fifties: 0, hundreds: 0, ducks: 0 },
-    bowling:  { wkts: 0, overs: 0, runs: 0, best: '—', threeWickets: 0, fiveWickets: 0 },
+    mom: user?.legacyMom || 0,
+    batting:  { runs: user?.legacyRuns || 0, innings: user?.legacyMatches || 0, dismissed: 0, notOut: 0, hs: 0, fifties: 0, hundreds: 0, ducks: 0 },
+    bowling:  { wkts: user?.legacyWickets || 0, overs: 0, runs: 0, best: '—', threeWickets: 0, fiveWickets: 0 },
     fielding: { catches: 0, runOuts: 0, stumpings: 0 },
   }
 }
@@ -96,10 +97,10 @@ function roleStats(role, player) {
   switch (role) {
     case 'player':
       return [
-        { label: 'Runs',    val: player.batting.runs    },
-        { label: 'Innings', val: player.batting.innings  },
-        { label: 'Wickets', val: player.bowling.wkts    },
-        { label: 'Matches', val: player.batting.innings  },
+        { label: 'Runs',    val: player.batting.runs   },
+        { label: 'Wickets', val: player.bowling.wkts   },
+        { label: 'Matches', val: player.batting.innings },
+        { label: 'MoM',     val: player.mom || 0       },
       ]
     case 'organiser':
       return [
