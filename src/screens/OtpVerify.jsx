@@ -165,7 +165,7 @@ export default function OtpVerify() {
       const withinValidity = renewal ? new Date(renewal) > new Date() : false
       const isPro = profile?.subscription === 'pro_active' ||
         (profile?.subscription === 'pro_cancelled' && withinValidity)
-      if (!isPro && !proIntent) {
+      if (!isNewUser && !isPro && !proIntent) {
         useStore.getState().setShowProSheet(true)
       }
     }
