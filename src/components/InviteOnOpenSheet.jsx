@@ -6,7 +6,7 @@ import { useStore } from '../store/useStore'
 const SKIP_PATHS = [
   '/landing', '/welcome', '/login', '/otp', '/setup', '/profile-match',
   '/celebration', '/city-select', '/role-select', '/player-match', '/role-onboard',
-  '/player-setup', '/invite',
+  '/player-setup', '/invite', '/ipl-pick', '/fetch-past-record',
 ]
 
 export default function InviteOnOpenSheet() {
@@ -16,6 +16,9 @@ export default function InviteOnOpenSheet() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
 
+  // Re-check on every navigation so the popup fires as soon as the user
+  // reaches a "real" screen (e.g. Home) even if they were on a skip path
+  // (like /otp or /city-select) when user.id was first set.
   useEffect(() => {
     if (!user) return
     if (SKIP_PATHS.some(p => pathname.startsWith(p))) return
@@ -25,9 +28,9 @@ export default function InviteOnOpenSheet() {
       sessionStorage.setItem('cy_invite_popup_shown', '1')
       setOpen(true)
       requestAnimationFrame(() => setVisible(true))
-    }, 2500)
+    }, 2000)
     return () => clearTimeout(t)
-  }, [user?.id]) // eslint-disable-line
+  }, [user?.id, pathname]) // eslint-disable-line
 
   const code = user?.username?.toUpperCase().slice(0, 6) || 'CY21'
 

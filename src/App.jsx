@@ -196,7 +196,13 @@ function WhatsNewGate({ children }) {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return
     const sub = CapApp.addListener('appStateChange', ({ isActive }) => {
-      if (isActive && user?.id) registerPush(user.id)
+      if (isActive && user?.id) {
+        registerPush(user.id)
+        // Clear invite popup flag so it re-shows on the next app open.
+        // sessionStorage persists across background/foreground on native WebViews,
+        // so we reset it here to treat each foreground as a fresh session.
+        sessionStorage.removeItem('cy_invite_popup_shown')
+      }
     })
     return () => { sub.remove() }
   }, [user?.id])
