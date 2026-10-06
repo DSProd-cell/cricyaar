@@ -67,11 +67,14 @@ function PlayerCard({ player, onSelect, selected }) {
       {/* Teams from legacy data */}
       {player.teams && Array.isArray(player.teams) && player.teams.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {player.teams.map((t, i) => (
+          {player.teams.slice(0, 4).map((t, i) => (
             <span key={i} className="text-[11px] bg-brand-50 text-brand-600 font-semibold px-2 py-0.5 rounded-full border border-brand-100">
               {typeof t === 'string' ? t : t.name}
             </span>
           ))}
+          {player.teams.length > 4 && (
+            <span className="text-[11px] text-navy-400 font-semibold px-1 py-0.5">+{player.teams.length - 4} more</span>
+          )}
         </div>
       )}
     </button>
@@ -88,6 +91,8 @@ export default function PlayerMatch() {
   const [loading, setLoading]   = useState(true)
   const [selected, setSelected] = useState(null)
   const [importing, setImporting] = useState(false)
+  const [importError, setImportError] = useState('')
+  const [searchedFor, setSearchedFor] = useState('')
   const [query, setQuery]       = useState(searchName)
 
   const [searched, setSearched] = useState(false)
@@ -96,12 +101,9 @@ export default function PlayerMatch() {
     if (!name.trim()) { setPlayers([]); setLoading(false); setSearched(false); return }
     setLoading(true)
     setSearched(true)
+    setSearchedFor(name.trim())
     try {
-      const { data, error } = await supabase
-        .from('legacy_players')
-        .select('*')
-        .ilike('name', `%${name.trim()}%`)
-        .limit(10)
+      const { data, error } = await supabase.rpc('search_legacy_players', { q: name.trim() })
 
       setLoading(false)
       if (error || !data) { setPlayers([]); return }
@@ -130,40 +132,27 @@ export default function PlayerMatch() {
   const handleImport = async () => {
     if (!selected) return
     setImporting(true)
+    setImportError('')
 
-    const updates = {
-      legacy_player_id: selected.id,
-      name: selected.name || user?.name,
-      city: selected.city || user?.city || '',
-    }
-    await supabase.from('profiles').update(updates).eq('id', user?.id)
-
-    // Import career stats
-    await supabase.from('player_stats').upsert({
-      user_id: user?.id,
-      matches: selected.matches_played || 0,
-      runs: selected.runs_scored || 0,
-      wickets: selected.wickets_taken || 0,
-      batting_avg: selected.batting_avg || 0,
-      bowling_avg: selected.bowling_avg || 0,
-    }, { onConflict: 'user_id' }).then(() => {})
-
-    // Auto-join teams from legacy data (teams stored as JSON array in legacy record)
-    if (selected.teams && Array.isArray(selected.teams) && selected.teams.length > 0) {
-      const teamInserts = selected.teams.map(t => ({
-        user_id: user?.id,
-        team_id: t.id || t,
-        role: selected.role || 'player',
-        source: 'legacy_import',
-      }))
-      await supabase.from('team_members').upsert(teamInserts, { onConflict: 'user_id,team_id' }).then(() => {})
+    // The claim runs server-side in one step: it links the record to this
+    // account and copies the name, city, photo and career stats across.
+    const { data, error } = await supabase.rpc('claim_legacy_player', { p_id: selected.id })
+    if (error) {
+      setImporting(false)
+      setImportError(error.message || 'Could not link this record. Please try again.')
+      return
     }
 
-    setUser({ ...user, name: selected.name || user?.name, city: selected.city || user?.city })
+    setUser({
+      ...user,
+      name: data?.name || user?.name,
+      city: data?.city || user?.city,
+      avatar: data?.photo_url || user?.avatar,
+    })
     setImporting(false)
 
     // Auto-assign role from legacy data if available, else let user pick
-    navigate('/role-onboard', { state: { preSelectedRole: selected.role || null } })
+    navigate('/role-onboard', { state: { preSelectedRole: null } })
   }
 
   const handleSkip = () => navigate('/role-onboard')
@@ -184,7 +173,7 @@ export default function PlayerMatch() {
             <h1 className="font-bold text-navy-900 text-lg leading-tight">Is This You?</h1>
             <p className="text-navy-500 text-xs">
               {players.length > 0
-                ? `${players.length} player${players.length > 1 ? 's' : ''} found matching "${searchName}"`
+                ? `${players.length} player${players.length > 1 ? 's' : ''} found matching "${searchedFor}"`
                 : 'Search your name across our cricket records'
               }
             </p>
@@ -264,6 +253,7 @@ export default function PlayerMatch() {
       {/* Bottom action */}
       {!loading && players.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-[var(--cy-surface)] border-t border-slate-100 p-4 pb-safe space-y-2">
+          {importError && <p className="text-red-500 text-xs text-center" role="alert">{importError}</p>}
           {selected ? (
             <button
               onClick={handleImport}
