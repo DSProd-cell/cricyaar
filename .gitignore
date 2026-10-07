@@ -14,3 +14,4 @@ supabase/.temp/
 # Losing the only copy means the app can never be updated under the same identity.
 android/app/*.keystore
 android/keystore.properties
+android/.kotlin/
