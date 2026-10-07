@@ -112,6 +112,7 @@ export default function PlayerMatch() {
   const [manualPhotoPreview, setManualPhotoPreview] = useState(null)
   const [savingManual, setSavingManual]     = useState(false)
   const [manualSaved, setManualSaved]       = useState(false)
+  const [manualError, setManualError]       = useState('')
   const photoInputRef = useRef(null)
 
   const searchPlayers = async (name) => {
@@ -196,33 +197,30 @@ export default function PlayerMatch() {
   const handleSaveManual = async () => {
     if (!user?.id) return
     setSavingManual(true)
+    setManualError('')
 
     try {
-      // Upload photo if provided
-      let avatarUrl = user?.avatar
+      // Upload photo if provided, then point the profile at it
       if (manualPhoto) {
-        avatarUrl = await uploadAvatar(user.id, manualPhoto)
-      }
-
-      // Update profile photo
-      if (avatarUrl !== user?.avatar) {
-        await supabase.from('profiles').update({ avatar: avatarUrl }).eq('id', user.id)
+        const avatarUrl = await uploadAvatar(user.id, manualPhoto)
+        const { error: photoError } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id)
+        if (photoError) throw photoError
         setUser({ ...user, avatar: avatarUrl })
       }
 
-      // Upsert player stats
-      const statsUpdate = {
-        user_id:    user.id,
-        matches:    parseInt(manualMatches) || 0,
-        runs:       parseInt(manualRuns)    || 0,
-        wickets:    parseInt(manualWickets) || 0,
-        updated_at: new Date().toISOString(),
+      // Stats are saved server-side (player_stats is not writable from the app)
+      if (manualMatches || manualRuns || manualWickets) {
+        const { error: statsError } = await supabase.rpc('update_my_player_stats', {
+          p_matches: parseInt(manualMatches) || 0,
+          p_runs:    parseInt(manualRuns)    || 0,
+          p_wickets: parseInt(manualWickets) || 0,
+        })
+        if (statsError) throw statsError
       }
-      await supabase.from('player_stats').upsert(statsUpdate, { onConflict: 'user_id' })
 
       setManualSaved(true)
-    } catch {
-      // silently fail — user can retry
+    } catch (err) {
+      setManualError(err?.message || 'Could not save. Please try again.')
     } finally {
       setSavingManual(false)
     }
@@ -231,7 +229,7 @@ export default function PlayerMatch() {
   return (
     <div className="min-h-dvh flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-slate-100 px-4 pt-safe pb-3">
+      <div className="sticky top-0 z-10 bg-[var(--cy-surface)] border-b border-slate-100 px-4 pt-safe pb-3">
         <div className="flex items-center gap-3 pt-3 mb-3">
           <button onClick={() => navigate('/celebration')} className="text-navy-500 hover:text-navy-900 transition-colors">
             <ArrowLeft size={20} />
@@ -415,6 +413,7 @@ export default function PlayerMatch() {
                     </div>
                   </div>
 
+                  {manualError && <p className="text-red-500 text-xs mb-2 font-medium" role="alert">{manualError}</p>}
                   <button
                     onClick={handleSaveManual}
                     disabled={savingManual || (!manualMatches && !manualRuns && !manualWickets && !manualPhoto)}
