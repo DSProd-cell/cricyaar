@@ -1,3 +1,4 @@
 #!/bin/bash
-cd /Users/debasish/cricmate-v0
-exec /Users/debasish/.local/node20/bin/node node_modules/.bin/vite --port 3092 --host
+# Starts the Vite dev server from wherever this repo is checked out.
+cd "$(dirname "$0")" || exit 1
+exec node node_modules/.bin/vite --port 3092 --host
