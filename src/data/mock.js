@@ -565,17 +565,17 @@ export const OPEN_TOURNAMENTS_LIST = [
 
 // ─── v3: OPEN TEAMS (Browse Open Teams — Find a Team) ────────────────────────
 export const OPEN_TEAMS_LIST = [
-  { id:'bt1', name:'Andheri Avengers',    city:'Mumbai',    color:'#3b82f6', wins:12, losses:5, nr:1,
+  { id:'bt1', name:'Andheri Avengers',    city:'Mumbai', language:'Marathi',    color:'#3b82f6', wins:12, losses:5, nr:1,
     squadSize:9,  maxSquad:15, lookingFor:['Batsman','All-rounder'], lastActive:'2 days ago' },
-  { id:'bt2', name:'Koramangala Kings',   city:'Bengaluru', color:'#7c3aed', wins:8,  losses:6, nr:0,
+  { id:'bt2', name:'Koramangala Kings',   city:'Bengaluru', language:'Kannada', color:'#7c3aed', wins:8,  losses:6, nr:0,
     squadSize:7,  maxSquad:15, lookingFor:['Bowler','Wicketkeeper'], lastActive:'1 day ago' },
-  { id:'bt3', name:'Rohini Rockets',      city:'Delhi',     color:'#dc2626', wins:15, losses:4, nr:2,
+  { id:'bt3', name:'Rohini Rockets',      city:'Delhi', language:'Hindi',     color:'#dc2626', wins:15, losses:4, nr:2,
     squadSize:11, maxSquad:15, lookingFor:['All-rounder'],            lastActive:'5 hours ago' },
-  { id:'bt4', name:'Chepauk Challengers', city:'Chennai',   color:'#f59e0b', wins:6,  losses:8, nr:1,
+  { id:'bt4', name:'Chepauk Challengers', city:'Chennai', language:'Tamil',   color:'#f59e0b', wins:6,  losses:8, nr:1,
     squadSize:8,  maxSquad:15, lookingFor:['Batsman','Bowler','All-rounder'], lastActive:'3 days ago' },
-  { id:'bt5', name:'Banjara Hawks',       city:'Hyderabad', color:'#059669', wins:10, losses:7, nr:0,
+  { id:'bt5', name:'Banjara Hawks',       city:'Hyderabad', language:'Telugu', color:'#059669', wins:10, losses:7, nr:0,
     squadSize:10, maxSquad:15, lookingFor:['Batsman'],                lastActive:'6 hours ago' },
-  { id:'bt6', name:'Chandigarh Chargers', city:'Chandigarh',color:'#0ea5e9', wins:7,  losses:9, nr:1,
+  { id:'bt6', name:'Chandigarh Chargers', city:'Chandigarh', language:'Hindi',color:'#0ea5e9', wins:7,  losses:9, nr:1,
     squadSize:6,  maxSquad:15, lookingFor:['Bowler','Batsman'],       lastActive:'Today' },
 ];
 

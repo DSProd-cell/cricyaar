@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { TEAM_LANGUAGES } from '../lib/constants'
 import { useNavigate } from 'react-router-dom'
 import { TEAMS, TOURNAMENTS, OPEN_TEAMS_LIST, TEAM_JOIN_REQUESTS_INBOX, ROLE_META, teamById, tournamentById, initials } from '../data/mock'
 import TopBar from '../components/TopBar'
@@ -233,6 +234,7 @@ export default function Teams() {
   const [searchQuery, setSearchQuery] = useState('')
   const [cityFilter, setCityFilter] = useState('All')
   const [posFilter, setPosFilter] = useState('Any')
+  const [langFilter, setLangFilter] = useState('All')
 
   const role = user?.role || 'fan'
   const isPro = user?.subscription === 'pro_active' || user?.subscription === 'pro_cancelled'
@@ -244,14 +246,16 @@ export default function Teams() {
   const pendingJoinReqs = localRequests.filter(r => r.status === 'pending').length
 
   // Find a Team — filtered open teams
+  const myLanguage = user?.motherTongue || ''
   const filteredOpenTeams = useMemo(() => {
     return OPEN_TEAMS_LIST.filter(t => {
       if (cityFilter !== 'All' && t.city !== cityFilter) return false
       if (posFilter !== 'Any' && !t.lookingFor.includes(posFilter)) return false
+      if (langFilter !== 'All' && t.language !== langFilter) return false
       if (searchQuery && !t.name.toLowerCase().includes(searchQuery.toLowerCase()) && !t.city.toLowerCase().includes(searchQuery.toLowerCase())) return false
       return true
-    })
-  }, [searchQuery, cityFilter, posFilter])
+    }).sort((a, b) => (myLanguage ? Number(b.language === myLanguage) - Number(a.language === myLanguage) : 0))
+  }, [searchQuery, cityFilter, posFilter, langFilter, myLanguage])
 
   const isRequested = (teamId) => teamJoinRequests.some(r => r.teamId === teamId)
   const pendingRequests = teamJoinRequests.filter(r => r.status === 'pending').length
@@ -294,10 +298,11 @@ export default function Teams() {
             {(isCaptain || role === 'organiser' || role === 'admin') && (
               <button
                 onClick={() => setShowJoinRequests(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-2xl mb-4 hover:border-amber-400 transition-colors animate-fade-in"
+                className="w-full flex items-center gap-3 px-4 py-3 border rounded-2xl mb-4 hover:border-amber-400 transition-colors animate-fade-in"
+                style={{ background: 'rgba(245,158,11,0.14)', borderColor: 'rgba(217,119,6,0.45)' }}
               >
-                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <Bell size={16} className="text-amber-600" />
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.22)' }}>
+                  <Bell size={16} className="text-amber-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-bold text-navy-900 text-sm">Join Requests</p>
@@ -375,10 +380,19 @@ export default function Teams() {
             </div>
 
             {/* Position filter chips */}
-            <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar mb-2">
               {['Any','Batsman','Bowler','All-rounder','Wicketkeeper'].map(p => (
                 <button key={p} className={`filter-chip flex-shrink-0 ${posFilter===p?'active':''}`} onClick={() => setPosFilter(p)}>
                   {p === 'Any' ? 'Any Position' : p}
+                </button>
+              ))}
+            </div>
+
+            {/* Language filter chips — your own language first */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar mb-4">
+              {['All', ...(myLanguage ? [myLanguage] : []), ...TEAM_LANGUAGES.filter(l => l !== myLanguage && l !== 'Other')].map(l => (
+                <button key={l} className={`filter-chip flex-shrink-0 ${langFilter===l?'active':''}`} onClick={() => setLangFilter(l)}>
+                  {l === 'All' ? 'Any Language' : l === myLanguage ? `${l} · yours` : l}
                 </button>
               ))}
             </div>
@@ -409,6 +423,16 @@ export default function Teams() {
                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-green-50 text-green-700 px-1.5 py-0.5 rounded-full">
                               <Globe size={9} />Open
                             </span>
+                            {team.language && (
+                              <span
+                                className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                style={team.language === myLanguage
+                                  ? { background: '#7C3AED', color: '#fff' }
+                                  : { background: 'rgba(124,58,237,0.16)', color: 'var(--cy-text)' }}
+                              >
+                                {team.language}{team.language === myLanguage ? ' · your language' : ''}
+                              </span>
+                            )}
                           </div>
                           <p className="text-navy-500 text-xs mt-0.5">{team.city} · {team.squadSize}/{team.maxSquad} players · {team.wins}W {team.losses}L</p>
                         </div>

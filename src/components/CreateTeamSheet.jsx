@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { PLAYERS } from '../data/mock'
+import { TEAM_LANGUAGES } from '../lib/constants'
 import {
   X, Crown, Check, Zap, Users, Shield,
   ChevronDown, Plus, Trash2, Star
@@ -51,7 +52,7 @@ function PlayerRow({ player, onRemove, onChangeRole, isPro, isLocked }) {
 
 export default function CreateTeamSheet({ onClose }) {
   const navigate = useNavigate()
-  const { user, addToast, setShowProSheet } = useStore()
+  const { user, addToast, setShowProSheet, addPublishedTeam } = useStore()
   const renewal = user?.proRenewalDate || null
   const isPro = user?.subscription === 'pro_active' ||
     (user?.subscription === 'pro_cancelled' && renewal && new Date(renewal) > new Date())
@@ -60,6 +61,8 @@ export default function CreateTeamSheet({ onClose }) {
   const [teamName, setTeamName]   = useState('')
   const [city, setCity]           = useState('Mumbai')
   const [color, setColor]         = useState(TEAM_COLORS[0])
+  // Defaults to the creator's own language; they can change it
+  const [language, setLanguage]   = useState(user?.motherTongue || '')
   const [captainId, setCaptainId] = useState(PLAYERS[0].id)
   const [keeperId, setKeeperId]   = useState(PLAYERS[5].id) // KL Rahul as default WK
   const [squad, setSquad]         = useState([
@@ -86,6 +89,19 @@ export default function CreateTeamSheet({ onClose }) {
   const handleCreate = () => {
     if (!isPro) { setShowProSheet(true); return }
     if (!teamName.trim()) { addToast('Please enter a team name', 'error'); return }
+    if (!language) { addToast('Please choose the team\'s language', 'error'); return }
+    // Save the team so it shows up under My Teams
+    addPublishedTeam({
+      id: `ut-${Date.now()}`,
+      name: teamName.trim(),
+      code: `${city.slice(0, 3).toUpperCase()}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+      city, color, language,
+      captain: captainId,
+      wins: 0, losses: 0, nr: 0,
+      visibility: 'open',
+      squad: squad.map(p => p.id),
+      matchHistory: [],
+    })
     addToast(`Team "${teamName}" created! 🏏`, 'success')
     onClose()
     navigate('/teams')
@@ -184,6 +200,23 @@ export default function CreateTeamSheet({ onClose }) {
                   {CITIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
+            </div>
+
+            {/* ── Team language ── */}
+            <div>
+              <label className="block text-sm font-bold text-navy-700 mb-1.5">
+                Team Language <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={language}
+                onChange={e => setLanguage(e.target.value)}
+                disabled={!isPro}
+                className="cm-select w-full"
+              >
+                <option value="" disabled>Choose the language your team speaks</option>
+                {TEAM_LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+              <p className="text-[11px] mt-1.5 text-navy-500">Players who speak this language will see your team first.</p>
             </div>
 
             {/* ── Team colour ── */}
