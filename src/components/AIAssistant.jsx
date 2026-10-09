@@ -12,7 +12,7 @@ import {
 const SKIP_PATHS = [
   '/welcome', '/login', '/otp', '/usp', '/role-onboard', '/player-setup',
   '/celebration', '/player-match', '/landing', '/profile-match', '/city-select',
-  '/role-select', '/setup',
+  '/role-select', '/setup', '/fetch-past-record', '/ipl-pick', '/yarein-welcome',
 ]
 
 // ── Context labels for current page ─────────────────────────────────────────

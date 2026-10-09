@@ -19,7 +19,9 @@ export default function CitySelect() {
   const navigate  = useNavigate()
   const { user, setUser, addToast } = useStore()
   const roleColor = getRoleColor(user?.role)
-  const [selected, setSelected] = useState('')
+  // Bengaluru is the only live city, so start with it chosen: Continue is
+  // enabled straight away instead of looking greyed out and unclickable.
+  const [selected, setSelected] = useState('Bengaluru')
   const [saving,   setSaving]   = useState(false)
 
   const handleContinue = async () => {
@@ -37,7 +39,7 @@ export default function CitySelect() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-slate-50">
+    <div className="min-h-dvh flex flex-col" style={{ background: 'var(--cy-bg)' }}>
       {/* Header */}
       <div
         className="pt-12 pb-8 px-6 text-center"
@@ -65,9 +67,9 @@ export default function CitySelect() {
                 disabled={false}
                 className="relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
                 style={{
-                  borderColor: isSel ? roleColor.primary : city.active ? '#e2e8f0' : '#f1f5f9',
-                  background:  isSel ? roleColor.light   : city.active ? '#fff'    : '#f8fafc',
-                  opacity:     city.active ? 1 : 0.65,
+                  borderColor: isSel ? roleColor.primary : city.active ? 'var(--cy-border)' : 'transparent',
+                  background:  isSel ? roleColor.light   : 'var(--cy-surface)',
+                  opacity:     city.active ? 1 : 0.8,
                   cursor:      'pointer',
                   transform:   isSel ? 'scale(1.03)' : 'scale(1)',
                 }}
@@ -75,12 +77,12 @@ export default function CitySelect() {
                 <span className="text-2xl">{city.emoji}</span>
                 <span
                   className="font-bold text-sm"
-                  style={{ color: isSel ? roleColor.primary : city.active ? '#1e293b' : '#94a3b8' }}
+                  style={{ color: isSel ? roleColor.primary : city.active ? 'var(--cy-text)' : 'var(--cy-muted)' }}
                 >
                   {city.name}
                 </span>
                 {!city.active && (
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">
+                  <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--cy-muted)' }}>
                     Coming Soon
                   </span>
                 )}
@@ -99,18 +101,18 @@ export default function CitySelect() {
           <button
             onClick={handleContinue}
             disabled={!selected || saving}
-            className="w-full py-4 rounded-2xl font-bold text-white text-[15px] transition-all active:scale-[0.98] disabled:opacity-40"
+            className="w-full py-4 rounded-2xl font-bold text-white text-[15px] transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
-              background: selected
-                ? `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})`
-                : '#94a3b8',
+              background: selected ? `linear-gradient(135deg, ${roleColor.gradientFrom}, ${roleColor.gradientTo})` : 'var(--cy-muted)',
+              boxShadow: selected ? '0 6px 20px rgba(0,0,0,0.25)' : 'none',
             }}
           >
             {saving ? 'Saving…' : 'Continue →'}
           </button>
           <button
             onClick={() => navigate('/ipl-pick', { state: { returnTo: '/fetch-past-record' } })}
-            className="w-full py-3 text-slate-400 font-medium text-sm"
+            className="w-full py-3 font-medium text-sm"
+            style={{ color: 'var(--cy-muted)' }}
           >
             Skip for now
           </button>
