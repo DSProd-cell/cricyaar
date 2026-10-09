@@ -9,6 +9,7 @@ import {
   Crown, ChevronRight, Calendar, Users2, Clock
 } from 'lucide-react'
 import FollowButton from '../components/FollowButton'
+import InternationalMatches from '../components/InternationalMatches'
 
 // ─── City Picker ──────────────────────────────────────────────────────────────
 function CityPickerModal({ currentCity, onSelect, onClose }) {
@@ -523,6 +524,7 @@ export default function FanHome() {
       <main className="flex-1 px-4 py-4 space-y-4 pb-44">
 
         {/* ── MATCHES TAB ── */}
+        {activeTab === 'matches' && <InternationalMatches />}
         {activeTab === 'matches' && realLiveMatches.length > 0 && (
           <div className="space-y-2 animate-fade-in">
             {realLiveMatches.map(m => (

@@ -6,6 +6,7 @@ import TopBar from '../components/TopBar'
 import MatchScoreSheet from '../components/MatchScoreSheet'
 import RoleStrip from '../components/RoleStrip'
 import RoleGateSheet from '../components/RoleGateSheet'
+import InternationalMatches from '../components/InternationalMatches'
 import {
   Activity, MapPin, Trophy, Eye, BarChart2, Building2, Circle,
   ChevronRight, Lock, Users, Send, Crown, Wallet, IndianRupee
@@ -162,6 +163,8 @@ export default function PlayerHome({ activeRole, setActiveRole }) {
             </div>
           </button>
         )}
+
+        <InternationalMatches />
 
         {/* Dashboard — free: live score only; rest = Pro */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
