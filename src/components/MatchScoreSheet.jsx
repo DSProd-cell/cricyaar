@@ -113,7 +113,7 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive, xi }) {
           </thead>
           <tbody>
             {batters.map((b, i) => (
-              <tr key={b.id} className={`border-b border-slate-50 ${(b.isStriker || b.isNonStriker) ? 'bg-brand-50/60' : ''}`}>
+              <tr key={b.id} className="border-b border-slate-50" style={(b.isStriker || b.isNonStriker) ? { background: 'rgba(34,197,94,0.14)' } : undefined}>
                 <td className="px-3 py-2">
                   <p className="font-semibold text-navy-800 text-xs leading-tight">
                     {i + 1}. {b.name}
@@ -137,7 +137,7 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive, xi }) {
                 <td className="text-center px-1 py-2 text-navy-500 text-xs tabular-nums">{b.balls}</td>
                 <td className="text-center px-1 py-2 text-navy-500 text-xs tabular-nums">{b.fours}</td>
                 <td className="text-center px-1 py-2 text-navy-500 text-xs tabular-nums">{b.sixes}</td>
-                <td className="text-center px-1 py-2 text-navy-400 text-xs tabular-nums">{sr(b.runs, b.balls)}</td>
+                <td className="text-center px-1 py-2 text-navy-500 text-xs tabular-nums">{sr(b.runs, b.balls)}</td>
               </tr>
             ))}
             {/* Did not bat */}
@@ -214,10 +214,10 @@ function InningsCard({ inn, battingTeam, bowlingTeam, isLive, xi }) {
                   <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.overs}</td>
                   <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.maidens ?? 0}</td>
                   <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.runs}</td>
-                  <td className={`text-center px-1.5 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-400'}`}>{b.wkts}</td>
-                  <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{b.wd ?? 0}</td>
-                  <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{b.nb ?? 0}</td>
-                  <td className="text-center px-1.5 py-2 text-navy-400 text-xs tabular-nums">{eco(b.runs, b.overs)}</td>
+                  <td className={`text-center px-1.5 py-2 text-xs font-bold tabular-nums ${b.wkts > 0 ? 'text-red-600' : 'text-navy-500'}`}>{b.wkts}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.wd ?? 0}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{b.nb ?? 0}</td>
+                  <td className="text-center px-1.5 py-2 text-navy-500 text-xs tabular-nums">{eco(b.runs, b.overs)}</td>
                 </tr>
               ))}
             </tbody>
@@ -289,12 +289,12 @@ export default function MatchScoreSheet({ match, onClose }) {
         </div>
 
         {/* Scoreboard hero */}
-        <div className="bg-navy-900 mx-5 mt-4 rounded-2xl px-4 py-4 flex-shrink-0">
+        <div className="bg-navy-900 theme-pin-fixed mx-5 mt-4 rounded-2xl px-4 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-navy-400 text-[11px] font-semibold uppercase tracking-wide mb-0.5">1st Innings</p>
               <p className="text-white font-extrabold text-sm truncate">{t1?.name}</p>
-              <p className="text-brand-400 font-extrabold text-2xl tabular-nums mt-1">{scoreA}</p>
+              <p className="font-extrabold text-2xl tabular-nums mt-1" style={{ color: '#4ade80' }}>{scoreA}</p>
               <p className="text-navy-500 text-xs mt-0.5">({overs0} ov)</p>
             </div>
             <div className="flex-col items-center flex-shrink-0 px-2">
@@ -307,7 +307,7 @@ export default function MatchScoreSheet({ match, onClose }) {
               <p className="text-white font-extrabold text-sm truncate">{t2?.name}</p>
               {scoreB
                 ? <p className="text-navy-300 font-extrabold text-2xl tabular-nums mt-1">{scoreB}</p>
-                : <p className="text-navy-600 font-bold text-sm mt-1">— —</p>
+                : <p className="text-navy-400 font-bold text-sm mt-1">— —</p>
               }
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function MatchScoreSheet({ match, onClose }) {
                 key={idx}
                 onClick={() => setInningsTab(idx)}
                 className={`flex-1 py-2 text-xs font-bold rounded-xl transition-colors ${
-                  inningsTab === idx ? 'bg-navy-900 text-white' : 'bg-slate-100 text-navy-500'
+                  inningsTab === idx ? 'bg-navy-900 theme-pin-fixed text-white' : 'bg-slate-100 text-navy-500'
                 }`}
               >
                 {idx + 1}{idx === 0 ? 'st' : 'nd'} Innings

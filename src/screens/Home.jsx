@@ -231,7 +231,7 @@ export default function Home() {
         {liveMatch && (
           <button
             onClick={() => navigate(`/score/${liveMatch.id}`)}
-            className="w-full mb-5 p-4 bg-navy-900 rounded-2xl text-left animate-slide-up cursor-pointer hover:bg-navy-800 transition-colors"
+            className="w-full mb-5 p-4 bg-navy-900 theme-pin-fixed rounded-2xl text-left animate-slide-up cursor-pointer hover:bg-navy-800 transition-colors"
           >
             <div className="flex items-center justify-between gap-2 min-w-0">
               <div className="flex items-center gap-2 flex-shrink-0">

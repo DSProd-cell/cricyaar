@@ -117,7 +117,7 @@ export default function EarningsDashboard() {
           <div className="flex gap-1 mb-3 overflow-x-auto pb-1 scrollbar-none">
             {[['all','All'],['completed','Completed'],['upcoming','Upcoming'],['cancelled','Cancelled'],['pending_payout','Pending']].map(([v,l]) => (
               <button key={v} onClick={() => setFilter(v)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === v ? 'bg-navy-900 border-navy-900 text-white' : 'bg-[var(--cy-surface)] border-navy-200 text-navy-600'}`}>
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${filter === v ? 'bg-navy-900 theme-pin-fixed border-navy-900 text-white' : 'bg-[var(--cy-surface)] border-navy-200 text-navy-600'}`}>
                 {l}
               </button>
             ))}

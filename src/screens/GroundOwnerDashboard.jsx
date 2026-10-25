@@ -301,7 +301,7 @@ function PaymentCollection({ user, setUser, addToast, groundName }) {
           <button
             onClick={handleSaveUpi}
             disabled={savingUpi}
-            className="flex-shrink-0 px-3 py-2 rounded-lg bg-navy-900 text-white text-xs font-semibold disabled:opacity-60"
+            className="flex-shrink-0 px-3 py-2 rounded-lg bg-navy-900 theme-pin-fixed text-white text-xs font-semibold disabled:opacity-60"
           >
             {savingUpi ? 'Saving…' : 'Save'}
           </button>

@@ -207,7 +207,7 @@ function ScoreDetailSheet({ match, onClose }) {
         </div>
 
         {/* Scoreboard hero */}
-        <div className="bg-navy-900 mx-5 mt-4 rounded-2xl px-4 py-4 flex-shrink-0">
+        <div className="bg-navy-900 theme-pin-fixed mx-5 mt-4 rounded-2xl px-4 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <p className="text-navy-400 text-[11px] font-semibold uppercase tracking-wide mb-0.5">Batting</p>
@@ -225,7 +225,7 @@ function ScoreDetailSheet({ match, onClose }) {
               <p className="text-white font-extrabold text-sm leading-tight truncate">{match.teamB}</p>
               {hasSecond
                 ? <p className="text-navy-300 font-extrabold text-2xl tabular-nums mt-1">{match.scoreB}</p>
-                : <p className="text-navy-600 font-bold text-sm mt-1">— —</p>
+                : <p className="text-navy-400 font-bold text-sm mt-1">— —</p>
               }
             </div>
           </div>
@@ -239,7 +239,7 @@ function ScoreDetailSheet({ match, onClose }) {
                 key={idx}
                 onClick={() => setInningsTab(idx)}
                 className={`flex-1 py-2 text-xs font-bold rounded-xl transition-colors ${
-                  inningsTab === idx ? 'bg-navy-900 text-white' : 'bg-slate-100 text-navy-500'
+                  inningsTab === idx ? 'bg-navy-900 theme-pin-fixed text-white' : 'bg-slate-100 text-navy-500'
                 }`}
               >
                 {idx + 1}st Innings
@@ -531,7 +531,7 @@ export default function FanHome() {
               <button
                 key={m.id}
                 onClick={() => navigate(`/live/${m.id}`)}
-                className="w-full bg-navy-900 rounded-xl px-4 py-3 text-left active:scale-[0.99] transition-transform"
+                className="w-full bg-navy-900 theme-pin-fixed rounded-xl px-4 py-3 text-left active:scale-[0.99] transition-transform"
               >
                 <div className="flex items-center gap-1.5 mb-2">
                   <Circle size={6} fill="#ef4444" className="text-red-500 animate-pulse flex-shrink-0" />
@@ -580,7 +580,7 @@ export default function FanHome() {
                     <button
                       key={i}
                       onClick={() => setSelectedMatch(row)}
-                      className="w-full bg-navy-900 rounded-xl px-4 py-3 text-left active:scale-[0.99] transition-transform"
+                      className="w-full bg-navy-900 theme-pin-fixed rounded-xl px-4 py-3 text-left active:scale-[0.99] transition-transform"
                     >
                       <div className="flex items-center gap-1.5 mb-2">
                         <Circle size={6} fill="#ef4444" className="text-red-500 animate-pulse flex-shrink-0" />

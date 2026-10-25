@@ -89,7 +89,7 @@ function ScorecardViewer({ match, onClose }) {
     const extras = (inn.extras?.wd||0) + (inn.extras?.nb||0) + (inn.extras?.b||0) + (inn.extras?.lb||0)
     return (
       <div className="mb-4">
-        <div className="flex items-center justify-between bg-navy-900 rounded-t-xl px-3 py-2">
+        <div className="flex items-center justify-between bg-navy-900 theme-pin-fixed rounded-t-xl px-3 py-2">
           <p className="text-white font-bold text-sm">{label} — {team?.name}</p>
           <p className="text-amber-300 font-extrabold text-sm">{inn.runs}/{inn.wkts} ({fmtOvers(inn.legalBalls)} ov)</p>
         </div>
@@ -156,7 +156,7 @@ function ScorecardViewer({ match, onClose }) {
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-slate-50 animate-slide-up">
       {/* Header */}
-      <div className="bg-navy-900 px-4 py-5 flex-shrink-0">
+      <div className="bg-navy-900 theme-pin-fixed px-4 py-5 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <p className="text-amber-200 text-xs font-bold uppercase tracking-wide">Match Scorecard</p>
           <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -201,7 +201,7 @@ function ScorecardViewer({ match, onClose }) {
         )}
       </div>
       <div className="px-4 pb-6 pt-2 border-t border-slate-100 bg-[var(--cy-surface)] flex-shrink-0">
-        <button onClick={onClose} className="w-full py-3.5 rounded-2xl bg-navy-900 text-white font-bold text-sm">
+        <button onClick={onClose} className="w-full py-3.5 rounded-2xl bg-navy-900 theme-pin-fixed text-white font-bold text-sm">
           Close Scorecard
         </button>
       </div>

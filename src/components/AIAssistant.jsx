@@ -622,7 +622,7 @@ export default function AIAssistant() {
       {!open && !showBroadcast && (
         <button
           onClick={() => setShowBroadcast(true)}
-          className="fixed right-4 z-[58] flex items-center gap-1.5 pl-2 pr-3 h-10 rounded-full shadow-lg active:scale-95"
+          className="fixed right-4 z-[48] flex items-center gap-1.5 pl-2 pr-3 h-10 rounded-full shadow-lg active:scale-95"
           style={{
             bottom: 82,
             background: 'linear-gradient(135deg, #7C3AED, #6366f1)',

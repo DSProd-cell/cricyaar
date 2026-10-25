@@ -52,7 +52,7 @@ export default function USPScreen() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-navy-900 overflow-y-auto">
+    <div className="min-h-dvh flex flex-col bg-navy-900 theme-pin-fixed overflow-y-auto">
 
       {/* ── Hero ── */}
       <div className="flex flex-col items-center pt-10 pb-4 px-5 animate-fade-in">
