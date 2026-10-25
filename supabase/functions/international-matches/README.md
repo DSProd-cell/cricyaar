@@ -1,37 +1,60 @@
 # international-matches
 
-Feeds the **International** section on the Home screen with live, upcoming and
-recent international matches. Until it is set up, the section simply does not
-appear (the app never shows an error for it).
+Feeds the **Live Cricket** strip on the Home screens with live, upcoming and
+recent international and league matches.
 
-## One-time setup
+## How it works
 
-1. **Get a CricAPI key** — sign up at https://cricketdata.org (free plan: about
-   100 calls/day).
-2. **Create the cache table** — run
-   `supabase/migrations/add_international_matches_cache.sql` in the Supabase
-   SQL editor.
-3. **Set the key** (never put it in the app or in git):
-   ```bash
-   supabase secrets set CRICAPI_KEY=your-key-here --project-ref okqbagfyuizvahhpimuh
+CricAPI resets TLS connections coming from Edge Function servers, but accepts
+them from the database. So the fetching is done by the database, and this
+function only serves what was saved:
+
+1. A `pg_cron` job (`refresh-cricapi`, every minute) runs `refresh_cricapi()`.
+   Most runs do nothing; it asks CricAPI (through `pg_net`) only when the saved
+   answer is stale, then saves the raw reply in `cricapi_raw`.
+2. This function reads that row, filters and reshapes it with `logic.ts`, and
+   returns it to signed-in app users. It needs no provider key.
+3. The app shows nothing until the first fetch has been saved.
+
+## Setup (one time)
+
+1. Run `supabase/migrations/add_cricapi_pipeline.sql` (creates the table, the
+   job and the schedule).
+2. Store your CricAPI key encrypted in Vault. It is never in code or in git:
+   ```sql
+   select vault.create_secret('YOUR-CRICAPI-KEY', 'cricapi_key', 'CricAPI key');
    ```
-4. **Deploy** (keeps JWT verification on, so only signed-in app users can call it):
+   To replace it later: `select vault.update_secret(id, 'NEW-KEY') from vault.secrets where name = 'cricapi_key';`
+3. Deploy this function:
    ```bash
    supabase functions deploy international-matches --project-ref okqbagfyuizvahhpimuh
    ```
 
-## Tuning
+## What it shows
 
-`INTL_CACHE_SECONDS` (default `900`) is how long one provider answer is reused.
-The free plan's ~100 calls/day fits 15 minutes. On a paid plan set it lower
-(for example `60`) for fresher live scores:
+International matches (full members and the regular associates, men's and
+women's; A-teams and age-group sides are excluded) plus IPL, WPL, BBL, PSL,
+SA20, The Hundred, CPL, LPL, BPL, ILT20 and MLC. League matches get a tag and
+their own filter chip in the app.
 
-```bash
-supabase secrets set INTL_CACHE_SECONDS=60 --project-ref okqbagfyuizvahhpimuh
+## Staying inside the free plan
+
+CricAPI's free plan allows about 100 calls a day and one fetch serves every
+user. `cricapi_ttl_seconds()` sets how long the saved answer stays fresh: 8
+minutes while something we show is live, 10 when one starts within 2 hours,
+otherwise hourly. That is about 25 calls on a quiet day and about 85 on a full
+8-hour IPL double-header day, and the job stops requesting when the provider
+reports the limit is nearly reached. A failed fetch keeps serving the last good
+answer; `cricapi_raw.last_error` says why (the key is masked).
+
+Check on it:
+
+```sql
+select fetched_at, hits_today, hits_limit, last_error from public.cricapi_raw;
 ```
 
-If the provider is down or the daily quota is used up, the function serves the
-last good answer instead of an error.
+The SQL (`cricapi_wanted`, `cricapi_ttl_seconds`) mirrors `logic.ts`
+(`isWanted`, `ttlFor`), so change both together.
 
 ## Tests
 
