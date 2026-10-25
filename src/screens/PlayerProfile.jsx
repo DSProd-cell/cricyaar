@@ -24,6 +24,8 @@ function realProfileShape(user) {
     name: user?.username || user?.name || 'Cricketer',
     username: user?.username || '',
     city: user?.city || '',
+    playingRole: user?.playingRole || '',
+    clubName: user?.clubName || '',
     bio: user?.bio || '',
     roles: user?.roles?.length ? user.roles : [user?.role || 'fan'],
     mom: user?.legacyMom || 0,
@@ -382,6 +384,9 @@ export default function PlayerProfile() {
           <div className="mt-3">
             <h1 className="font-black text-navy-900 text-[22px] leading-tight tracking-tight">{player.name}</h1>
             {player.username && <p className="text-navy-400 text-sm mt-0.5 font-medium">@{player.username}</p>}
+            {(player.playingRole || player.clubName) && (
+              <p className="text-navy-500 text-sm mt-0.5">{[player.playingRole, player.clubName].filter(Boolean).join(' · ')}</p>
+            )}
 
             {/* All roles — active/most-used first */}
             {(() => {

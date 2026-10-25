@@ -162,6 +162,13 @@ function WhatsNewGate({ children }) {
               kycApprovedAt: profile.kyc_approved_at || null,
               groundOwnerVerified: profile.ground_owner_verified || false,
               playerSetupDone: profile.player_setup_done || false,
+              legacyRuns:    profile.legacy_runs    || 0,
+              legacyWickets: profile.legacy_wickets || 0,
+              legacyMatches: profile.legacy_matches || 0,
+              legacyMom:     profile.legacy_mom     || 0,
+              motherTongue:  profile.mother_tongue  || '',
+              playingRole:   profile.playing_role   || '',
+              clubName:      profile.club_name      || '',
             })
             // Notify user if KYC was just approved since last session
             if (prevKycStatus === 'pending' && profile.kyc_status === 'approved') {

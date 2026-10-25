@@ -147,6 +147,8 @@ export default function OtpVerify() {
         legacyWickets: profile?.legacy_wickets || 0,
         legacyMatches: profile?.legacy_matches || 0,
         legacyMom:     profile?.legacy_mom     || 0,
+        playingRole:   profile?.playing_role   || '',
+        clubName:      profile?.club_name      || '',
         motherTongue:  (isNewUser && pendingSignup?.motherTongue) ? pendingSignup.motherTongue : (profile?.mother_tongue || ''),
       })
       localStorage.setItem('whats_new_seen_version', 'v3')
